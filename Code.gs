@@ -17,7 +17,7 @@ function showImporter()
 
 function importXLSXFromFile(fileData)
 {
-	let tempSheetFile;
+	let tmpSheetFile;
 
 	try
 	{
@@ -30,22 +30,22 @@ function importXLSXFromFile(fileData)
 			title: fileData.name.split('.').slice(0, -1).join('.'), // Use file name for the new Sheet's title
 			mimeType: MimeType.GOOGLE_SHEETS,
 		};
-		tempSheetFile = Drive.Files.create(resource, blob);
+		tmpSheetFile = Drive.Files.create(resource, blob);
 
 		// 3. Copy data from the new sheet to the active spreadsheet
-		const sourceSpreadsheet = SpreadsheetApp.openById(tempSheetFile.id);
-		const sourceSheet = sourceSpreadsheet.getSheets()[0];
-		const sourceData = sourceSheet.getDataRange().getValues();
+		const srcSpreadsheet = SpreadsheetApp.openById(tmpSheetFile.id);
+		const srcSheet       = srcSpreadsheet.getSheets()[0];
+		const srcData        = srcSheet.getDataRange().getValues();
 
-		if (sourceData.length === 0)
+		if (srcData.length === 0)
 		{
 			throw new Error('The selected XLSX file is empty or could not be read.');
 		}
 
-		const targetSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-		const sheetName = sourceSpreadsheet.getName();
-		const targetSheet = targetSpreadsheet.insertSheet(sheetName);
-		targetSheet.getRange(1, 1, sourceData.length, sourceData[0].length).setValues(sourceData);
+		const trgSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+		const sheetName      = 'tmp-' + Date.now();
+		const trgSheet       = trgSpreadsheet.insertSheet(sheetName);
+		trgSheet.getRange(1, 1, srcData.length, srcData[0].length).setValues(srcData);
 
 		return `Successfully imported '${fileData.name}'.`;
 	}
@@ -57,15 +57,15 @@ function importXLSXFromFile(fileData)
 	finally
 	{
 		// 4. Cleanup: Delete the temporary Google Sheet
-		if (tempSheetFile && tempSheetFile.id)
+		if (tmpSheetFile && tmpSheetFile.id)
 		{
 			try
 			{
-				Drive.Files.remove(tempSheetFile.id);
+				Drive.Files.remove(tmpSheetFile.id);
 			}
 			catch(e)
 			{
-				console.error('Cleanup Error: Failed to remove temporary file with ID ' + tempSheetFile.id + '. Error: ' + e.message);
+				console.error('Cleanup Error: Failed to remove temporary file with ID ' + tmpSheetFile.id + '. Error: ' + e.message);
 			}
 		}
 	}
