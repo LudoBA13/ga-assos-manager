@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base target="_top">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
+	</head>
+	<body>
+		<main class="container">
+			<form onsubmit="event.preventDefault(); upload();">
+				<label for="file">XLSX file</label>
+				<input type="file" id="file" name="file" accept=".xlsx, .xls" required>
+				<button type="submit">Import</button>
+			</form>
+			<div id="status"></div>
+		</main>
+		<script>
+			function upload()
+			{
+				const fileInput = document.getElementById('file');
+				const file = fileInput.files[0];
+
+				if (file)
+				{
+					document.getElementById('status').innerHTML = '<progress indeterminate></progress>';
+					const reader = new FileReader;
+					reader.onload = function(e)
+					{
+						const dataUrl = e.target.result;
+						const data = dataUrl.split(',')[1];
+						const fileData = {
+							name: file.name,
+							mimeType: file.type,
+							data: data
+						};
+
+						google.script.run
+							.withSuccessHandler(onSuccess)
+							.withFailureHandler(onFailure)
+							.importXLSXFromFile(fileData);
+					};
+					reader.readAsDataURL(file);
+				}
+			}
+
+			function onSuccess(message)
+			{
+				document.getElementById('status').innerHTML = `<p>${message}</p>`;
+				if (message.startsWith('Successfully'))
+				{
+					setTimeout(function()
+					{
+						google.script.host.close();
+					}, 2000);
+				}
+			}
+
+			function onFailure(error)
+			{
+				document.getElementById('status').innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+			}
+		</script>
+	</body>
+</html>
