@@ -4,14 +4,14 @@
 function onOpen()
 {
 	SpreadsheetApp.getUi()
-		.createMenu('XLSX Importer')
-		.addItem('Import', 'showImporter')
+		.createMenu('AssoConnect')
+		.addItem(_('Importer les structures'), 'showImporter')
 		.addToUi();
 }
 
 function showImporter()
 {
-	const html = HtmlService.createHtmlOutputFromFile('Index').setWidth(300);
+	const html = HtmlService.createTemplateFromFile('Index').evaluate().setWidth(300);
 	SpreadsheetApp.getUi().showSidebar(html);
 }
 

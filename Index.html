@@ -7,9 +7,9 @@
 	<body>
 		<main class="container">
 			<form onsubmit="event.preventDefault(); upload();">
-				<label for="file">XLSX file</label>
+				<label for="file"><?= _('Fichier XLSX') ?></label>
 				<input type="file" id="file" name="file" accept=".xlsx, .xls" required>
-				<button type="submit">Import</button>
+				<button type="submit"><?= _('Importer') ?></button>
 			</form>
 			<div id="status"></div>
 		</main>
@@ -45,13 +45,7 @@
 			function onSuccess(message)
 			{
 				document.getElementById('status').innerHTML = `<p>${message}</p>`;
-				if (message.startsWith('Successfully'))
-				{
-					setTimeout(function()
-					{
-						google.script.host.close();
-					}, 2000);
-				}
+				setTimeout(() => google.script.host.close(), 2000);
 			}
 
 			function onFailure(error)
