@@ -47,12 +47,7 @@ function importXLSXFromFile(fileData)
 		const trgSheet       = trgSpreadsheet.insertSheet(sheetName);
 		trgSheet.getRange(1, 1, srcData.length, srcData[0].length).setValues(srcData);
 
-		return `Successfully imported '${fileData.name}'.`;
-	}
-	catch (e)
-	{
-		console.error('Import Error: ' + e.toString());
-		return 'Error: ' + e.message;
+		return trgSheet;
 	}
 	finally
 	{

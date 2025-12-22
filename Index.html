@@ -42,9 +42,9 @@
 				}
 			}
 
-			function onSuccess(message)
+			function onSuccess()
 			{
-				document.getElementById('status').innerHTML = `<p>${message}</p>`;
+				document.getElementById('status').innerHTML = `<p>${'<?= _('Importation réussie') ?>'}</p>`;
 				setTimeout(() => google.script.host.close(), 2000);
 			}
 
