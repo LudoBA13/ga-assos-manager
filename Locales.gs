@@ -1,10 +1,8 @@
 // Configuration
 const ACTIVE_LOCALE = 'fr';
 
-const CATALOG =
-{
-	'fr':
-	{
+const CATALOG = {
+	'fr': {
 	}
 };
 

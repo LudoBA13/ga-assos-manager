@@ -63,7 +63,7 @@ function importXLSXFromFile(fileData)
 			{
 				Drive.Files.remove(tmpSheetFile.id);
 			}
-			catch(e)
+			catch (e)
 			{
 				console.error('Cleanup Error: Failed to remove temporary file with ID ' + tmpSheetFile.id + '. Error: ' + e.message);
 			}

@@ -23,7 +23,7 @@
 				{
 					document.getElementById('status').innerHTML = '<progress indeterminate></progress>';
 					const reader = new FileReader;
-					reader.onload = function(e)
+					reader.onload = function (e)
 					{
 						const dataUrl = e.target.result;
 						const data = dataUrl.split(',')[1];
