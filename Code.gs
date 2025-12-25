@@ -15,19 +15,6 @@ function showImporter()
 	SpreadsheetApp.getUi().showSidebar(html);
 }
 
-function debugImport()
-{
-	const ss    = SpreadsheetApp.getActiveSpreadsheet();
-	const sheet = ss.getSheetByName('Import');
-
-	if (!sheet)
-	{
-		throw new Error('Sheet named "Import" not found.');
-	}
-
-	updateAssoConnectFromSheet(sheet);
-}
-
 function getTableFromSheet(sheet, tableName)
 {
 	for (const table of sheet.tables)
@@ -39,15 +26,8 @@ function getTableFromSheet(sheet, tableName)
 	}
 }
 
-function updateAssoConnectFromSheet(sheet)
+function getAssoConnectTable()
 {
-	const data = sheet.getDataRange().getValues();
-
-	if (!data || data.length === 0)
-	{
-		throw new Error('The imported file appears to be empty.');
-	}
-
 	const ss   = SpreadsheetApp.getActiveSpreadsheet();
 	const ssId = ss.getId();
 
@@ -61,56 +41,64 @@ function updateAssoConnectFromSheet(sheet)
 		throw new Error('Cannot get a response sheet.');
 	}
 
-	let targetTable = null;
-
 	// Iterate through sheets to find the table
 	for (const s of response.sheets)
 	{
 		if (s.tables)
 		{
-			targetTable = getTableFromSheet(s, 'AssoConnect');
-			if (targetTable)
+			const table = getTableFromSheet(s, 'AssoConnect');
+			if (table)
 			{
-				break;
+				return table;
 			}
 		}
 	}
+}
 
-	if (!targetTable)
+function updateAssoConnectData(data)
+{
+	if (!data || data.length === 0)
 	{
-		throw new Error('Table named "AssoConnect" not found in the spreadsheet.');
+		throw new Error('No data passed to updateAssoConnectData.');
 	}
 
-	const targetSheetId = targetTable.range.sheetId;
+	const table = getAssoConnectTable();
+	if (!table)
+	{
+		throw new Error('Cannot locate the AssoConnect table.');
+	}
 
-	// 2. Clear the old data range to avoid leftovers if the new data is smaller
+	// Clear the old data range to avoid leftovers if the new data is smaller.
 	// We use the standard service for clearing content as it's easier
-	const targetSheet = ss.getSheets().find(s => s.getSheetId() === targetSheetId);
-	if (targetSheet)
+	const ss = SpreadsheetApp.getActiveSpreadsheet();
+	const ssId = ss.getId();
+	const sheetId = table.range.sheetId;
+	const sheet = ss.getSheets().find(s => s.getSheetId() === sheetId);
+	if (sheet)
 	{
 		// startRowIndex is 0-based, getRange uses 1-based
-		targetSheet.getRange(
-			targetTable.range.startRowIndex + 1,
-			targetTable.range.startColumnIndex + 1,
-			targetTable.range.endRowIndex - targetTable.range.startRowIndex,
-			targetTable.range.endColumnIndex - targetTable.range.startColumnIndex
+		sheet.getRange(
+			table.range.startRowIndex + 1,
+			table.range.startColumnIndex + 1,
+			table.range.endRowIndex - table.range.startRowIndex,
+			table.range.endColumnIndex - table.range.startColumnIndex
 		).clearContent();
 	}
 
 	// 3. Resize the table to fit the new data
 	const newRange = {
-		sheetId: targetSheetId,
-		startRowIndex: targetTable.range.startRowIndex,
-		startColumnIndex: targetTable.range.startColumnIndex,
-		endRowIndex: targetTable.range.startRowIndex + data.length,
-		endColumnIndex: targetTable.range.startColumnIndex + data[0].length
+		sheetId:          sheetId,
+		startRowIndex:    table.range.startRowIndex,
+		startColumnIndex: table.range.startColumnIndex,
+		endRowIndex:      table.range.startRowIndex + data.length,
+		endColumnIndex:   table.range.startColumnIndex + data[0].length
 	};
 
 	const updateRequest = {
 		updateTable: {
 			table: {
-				tableId: targetTable.tableId,
-				range: newRange
+				tableId: table.tableId,
+				range:   newRange
 			},
 			fields: 'range'
 		}
@@ -119,7 +107,7 @@ function updateAssoConnectFromSheet(sheet)
 	Sheets.Spreadsheets.batchUpdate({ requests: [updateRequest] }, ssId);
 
 	// 4. Write the new data
-	targetSheet.getRange(
+	sheet.getRange(
 		newRange.startRowIndex + 1,
 		newRange.startColumnIndex + 1,
 		data.length,
@@ -129,17 +117,12 @@ function updateAssoConnectFromSheet(sheet)
 
 function updateAssoConnectFromFile(fileData)
 {
-	const sheet = importXLSXFromFile(fileData);
-
-	try
+	const data = getDataFromXLSXFile(fileData);
+	if (!data || data.length === 0)
 	{
-		updateAssoConnectFromSheet(sheet);
+		throw new Error('No data in file.');
 	}
-	finally
-	{
-		// Clean up the temporary sheet
-		SpreadsheetApp.getActiveSpreadsheet().deleteSheet(sheet);
-	}
+	updateAssoConnectData(data);
 }
 
 /**
@@ -177,9 +160,8 @@ function createHiddenSheet(sheetName)
  * @param {string} fileData.name The name of the file.
  * @param {string} fileData.mimeType The MIME type of the file.
  * @param {string} fileData.data The base64 encoded data of the file.
- * @returns {GoogleAppsScript.Spreadsheet.Sheet} The newly created sheet containing the imported data.
  */
-function importXLSXFromFile(fileData)
+function getDataFromXLSXFile(fileData)
 {
 	let tmpSheetFile;
 
@@ -197,20 +179,16 @@ function importXLSXFromFile(fileData)
 		tmpSheetFile = Drive.Files.create(resource, blob);
 
 		// 3. Copy data from the new sheet to the active spreadsheet
-		const srcSpreadsheet = SpreadsheetApp.openById(tmpSheetFile.id);
-		const srcSheet       = srcSpreadsheet.getSheets()[0];
-		const srcData        = srcSheet.getDataRange().getValues();
+		const tmpSpreadsheet = SpreadsheetApp.openById(tmpSheetFile.id);
+		const tmpSheet       = tmpSpreadsheet.getSheets()[0];
+		const data           = tmpSheet.getDataRange().getValues();
 
-		if (srcData.length === 0)
+		if (data.length === 0)
 		{
 			throw new Error('The selected XLSX file is empty or could not be read.');
 		}
 
-		const sheetName = 'tmp-' + Date.now();
-		const trgSheet = createHiddenSheet(sheetName);
-		trgSheet.getRange(1, 1, srcData.length, srcData[0].length).setValues(srcData);
-
-		return trgSheet;
+		return data;
 	}
 	finally
 	{
