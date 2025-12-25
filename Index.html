@@ -7,9 +7,9 @@
 	<body>
 		<main class="container">
 			<form onsubmit="event.preventDefault(); upload();">
-				<label for="file"><?= _('Fichier XLSX') ?></label>
+				<label for="file"><?= _('Fichier AssoConnect XLSX') ?></label>
 				<input type="file" id="file" name="file" accept=".xlsx, .xls" required>
-				<button type="submit"><?= _('Importer') ?></button>
+				<button type="submit"><?= _('Mettre à jour') ?></button>
 			</form>
 			<div id="status"></div>
 		</main>
@@ -39,7 +39,7 @@
 					google.script.run
 						.withSuccessHandler(onSuccess)
 						.withFailureHandler(onFailure)
-						.importXLSXFromFile(fileData);
+						.updateAssoConnectFromFile(fileData);
 				};
 				reader.readAsDataURL(file);
 			}

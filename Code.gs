@@ -15,6 +15,108 @@ function showImporter()
 	SpreadsheetApp.getUi().showSidebar(html);
 }
 
+function updateAssoConnectFromFile(fileData)
+{
+	const sheet = importXLSXFromFile(fileData);
+
+	try
+	{
+		const data = sheet.getDataRange().getValues();
+
+		if (!data || data.length === 0)
+		{
+			throw new Error('The imported file appears to be empty.');
+		}
+
+		const ss   = SpreadsheetApp.getActiveSpreadsheet();
+		const ssId = ss.getId();
+
+		// 1. Find the table named "AssoConnect"
+		// We need to request the 'tables' field from the API
+		const response = Sheets.Spreadsheets.get(ssId, {
+			fields: 'sheets(properties,tables)'
+		});
+
+		let targetTable   = null;
+		let targetSheetId = null;
+
+		// Iterate through sheets to find the table
+		if (response.sheets)
+		{
+			for (const s of response.sheets)
+			{
+				if (s.tables)
+				{
+					for (const t of s.tables)
+					{
+						// Check displayName. Note: API docs sometimes refer to it as just 'displayName' in 'spec'
+						if (t.spec && t.spec.displayName === 'AssoConnect')
+						{
+							targetTable   = t;
+							targetSheetId = s.properties.sheetId;
+							break;
+						}
+					}
+				}
+				if (targetTable) break;
+			}
+		}
+
+		if (!targetTable)
+		{
+			throw new Error('Table named "AssoConnect" not found in the spreadsheet.');
+		}
+
+		// 2. Clear the old data range to avoid leftovers if the new data is smaller
+		// We use the standard service for clearing content as it's easier
+		const targetSheet = ss.getSheets().find(s => s.getSheetId() === targetSheetId);
+		if (targetSheet)
+		{
+			// startRowIndex is 0-based, getRange uses 1-based
+			targetSheet.getRange(
+				targetTable.range.startRowIndex + 1,
+				targetTable.range.startColumnIndex + 1,
+				targetTable.range.endRowIndex - targetTable.range.startRowIndex,
+				targetTable.range.endColumnIndex - targetTable.range.startColumnIndex
+			).clearContent();
+		}
+
+		// 3. Resize the table to fit the new data
+		const newRange = {
+			sheetId: targetSheetId,
+			startRowIndex: targetTable.range.startRowIndex,
+			startColumnIndex: targetTable.range.startColumnIndex,
+			endRowIndex: targetTable.range.startRowIndex + data.length,
+			endColumnIndex: targetTable.range.startColumnIndex + data[0].length
+		};
+
+		const updateRequest = {
+			updateTable: {
+				table: {
+					tableId: targetTable.tableId,
+					range: newRange
+				},
+				fields: 'range'
+			}
+		};
+
+		Sheets.Spreadsheets.batchUpdate({ requests: [updateRequest] }, ssId);
+
+		// 4. Write the new data
+		targetSheet.getRange(
+			newRange.startRowIndex + 1,
+			newRange.startColumnIndex + 1,
+			data.length,
+			data[0].length
+		).setValues(data);
+	}
+	finally
+	{
+		// Clean up the temporary sheet
+		SpreadsheetApp.getActiveSpreadsheet().deleteSheet(sheet);
+	}
+}
+
 /**
  * Imports an XLSX file from base64 data into a new temporary sheet.
  *
