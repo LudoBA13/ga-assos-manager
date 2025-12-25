@@ -12,7 +12,7 @@ function onOpen()
 
 function showImporter()
 {
-	const html = HtmlService.createTemplateFromFile('Index').evaluate().setWidth(300);
+	const html = HtmlService.createTemplateFromFile('Import').evaluate().setWidth(300);
 	SpreadsheetApp.getUi().showSidebar(html);
 }
 
