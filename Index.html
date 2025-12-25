@@ -19,27 +19,29 @@
 				const fileInput = document.getElementById('file');
 				const file = fileInput.files[0];
 
-				if (file)
+				if (!file)
 				{
-					document.getElementById('status').innerHTML = '<progress indeterminate></progress>';
-					const reader = new FileReader;
-					reader.onload = function (e)
-					{
-						const dataUrl = e.target.result;
-						const data = dataUrl.split(',')[1];
-						const fileData = {
-							name: file.name,
-							mimeType: file.type,
-							data: data
-						};
-
-						google.script.run
-							.withSuccessHandler(onSuccess)
-							.withFailureHandler(onFailure)
-							.importXLSXFromFile(fileData);
-					};
-					reader.readAsDataURL(file);
+					return;
 				}
+
+				document.getElementById('status').innerHTML = '<progress indeterminate></progress>';
+				const reader = new FileReader;
+				reader.onload = function (e)
+				{
+					const dataUrl = e.target.result;
+					const data = dataUrl.split(',')[1];
+					const fileData = {
+						name: file.name,
+						mimeType: file.type,
+						data: data
+					};
+
+					google.script.run
+						.withSuccessHandler(onSuccess)
+						.withFailureHandler(onFailure)
+						.importXLSXFromFile(fileData);
+				};
+				reader.readAsDataURL(file);
 			}
 
 			function onSuccess()
