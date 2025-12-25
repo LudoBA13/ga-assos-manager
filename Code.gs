@@ -143,6 +143,34 @@ function updateAssoConnectFromFile(fileData)
 }
 
 /**
+ * Creates a new hidden sheet in the active spreadsheet using the Advanced Sheets API.
+ *
+ * @param {string} sheetName The name of the new sheet.
+ * @returns {GoogleAppsScript.Spreadsheet.Sheet} The newly created hidden sheet.
+ */
+function createHiddenSheet(sheetName)
+{
+	const ss   = SpreadsheetApp.getActiveSpreadsheet();
+	const ssId = ss.getId();
+
+	const resource = {
+		requests: [{
+			addSheet: {
+				properties: {
+					title: sheetName,
+					hidden: true
+				}
+			}
+		}]
+	};
+
+	const response = Sheets.Spreadsheets.batchUpdate(resource, ssId);
+	const newSheetId = response.replies[0].addSheet.properties.sheetId;
+
+	return ss.getSheetByName(sheetName);
+}
+
+/**
  * Imports an XLSX file from base64 data into a new temporary sheet.
  *
  * @param {Object} fileData The file data object.
@@ -178,9 +206,8 @@ function importXLSXFromFile(fileData)
 			throw new Error('The selected XLSX file is empty or could not be read.');
 		}
 
-		const trgSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-		const sheetName      = 'tmp-' + Date.now();
-		const trgSheet       = trgSpreadsheet.insertSheet(sheetName);
+		const sheetName = 'tmp-' + Date.now();
+		const trgSheet = createHiddenSheet(sheetName);
 		trgSheet.getRange(1, 1, srcData.length, srcData[0].length).setValues(srcData);
 
 		return trgSheet;
