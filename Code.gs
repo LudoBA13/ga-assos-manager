@@ -15,6 +15,15 @@ function showImporter()
 	SpreadsheetApp.getUi().showSidebar(html);
 }
 
+/**
+ * Imports an XLSX file from base64 data into a new temporary sheet.
+ *
+ * @param {Object} fileData The file data object.
+ * @param {string} fileData.name The name of the file.
+ * @param {string} fileData.mimeType The MIME type of the file.
+ * @param {string} fileData.data The base64 encoded data of the file.
+ * @returns {GoogleAppsScript.Spreadsheet.Sheet} The newly created sheet containing the imported data.
+ */
 function importXLSXFromFile(fileData)
 {
 	let tmpSheetFile;
