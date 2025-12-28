@@ -29,8 +29,14 @@ function deployNamedFunctions()
 		{
 			name: 'AC',
 			description: 'Returns a full column from the DonnéesAssoConnect sheet by its header name.',
-			definition: "=INDEX('DonnéesAssoConnect'!$A$2:$DZ; 0; MATCH(col_name; 'DonnéesAssoConnect'!$1:$1; 0))",
+			definition: "=INDEX('DonnéesAssoConnect'!$A$2:$DZ, 0, MATCH(col_name, 'DonnéesAssoConnect'!$1:$1, 0))",
 			argumentPlaceholders: [{ name: 'col_name' }]
+		},
+		{
+			name: 'AC_COLS',
+			description: 'Returns columns from DonnéesAssoConnect matching the headers in the provided range.',
+			definition: "=CHOOSECOLS(REDUCE(0, headers, LAMBDA(acc, h, HSTACK(acc, INDEX('DonnéesAssoConnect'!$A$2:$DZ, 0, MATCH(h, 'DonnéesAssoConnect'!$1:$1, 0))))), SEQUENCE(1, COLUMNS(headers), 2))",
+			argumentPlaceholders: [{ name: 'headers' }]
 		}
 	];
 
