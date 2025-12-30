@@ -28,13 +28,13 @@ function deployNamedFunctions()
 	const functions = [
 		{
 			name: 'AC',
-			description: 'Returns a full column from the DonnéesAssoConnect sheet by its header name.',
+			description: _('Renvoie une colonne complète de la feuille DonnéesAssoConnect via son nom d\'en-tête.'),
 			definition: "=INDEX('DonnéesAssoConnect'!$A$2:$DZ, 0, MATCH(col_name, 'DonnéesAssoConnect'!$1:$1, 0))",
 			argumentPlaceholders: [{ name: 'col_name' }]
 		},
 		{
 			name: 'AC_COLS',
-			description: 'Returns columns from DonnéesAssoConnect matching the headers in the provided range.',
+			description: _('Renvoie les colonnes de DonnéesAssoConnect correspondant aux en-têtes de la plage fournie.'),
 			definition: "=CHOOSECOLS(REDUCE(0, headers, LAMBDA(acc, h, HSTACK(acc, INDEX('DonnéesAssoConnect'!$A$2:$DZ, 0, MATCH(h, 'DonnéesAssoConnect'!$1:$1, 0))))), SEQUENCE(1, COLUMNS(headers), 2))",
 			argumentPlaceholders: [{ name: 'headers' }]
 		}
@@ -94,17 +94,17 @@ function deployNamedFunctions()
 		if (requests.length > 0)
 		{
 			Sheets.Spreadsheets.batchUpdate({ requests: requests }, ssId);
-			SpreadsheetApp.getUi().alert(`${requests.length} opération(s) sur les fonctions effectuée(s) avec succès !`);
+			SpreadsheetApp.getUi().alert(_('%s opération(s) sur les fonctions effectuée(s) avec succès !', requests.length));
 		}
 		else
 		{
-			SpreadsheetApp.getUi().alert('Aucune modification nécessaire.');
+			SpreadsheetApp.getUi().alert(_('Aucune modification nécessaire.'));
 		}
 	}
 	catch (e)
 	{
 		console.error('Error deploying Named Functions: ' + e.message);
-		SpreadsheetApp.getUi().alert('Erreur lors du déploiement : ' + e.message);
+		SpreadsheetApp.getUi().alert(_('Erreur lors du déploiement : %s', e.message));
 	}
 }
 
