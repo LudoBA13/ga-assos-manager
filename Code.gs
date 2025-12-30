@@ -169,13 +169,22 @@ function updateAssoConnectData(data)
 	const sheet = ss.getSheets().find(s => s.getSheetId() === sheetId);
 	if (sheet)
 	{
-		// startRowIndex is 0-based, getRange uses 1-based
-		sheet.getRange(
-			table.range.startRowIndex + 1,
-			table.range.startColumnIndex + 1,
-			table.range.endRowIndex - table.range.startRowIndex,
-			table.range.endColumnIndex - table.range.startColumnIndex
-		).clearContent();
+		const curRowsCnt = table.range.endRowIndex - table.range.startRowIndex;
+		const curColsCnt = table.range.endColumnIndex - table.range.startColumnIndex;
+		const newRowsCnt = data.length;
+		const newColsCnt = data[0].length;
+
+		// Only clear if the target range is wider or taller than the new data
+		if (curRowsCnt > newRowsCnt || curColsCnt > newColsCnt)
+		{
+			// startRowIndex is 0-based, getRange uses 1-based
+			sheet.getRange(
+				table.range.startRowIndex + 1,
+				table.range.startColumnIndex + 1,
+				curRowsCnt,
+				curColsCnt
+			).clearContent();
+		}
 	}
 
 	// 3. Resize the table to fit the new data
