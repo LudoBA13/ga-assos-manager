@@ -1,6 +1,6 @@
 function showImporter()
 {
-	const html = HtmlService.createTemplateFromFile('Import').evaluate().setWidth(300);
+	const html = HtmlService.createTemplateFromFile('UI.Import').evaluate().setWidth(300);
 	SpreadsheetApp.getUi().showSidebar(html);
 }
 
