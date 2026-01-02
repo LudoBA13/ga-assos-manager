@@ -57,6 +57,16 @@ function updateAssoConnectData(data)
 		throw new Error('Cannot locate the AssoConnect table.');
 	}
 
+	updateTableData(table, data);
+}
+
+function updateTableData(table, data)
+{
+	if (!data || data.length === 0)
+	{
+		throw new Error('No data passed to updateTableData.');
+	}
+
 	// Clear the old data range to avoid leftovers if the new data is smaller.
 	// We use the standard service for clearing content as it's easier
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
