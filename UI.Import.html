@@ -46,7 +46,7 @@
 
 			function onSuccess()
 			{
-				document.getElementById('status').innerHTML = `<p>${'<?= _('Importation réussie') ?>'}</p>`;
+				document.getElementById('status').innerHTML = `<p>${<?= JSON.stringify(_('Importation réussie')) ?>}</p>`;
 				setTimeout(() => google.script.host.close(), 2000);
 			}
 
