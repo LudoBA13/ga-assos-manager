@@ -42,7 +42,7 @@ function deployNamedFunctions()
 		const response = Sheets.Spreadsheets.get(ssId, {
 			fields: 'namedFunctions'
 		});
-		
+
 		const existingFunctions = response.namedFunctions || [];
 		const requests = [];
 

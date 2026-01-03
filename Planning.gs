@@ -14,10 +14,10 @@ class Planning
 		const sheet    = trgRange.getSheet();
 		const startRow = trgRange.getRow();
 		const startCol = trgRange.getColumn();
-		
+
 		const numRows = tplRange.getNumRows();
 		const numCols = tplRange.getNumColumns();
-		
+
 		sheet.getRange(startRow, startCol, numRows, numCols).insertCells(SpreadsheetApp.Dimension.ROWS);
 
 		// Destination range at the original coordinates (now empty)

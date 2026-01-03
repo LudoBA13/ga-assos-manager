@@ -26,12 +26,12 @@ function updateAnomaliesFormula(e)
 		{
 			// Strip the prefix for the 3rd column
 			const shortName = name.replace(prefix, "");
-			
+
 			const range = "'" + name + "'!$A$2:$B";
 			const criteria = "'" + name + "'!$A$2:$A";
 
 			// Building a multi-line, indented formula string for this specific sheet
-			const sheetFormula = 
+			const sheetFormula =
 				"    IFERROR\n" +
 				"    (\n" +
 				"        LET\n" +
@@ -40,7 +40,7 @@ function updateAnomaliesFormula(e)
 				"            HSTACK(f; MAP(INDEX(f;;1); LAMBDA(x; \"" + _(shortName) + "\")))\n" +
 				"        )\n" +
 				"    )";
-			
+
 			rangeStrings.push(sheetFormula);
 		}
 	});
