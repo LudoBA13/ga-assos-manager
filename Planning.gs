@@ -11,30 +11,32 @@ class Planning
 		}
 
 		const trgRange = ss.getRange(address);
+		const sheet    = trgRange.getSheet();
+		const startRow = trgRange.getRow();
+		const startCol = trgRange.getColumn();
 		
-		// Ensure the target range has the same dimensions as the template
 		const numRows = tplRange.getNumRows();
 		const numCols = tplRange.getNumColumns();
 		
-		const dstRange = trgRange.getSheet().getRange(
-			trgRange.getRow(),
-			trgRange.getColumn(),
-			numRows,
-			numCols
-		);
+		sheet.getRange(startRow, startCol, numRows, numCols).insertCells(SpreadsheetApp.Dimension.ROWS);
 
-		tplRange.copyTo(dstRange, SpreadsheetApp.CopyPasteType.PASTE_ALL, false);
+		// Destination range at the original coordinates (now empty)
+		const dstRange = sheet.getRange(startRow, startCol);
+
+		// Decompose copyTo to avoid "Unexpected error" with PASTE_ALL
+		tplRange.copyTo(dstRange, SpreadsheetApp.CopyPasteType.PASTE_VALUES, false);
+		tplRange.copyTo(dstRange, SpreadsheetApp.CopyPasteType.PASTE_FORMAT, false);
+		tplRange.copyTo(dstRange, SpreadsheetApp.CopyPasteType.PASTE_DATA_VALIDATION, false);
+		tplRange.copyTo(dstRange, SpreadsheetApp.CopyPasteType.PASTE_CONDITIONAL_FORMATTING, false);
 		tplRange.copyTo(dstRange, SpreadsheetApp.CopyPasteType.PASTE_COLUMN_WIDTHS, false);
 
 		const tplSheet = tplRange.getSheet();
-		const dstSheet = dstRange.getSheet();
 		const tplRow   = tplRange.getRow();
-		const dstRow   = dstRange.getRow();
 
 		for (let i = 0; i < numRows; i++)
 		{
 			const height = tplSheet.getRowHeight(tplRow + i);
-			dstSheet.setRowHeight(dstRow + i, height);
+			sheet.setRowHeight(startRow + i, height);
 		}
 	}
 }
