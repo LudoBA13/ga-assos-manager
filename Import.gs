@@ -136,31 +136,37 @@ class Import
 			}
 		}
 
-		// 3. Resize the table to fit the new data
-		const newRange = {
-			sheetId:          sheetId,
-			startRowIndex:    table.range.startRowIndex,
-			startColumnIndex: table.range.startColumnIndex,
-			endRowIndex:      table.range.startRowIndex + data.length,
-			endColumnIndex:   table.range.startColumnIndex + data[0].length
-		};
+		// 3. Resize the table to fit the new data if necessary
+		const newEndRowIdx = table.range.startRowIndex + data.length;
+		const newEndColIdx = table.range.startColumnIndex + data[0].length;
 
-		const updateRequest = {
-			updateTable: {
-				table: {
-					tableId: table.tableId,
-					range:   newRange
-				},
-				fields: 'range'
-			}
-		};
+		if (table.range.endRowIndex !== newEndRowIdx || table.range.endColumnIndex !== newEndColIdx)
+		{
+			const newRange = {
+				sheetId:          sheetId,
+				startRowIndex:    table.range.startRowIndex,
+				startColumnIndex: table.range.startColumnIndex,
+				endRowIndex:      newEndRowIdx,
+				endColumnIndex:   newEndColIdx
+			};
 
-		Sheets.Spreadsheets.batchUpdate({ requests: [updateRequest] }, ssId);
+			const updateRequest = {
+				updateTable: {
+					table: {
+						tableId: table.tableId,
+						range:   newRange
+					},
+					fields: 'range'
+				}
+			};
+
+			Sheets.Spreadsheets.batchUpdate({ requests: [updateRequest] }, ssId);
+		}
 
 		// 4. Write the new data
 		sheet.getRange(
-			newRange.startRowIndex + 1,
-			newRange.startColumnIndex + 1,
+			table.range.startRowIndex + 1,
+			table.range.startColumnIndex + 1,
 			data.length,
 			data[0].length
 		).setValues(data);
