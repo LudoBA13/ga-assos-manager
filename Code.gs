@@ -101,3 +101,13 @@ function deployNamedFunctions()
 		SpreadsheetApp.getUi().alert(_('Erreur lors du déploiement : %s', e.message));
 	}
 }
+
+function showImporter()
+{
+	Importer.show();
+}
+
+function updateAssoConnectFromFile(fileData)
+{
+	Importer.updateAssoConnectFromFile(fileData);
+}

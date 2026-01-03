@@ -1,12 +1,22 @@
-class Import
+class Importer
 {
 	static show()
 	{
-		const html = HtmlService.createTemplateFromFile('UI.Import').evaluate().setWidth(300);
+		const html = HtmlService.createTemplateFromFile('UI.Importer').evaluate().setWidth(300);
 		SpreadsheetApp.getUi().showSidebar(html);
 	}
 
-	static getTable(tableName)
+	static updateAssoConnectFromFile(fileData)
+	{
+		const data = this.#getDataFromXLSXFile(fileData);
+		if (!data || data.length === 0)
+		{
+			throw new Error('No data in file.');
+		}
+		this.#updateAssoConnectData(data);
+	}
+
+	static #getTable(tableName)
 	{
 		const ss   = SpreadsheetApp.getActiveSpreadsheet();
 		const ssId = ss.getId();
@@ -32,25 +42,25 @@ class Import
 		return null;
 	}
 
-	static updateAssoConnectData(data)
+	static #updateAssoConnectData(data)
 	{
 		if (!data || data.length === 0)
 		{
 			throw new Error('No data passed to updateAssoConnectData.');
 		}
 
-		const table = this.getTable('AssoConnect');
+		const table = this.#getTable('AssoConnect');
 		if (!table)
 		{
 			throw new Error('Cannot locate the AssoConnect table.');
 		}
 
-		this.updateTableData(table, data);
+		this.#updateTableData(table, data);
 
 		// Process and update Extra table
 		try
 		{
-			this.updateExtraData(data);
+			this.#updateExtraData(data);
 		}
 		catch (e)
 		{
@@ -58,7 +68,7 @@ class Import
 		}
 	}
 
-	static updateExtraData(assoConnectData)
+	static #updateExtraData(assoConnectData)
 	{
 		// 1. Locate headers
 		const headers = assoConnectData[0];
@@ -92,10 +102,10 @@ class Import
 		}
 
 		// 3. Update table
-		const table = this.getTable('Extra');
+		const table = this.#getTable('Extra');
 		if (table)
 		{
-			this.updateTableData(table, extraData);
+			this.#updateTableData(table, extraData);
 		}
 		else
 		{
@@ -103,7 +113,7 @@ class Import
 		}
 	}
 
-	static updateTableData(table, data)
+	static #updateTableData(table, data)
 	{
 		if (!data || data.length === 0)
 		{
@@ -172,23 +182,13 @@ class Import
 		).setValues(data);
 	}
 
-	static updateAssoConnectFromFile(fileData)
-	{
-		const data = this.getDataFromXLSXFile(fileData);
-		if (!data || data.length === 0)
-		{
-			throw new Error('No data in file.');
-		}
-		this.updateAssoConnectData(data);
-	}
-
 	/**
 	 * Creates a new hidden sheet in the active spreadsheet using the Advanced Sheets API.
 	 *
 	 * @param {string} sheetName The name of the new sheet.
 	 * @returns {GoogleAppsScript.Spreadsheet.Sheet} The newly created hidden sheet.
 	 */
-	static createHiddenSheet(sheetName)
+	static #createHiddenSheet(sheetName)
 	{
 		const ss   = SpreadsheetApp.getActiveSpreadsheet();
 		const ssId = ss.getId();
@@ -218,7 +218,7 @@ class Import
 	 * @param {string} fileData.mimeType The MIME type of the file.
 	 * @param {string} fileData.data The base64 encoded data of the file.
 	 */
-	static getDataFromXLSXFile(fileData)
+	static #getDataFromXLSXFile(fileData)
 	{
 		let tmpSheetFile;
 
@@ -265,13 +265,3 @@ class Import
 	}
 }
 
-// Global bridges
-function showImporter()
-{
-	Import.show();
-}
-
-function updateAssoConnectFromFile(fileData)
-{
-	Import.updateAssoConnectFromFile(fileData);
-}
