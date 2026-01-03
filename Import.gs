@@ -15,33 +15,51 @@ function getTableFromSheet(sheet, tableName)
 	}
 }
 
-function getAssoConnectTable()
+function getTable(sheetName, tableName)
 {
 	const ss   = SpreadsheetApp.getActiveSpreadsheet();
 	const ssId = ss.getId();
 
-	// 1. Find the table named "AssoConnect"
-	// We need to request the 'tables' field from the API
 	const response = Sheets.Spreadsheets.get(ssId, {
 		fields: 'sheets(properties,tables)'
 	});
+
 	if (!response.sheets)
 	{
-		throw new Error('Cannot get a response sheet.');
+		return null;
 	}
 
-	// Iterate through sheets to find the table
-	for (const s of response.sheets)
+	if (sheetName)
 	{
-		if (s.tables)
+		const sheet = response.sheets.find(s => s.properties.title === sheetName);
+		if (sheet && sheet.tables)
 		{
-			const table = getTableFromSheet(s, 'AssoConnect');
+			const table = getTableFromSheet(sheet, tableName);
 			if (table)
 			{
 				return table;
 			}
 		}
 	}
+
+	for (const s of response.sheets)
+	{
+		if (s.tables)
+		{
+			const table = getTableFromSheet(s, tableName);
+			if (table)
+			{
+				return table;
+			}
+		}
+	}
+
+	return null;
+}
+
+function getAssoConnectTable()
+{
+	return getTable(null, 'AssoConnect');
 }
 
 function updateAssoConnectData(data)
@@ -72,32 +90,7 @@ function updateAssoConnectData(data)
 
 function getExtraTable()
 {
-	const ss   = SpreadsheetApp.getActiveSpreadsheet();
-	const ssId = ss.getId();
-
-	// We need to request the 'tables' field from the API
-	const response = Sheets.Spreadsheets.get(ssId, {
-		fields: 'sheets(properties,tables)'
-	});
-
-	if (!response.sheets) return null;
-
-	const extraSheet = response.sheets.find(s => s.properties.title === 'DonnéesExtra');
-	if (extraSheet && extraSheet.tables)
-	{
-		const table = getTableFromSheet(extraSheet, 'Extra');
-		if (table) return table;
-	}
-
-	// Fallback: search all sheets if not found in 'DonnéesExtra'
-	for (const s of response.sheets)
-	{
-		if (s.tables)
-		{
-			const table = getTableFromSheet(s, 'Extra');
-			if (table) return table;
-		}
-	}
+	return getTable('DonnéesExtra', 'Extra');
 }
 
 function updateExtraData(assoConnectData)
