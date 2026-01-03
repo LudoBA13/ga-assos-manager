@@ -4,18 +4,7 @@ function showImporter()
 	SpreadsheetApp.getUi().showSidebar(html);
 }
 
-function getTableFromSheet(sheet, tableName)
-{
-	for (const table of sheet.tables)
-	{
-		if (table.name === tableName)
-		{
-			return table;
-		}
-	}
-}
-
-function getTable(sheetName, tableName)
+function getTable(tableName)
 {
 	const ss   = SpreadsheetApp.getActiveSpreadsheet();
 	const ssId = ss.getId();
@@ -29,37 +18,16 @@ function getTable(sheetName, tableName)
 		return null;
 	}
 
-	if (sheetName)
-	{
-		const sheet = response.sheets.find(s => s.properties.title === sheetName);
-		if (sheet && sheet.tables)
-		{
-			const table = getTableFromSheet(sheet, tableName);
-			if (table)
-			{
-				return table;
-			}
-		}
-	}
-
 	for (const s of response.sheets)
 	{
-		if (s.tables)
+		const table = s.tables?.find(t => t.name === tableName);
+		if (table)
 		{
-			const table = getTableFromSheet(s, tableName);
-			if (table)
-			{
-				return table;
-			}
+			return table;
 		}
 	}
 
 	return null;
-}
-
-function getAssoConnectTable()
-{
-	return getTable(null, 'AssoConnect');
 }
 
 function updateAssoConnectData(data)
@@ -69,7 +37,7 @@ function updateAssoConnectData(data)
 		throw new Error('No data passed to updateAssoConnectData.');
 	}
 
-	const table = getAssoConnectTable();
+	const table = getTable('AssoConnect');
 	if (!table)
 	{
 		throw new Error('Cannot locate the AssoConnect table.');
@@ -86,11 +54,6 @@ function updateAssoConnectData(data)
 	{
 		console.warn('Failed to update Extra table: ' + e.message);
 	}
-}
-
-function getExtraTable()
-{
-	return getTable('DonnéesExtra', 'Extra');
 }
 
 function updateExtraData(assoConnectData)
@@ -127,7 +90,7 @@ function updateExtraData(assoConnectData)
 	}
 
 	// 3. Update table
-	const table = getExtraTable();
+	const table = getTable('Extra');
 	if (table)
 	{
 		updateTableData(table, extraData);
