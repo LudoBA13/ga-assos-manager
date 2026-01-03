@@ -60,10 +60,10 @@ function updateExtraData(assoConnectData)
 {
 	// 1. Locate headers
 	const headers = assoConnectData[0];
-	const idIndex = headers.indexOf('ID du Contact');
-	const infoIndex = headers.indexOf('Informations complémentaires');
+	const idIdx = headers.indexOf('ID du Contact');
+	const infoIdx = headers.indexOf('Informations complémentaires');
 
-	if (idIndex === -1 || infoIndex === -1)
+	if (idIdx === -1 || infoIdx === -1)
 	{
 		console.warn('Cannot update Extra table: Missing required columns in source data.');
 		return;
@@ -77,8 +77,8 @@ function updateExtraData(assoConnectData)
 	for (let i = 1; i < assoConnectData.length; i++)
 	{
 		const row = assoConnectData[i];
-		const id = row[idIndex];
-		const info = row[infoIndex] ? String(row[infoIndex]) : '';
+		const id = row[idIdx];
+		const info = row[infoIdx] ? String(row[infoIdx]) : '';
 
 		const udMatch = info.match(udRegex);
 		const planningMatch = info.match(planningRegex);
