@@ -58,6 +58,91 @@ function updateAssoConnectData(data)
 	}
 
 	updateTableData(table, data);
+
+	// Process and update Extra table
+	try
+	{
+		updateExtraData(data);
+	}
+	catch (e)
+	{
+		console.warn('Failed to update Extra table: ' + e.message);
+	}
+}
+
+function getExtraTable()
+{
+	const ss   = SpreadsheetApp.getActiveSpreadsheet();
+	const ssId = ss.getId();
+
+	// We need to request the 'tables' field from the API
+	const response = Sheets.Spreadsheets.get(ssId, {
+		fields: 'sheets(properties,tables)'
+	});
+
+	if (!response.sheets) return null;
+
+	const extraSheet = response.sheets.find(s => s.properties.title === 'DonnéesExtra');
+	if (extraSheet && extraSheet.tables)
+	{
+		const table = getTableFromSheet(extraSheet, 'Extra');
+		if (table) return table;
+	}
+
+	// Fallback: search all sheets if not found in 'DonnéesExtra'
+	for (const s of response.sheets)
+	{
+		if (s.tables)
+		{
+			const table = getTableFromSheet(s, 'Extra');
+			if (table) return table;
+		}
+	}
+}
+
+function updateExtraData(assoConnectData)
+{
+	// 1. Locate headers
+	const headers = assoConnectData[0];
+	const idIndex = headers.indexOf('ID du Contact');
+	const infoIndex = headers.indexOf('Informations complémentaires');
+
+	if (idIndex === -1 || infoIndex === -1)
+	{
+		console.warn('Cannot update Extra table: Missing required columns in source data.');
+		return;
+	}
+
+	// 2. Extract data
+	const extraData = [['ID', 'planning', 'ud']];
+	const udRegex = /\$ud:(\d+)\$/;
+	const planningRegex = /\$planning:(\w+)\$/;
+
+	for (let i = 1; i < assoConnectData.length; i++)
+	{
+		const row = assoConnectData[i];
+		const id = row[idIndex];
+		const info = row[infoIndex] ? String(row[infoIndex]) : '';
+
+		const udMatch = info.match(udRegex);
+		const planningMatch = info.match(planningRegex);
+
+		const ud = udMatch ? udMatch[1] : '';
+		const planning = planningMatch ? planningMatch[1] : '';
+
+		extraData.push([id, planning, ud]);
+	}
+
+	// 3. Update table
+	const table = getExtraTable();
+	if (table)
+	{
+		updateTableData(table, extraData);
+	}
+	else
+	{
+		console.warn('Extra table not found.');
+	}
 }
 
 function updateTableData(table, data)
