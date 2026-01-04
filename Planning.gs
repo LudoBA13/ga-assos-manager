@@ -1,5 +1,97 @@
+const ICON_TIMESLOT_ADD    = '\u2795';
+const ICON_TIMESLOT_DELETE = '\u274C';
+
 class Planning
 {
+	static hasDataValidation(sheet, row, col)
+	{
+		const range = sheet.getRange(row, col);
+		if (range.isPartOfMerge())
+		{
+			// If the cell is part of a merge, checking the specific cell might return null
+			// even if the merged range has validation. We must check the top-left cell.
+			const mergedRange = range.getMergedRanges()[0];
+			return mergedRange.getCell(1, 1).getDataValidation() !== null;
+		}
+		return range.getDataValidation() !== null;
+	}
+
+	static isPlanning(cell)
+	{
+		const cellCol = cell.getColumn();
+		const cellRow = cell.getRow();
+		const sheet   = cell.getSheet();
+
+		// Locate top left corner of the planning (headers have no validation)
+		let col = cellCol;
+		while (col > 0 && Planning.hasDataValidation(sheet, cellRow, col))
+		{
+			--col;
+		}
+
+		let row = cellRow;
+		while (row > 0 && Planning.hasDataValidation(sheet, row, cellCol))
+		{
+			--row;
+		}
+
+		const originValue = (col > 0 && row > 0) ? sheet.getRange(row, col).getValue() : null;
+		return originValue === 'tplPlanning';
+	}
+
+	static getCellInfo(cell)
+	{
+		const info = {
+			isPlanning:          false,
+			isTimeslot:          false,
+			isProducts:          false,
+			isFullTimeslot:      false,
+			isMorningTimeslot:   false,
+			isAfternoonTimeslot: false
+		};
+
+		const criteria = cell.getDataValidation()?.getCriteriaType();
+		if (criteria !== SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST)
+		{
+			return info;
+		}
+
+		info.isPlanning = Planning.isPlanning(cell);
+		if (!info.isPlanning)
+		{
+			return info;
+		}
+
+		const timeslotRegexp = /(?:08:3|1[04]:0)0$/;
+		const values = cell.getDataValidation().getCriteriaValues()[0];
+		if (timeslotRegexp.test(values?.[0]))
+		{
+			info.isTimeslot = true;
+			if (values[values.length - 1].startsWith(ICON_TIMESLOT_ADD))
+			{
+				// The last option of a full timeslot starts with U+2795
+				info.isFullTimeslot = true;
+			}
+			else if (values.length >= 3)
+			{
+				info.isMorningTimeslot = true;
+			}
+			else
+			{
+				// Only one time slot in the afternoon
+				info.isAfternoonTimeslot = true;
+			}
+		}
+
+		const productsRegexp = /^[\u2744\u{1F969}\u{1F4E6}]/u;
+		if (productsRegexp.test(values?.[0]))
+		{
+			info.isProducts = true;
+		}
+
+		return info;
+	}
+
 	static initUI(address)
 	{
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
