@@ -6,14 +6,12 @@ class Planning
 	static hasDataValidation(sheet, row, col)
 	{
 		const range = sheet.getRange(row, col);
-		if (range.isPartOfMerge())
-		{
-			// If the cell is part of a merge, checking the specific cell might return null
-			// even if the merged range has validation. We must check the top-left cell.
-			const mergedRange = range.getMergedRanges()[0];
-			return mergedRange.getCell(1, 1).getDataValidation() !== null;
-		}
-		return range.getDataValidation() !== null;
+
+		// If the cell is part of a merge, checking the specific cell might return null
+		// even if the merged range has validation. We must check the top-left cell.
+		const cell = (range.isPartOfMerge()) ? range.getMergedRanges()[0] : range;
+
+		return cell.getDataValidation() !== null;
 	}
 
 	static isPlanning(cell)
@@ -35,8 +33,7 @@ class Planning
 			--row;
 		}
 
-		const originValue = (col > 0 && row > 0) ? sheet.getRange(row, col).getValue() : null;
-		return originValue === 'tplPlanning';
+		return (col > 0 && row > 0) && sheet.getRange(row, col).getValue() === 'tplPlanning';
 	}
 
 	static getCellInfo(cell)
