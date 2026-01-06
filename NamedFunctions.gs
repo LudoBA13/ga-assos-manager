@@ -19,6 +19,12 @@ function deployNamedFunctions()
 			description: _('Renvoie les colonnes de DonnéesAssoConnect correspondant aux en-têtes de la plage fournie.'),
 			definition: "=CHOOSECOLS(REDUCE(0, headers, LAMBDA(acc, h, HSTACK(acc, INDEX('DonnéesAssoConnect'!$A$2:$DZ, 0, MATCH(h, 'DonnéesAssoConnect'!$1:$1, 0))))), SEQUENCE(1, COLUMNS(headers), 2))",
 			argumentPlaceholders: [{ name: 'headers' }]
+		},
+		{
+			name: 'GET_VIF_FROM_APPROXIMATE_NAME',
+			description: _('Recherche la valeur associée à un nom dans la feuille FuzzyDB.'),
+			definition: "=XLOOKUP(name, FuzzyDB!$A:$A, FuzzyDB!$B:$B)",
+			argumentPlaceholders: [{ name: 'name' }]
 		}
 	];
 
