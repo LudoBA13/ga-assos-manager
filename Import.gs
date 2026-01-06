@@ -8,15 +8,15 @@ class Importer
 
 	static updateAssoConnectFromFile(fileData)
 	{
-		const data = this.#getDataFromXLSXFile(fileData);
+		const data = this.getDataFromXLSXFile(fileData);
 		if (!data || data.length === 0)
 		{
 			throw new Error('No data in file.');
 		}
-		this.#updateAssoConnectData(data);
+		this.updateAssoConnectData(data);
 	}
 
-	static #getTable(tableName)
+	static getTable(tableName)
 	{
 		const ss   = SpreadsheetApp.getActiveSpreadsheet();
 		const ssId = ss.getId();
@@ -42,33 +42,43 @@ class Importer
 		return null;
 	}
 
-	static #updateAssoConnectData(data)
+	static updateAssoConnectData(data)
 	{
 		if (!data || data.length === 0)
 		{
 			throw new Error('No data passed to updateAssoConnectData.');
 		}
 
-		const table = this.#getTable('AssoConnect');
+		const table = this.getTable('AssoConnect');
 		if (!table)
 		{
 			throw new Error('Cannot locate the AssoConnect table.');
 		}
 
-		this.#updateTableData(table, data);
+		this.updateTableData(table, data);
 
 		// Process and update Extra table
 		try
 		{
-			this.#updateExtraData(data);
+			this.updateExtraData(data);
 		}
 		catch (e)
 		{
 			console.warn('Failed to update Extra table: ' + e.message);
 		}
+
+		// Process and update FuzzyDB
+		try
+		{
+			this.updateFuzzyDB(data);
+		}
+		catch (e)
+		{
+			console.warn('Failed to update FuzzyDB: ' + e.message);
+		}
 	}
 
-	static #updateExtraData(assoConnectData)
+	static updateExtraData(assoConnectData)
 	{
 		// 1. Locate headers
 		const headers = assoConnectData[0];
@@ -102,10 +112,10 @@ class Importer
 		}
 
 		// 3. Update table
-		const table = this.#getTable('Extra');
+		const table = this.getTable('Extra');
 		if (table)
 		{
-			this.#updateTableData(table, extraData);
+			this.updateTableData(table, extraData);
 		}
 		else
 		{
@@ -113,7 +123,66 @@ class Importer
 		}
 	}
 
-	static #updateTableData(table, data)
+	static updateFuzzyDB(assoConnectData)
+	{
+		// 1. Locate headers
+		const headers = assoConnectData[0];
+		const nomIdx = headers.indexOf('Nom');
+		const codeIdx = headers.indexOf('Code VIF');
+
+		if (nomIdx === -1 || codeIdx === -1)
+		{
+			console.warn('Cannot update FuzzyDB: Missing required columns (Nom, Code VIF) in source data.');
+			return;
+		}
+
+		// 2. Access FuzzyDB sheet
+		const ss = SpreadsheetApp.getActiveSpreadsheet();
+		const fuzzySheet = ss.getSheetByName('FuzzyDB');
+		if (!fuzzySheet)
+		{
+			console.warn('FuzzyDB sheet not found.');
+			return;
+		}
+
+		// 3. Get existing names from FuzzyDB!$A:$A
+		const lastRow = fuzzySheet.getLastRow();
+		const existingNames = new Set();
+
+		if (lastRow > 0)
+		{
+			const values = fuzzySheet.getRange(1, 1, lastRow, 1).getValues();
+			for (let i = 0; i < values.length; i++)
+			{
+				existingNames.add(values[i][0]);
+			}
+		}
+
+		// 4. Identify new values
+		const newEntries = [];
+		const seenInBatch = new Set();
+
+		for (let i = 1; i < assoConnectData.length; i++)
+		{
+			const row = assoConnectData[i];
+			const nom = row[nomIdx];
+			const code = row[codeIdx];
+
+			if (nom && !existingNames.has(nom) && !seenInBatch.has(nom))
+			{
+				newEntries.push([nom, code]);
+				seenInBatch.add(nom);
+			}
+		}
+
+		// 5. Append new entries
+		if (newEntries.length > 0)
+		{
+			fuzzySheet.getRange(lastRow + 1, 1, newEntries.length, 2).setValues(newEntries);
+		}
+	}
+
+	static updateTableData(table, data)
 	{
 		if (!data || data.length === 0)
 		{
@@ -188,7 +257,7 @@ class Importer
 	 * @param {string} sheetName The name of the new sheet.
 	 * @returns {GoogleAppsScript.Spreadsheet.Sheet} The newly created hidden sheet.
 	 */
-	static #createHiddenSheet(sheetName)
+	static createHiddenSheet(sheetName)
 	{
 		const ss   = SpreadsheetApp.getActiveSpreadsheet();
 		const ssId = ss.getId();
@@ -218,7 +287,7 @@ class Importer
 	 * @param {string} fileData.mimeType The MIME type of the file.
 	 * @param {string} fileData.data The base64 encoded data of the file.
 	 */
-	static #getDataFromXLSXFile(fileData)
+	static getDataFromXLSXFile(fileData)
 	{
 		let tmpSheetFile;
 
@@ -264,4 +333,3 @@ class Importer
 		}
 	}
 }
-
