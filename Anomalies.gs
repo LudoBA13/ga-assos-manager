@@ -53,13 +53,17 @@ function updateAnomaliesFormula(e)
 	}
 
 	// 2. Build and write the final multi-line VSTACK formula
+	const trgRange = trgSheet.getRange("A1");
 	if (rangeStrings.length > 0)
 	{
 		const formula = "=VSTACK\n(\n" + rangeStrings.join(";\n") + "\n)";
-		trgSheet.getRange("A1").setFormula(formula);
+		if (trgRange.getFormula() !== formula)
+		{
+			trgRange.setFormula(formula);
+		}
 	}
 	else
 	{
-		trgSheet.getRange("A1").setValue("No matching sheets found.");
+		trgRange.setValue("No matching sheets found.");
 	}
 }
