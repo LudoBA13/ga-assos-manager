@@ -3,9 +3,11 @@ const ACTIVE_LOCALE = 'fr';
 
 const CATALOG = {
 	'fr': {
-		"HabilitationExpirée"  : "La date d'habilitation régionale a expiré",
-		"SansDateHabilitation" : "La date d'habilitation régionale est manquante",
-		"SansHabilitation"     : "Pas d'habilitation régionale, nationale, ou CCAS/CIAS"
+		"HabilitationExpirée"     : "La date d'habilitation régionale a expiré",
+		"SansDateHabilitation"    : "La date d'habilitation régionale est manquante",
+		"SansHabilitation"        : "Pas d'habilitation régionale, nationale, ou CCAS/CIAS",
+		"SiretManquant"           : "Numéro SIRET manquant",
+		"HabilitationIncohérente" : "Les données d'habilitation sont incohérentes"
 	}
 };
 
