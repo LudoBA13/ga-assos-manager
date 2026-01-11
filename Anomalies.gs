@@ -37,7 +37,7 @@ function updateAnomaliesFormula(e)
 				"        LET\n" +
 				"        (\n" +
 				"            f; FILTER(" + range + "; " + criteria + " <> \"\");\n" +
-				"            HSTACK(f; MAP(INDEX(f;;1); LAMBDA(x; \"" + _(shortName) + "\")))\n" +
+				"            HSTACK(f; ARRAYFORMULA(IF(SEQUENCE(ROWS(f)); \"" + _(shortName) + "\")))\n" +
 				"        )\n" +
 				"    )";
 
@@ -56,7 +56,7 @@ function updateAnomaliesFormula(e)
 	const trgRange = trgSheet.getRange("A1");
 	if (rangeStrings.length > 0)
 	{
-		const formula = "=VSTACK\n(\n" + rangeStrings.join(";\n") + "\n)";
+		const formula = "=SORT(VSTACK\n(\n" + rangeStrings.join(";\n") + "\n); 2; TRUE)";
 		if (trgRange.getFormula() !== formula)
 		{
 			trgRange.setFormula(formula);
