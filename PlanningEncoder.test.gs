@@ -26,6 +26,8 @@
 
 /**
  * Runs all tests for the PlanningEncoder library.
+ * Logs the results to the Apps Script logger.
+ * @returns {{passed: number, failed: number, total: number, details: Array<{name: string, status: string, error: string, stack: string}>}}
  */
 function runPlanningEncoderTests()
 {
