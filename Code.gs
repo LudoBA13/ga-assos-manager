@@ -7,6 +7,8 @@ function onOpen()
 		.createMenu('AssoConnect')
 		.addItem(_('Importer les structures'), 'showImporter')
 		.addItem(_('Mettre à jour fonctions'), 'deployNamedFunctions')
+		.addSeparator()
+		.addItem(_('Lancer les tests'), 'runTests')
 		.addToUi();
 }
 
@@ -19,4 +21,9 @@ function showImporter()
 function updateAssoConnectFromFile(fileData)
 {
 	Importer.updateAssoConnectFromFile(fileData);
+}
+
+function runTests()
+{
+	runPlanningEncoderTests();
 }
