@@ -82,8 +82,8 @@ const PLANNING_CONSTANTS = {
 	},
 	TIMES: {
 		'Md': '8h30',
-		'Mf': '10h00',
-		'Ap': '14h00'
+		'Mf': '10h',
+		'Ap': '14h'
 	},
 	TIME_ORDER: {
 		'Md': 0,

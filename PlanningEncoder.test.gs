@@ -117,7 +117,7 @@ function test_decodePlanning()
 	assertEqual(expected1, decodePlanning(schedule1), "Test 1: Single entry");
 
 	const schedule2 = "1LuMdFr2MaApSe";
-	const expected2 = "1er lundi 8h30: Frais. 2e mardi 14h00: Sec.";
+	const expected2 = "1er lundi 8h30: Frais. 2e mardi 14h: Sec.";
 	assertEqual(expected2, decodePlanning(schedule2), "Test 2: Multiple entries");
 
 	const schedule3 = "1LuMdFr1LuMdSe";
@@ -236,7 +236,7 @@ function test_parseHumanReadable()
 	const expected1 = "1LuMdFr";
 	assertEqual(expected1, parseHumanReadable(text1), "Test 1: Single entry");
 
-	const text2 = "1er lundi 8h30: Frais. 2e mardi 14h00: Sec.";
+	const text2 = "1er lundi 8h30: Frais. 2e mardi 14h: Sec.";
 	const expected2 = "1LuMdFr2MaApSe";
 	assertEqual(expected2, parseHumanReadable(text2), "Test 2: Multiple entries");
 
@@ -265,7 +265,7 @@ function test_decodePlannings()
 	];
 	const expected1 = [
 		["1er lundi 8h30: Frais."],
-		["2e mardi 14h00: Sec."]
+		["2e mardi 14h: Sec."]
 	];
 	assertEqual(expected1, decodePlannings(range1), "Test 1: Multiple rows, single column");
 
@@ -273,7 +273,7 @@ function test_decodePlannings()
 		["1LuMdFr", "2MaApSe"]
 	];
 	const expected2 = [
-		["1er lundi 8h30: Frais.", "2e mardi 14h00: Sec."]
+		["1er lundi 8h30: Frais.", "2e mardi 14h: Sec."]
 	];
 	assertEqual(expected2, decodePlannings(range2), "Test 2: Single row, multiple columns");
 
@@ -282,8 +282,8 @@ function test_decodePlannings()
 		["3MeMfSu", "4JeMdFr"]
 	];
 	const expected3 = [
-		["1er lundi 8h30: Frais.", "2e mardi 14h00: Sec."],
-		["3e mercredi 10h00: Surgelé.", "4e jeudi 8h30: Frais."]
+		["1er lundi 8h30: Frais.", "2e mardi 14h: Sec."],
+		["3e mercredi 10h: Surgelé.", "4e jeudi 8h30: Frais."]
 	];
 	assertEqual(expected3, decodePlannings(range3), "Test 3: Multiple rows, multiple columns");
 
