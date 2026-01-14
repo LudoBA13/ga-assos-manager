@@ -202,6 +202,13 @@ const groupAndSortEntries = (schedule) =>
 	});
 };
 
+/**
+ * Decodes a planning schedule from its encoded string representation into a human-readable format.
+ * This function can be used as a custom function in Google Sheets.
+ * @customfunction
+ * @param {string} schedule The encoded schedule string (e.g., "1LuMdFr").
+ * @returns {string} The human-readable planning schedule (e.g., "1er lundi 8h30: Frais.").
+ */
 const decodePlanning = (schedule) =>
 {
 	if (!schedule)
@@ -267,8 +274,13 @@ const canonicalizeSchedule = (schedule) =>
 
 /**
  * Encodes a list of planning objects into a schedule string.
- * Input: Array of objects { week, day, time, product|products }
- *        where properties are the codes (e.g., '1', 'Lu', 'Md', 'Fr').
+ * This function can be used as a custom function in Google Sheets.
+ * When used in Google Sheets, the input `entries` should be a 2D array where each inner array
+ * represents a planning entry with properties in a defined order (e.g., [week, day, time, product]).
+ * @customfunction
+ * @param {Array<Array<string>>} entries An array of arrays, where each inner array represents a planning entry.
+ *                                       Example: `[['1', 'Lu', 'Md', 'Fr'], ['2', 'Ma', 'Ap', 'Se']]`
+ * @returns {string} The encoded schedule string.
  */
 const encodePlanning = (entries) =>
 {
@@ -277,9 +289,25 @@ const encodePlanning = (entries) =>
 		return '';
 	}
 
+	let formattedEntries = [];
+	// Check if the input is a 2D array from Google Sheets
+	if (entries.length > 0 && Array.isArray(entries[0]))
+	{
+		formattedEntries = entries.map(row => ({
+			week: row[0],
+			day: row[1],
+			time: row[2],
+			product: row[3]
+		}));
+	}
+	else
+	{
+		formattedEntries = entries;
+	}
+
 	let schedule = '';
 
-	for (const entry of entries)
+	for (const entry of formattedEntries)
 	{
 		const { week, day, time, product, products } = entry;
 		const productList = products || (product ? [product] : []);
