@@ -232,6 +232,34 @@ const decodePlanning = (schedule) =>
 };
 
 /**
+ * Decodes a 2D array (range) of planning schedules, applying decodePlanning to each value.
+ * This function can be used as a custom function in Google Sheets.
+ * @customfunction
+ * @param {Array<Array<string>>} range The 2D array (range) of encoded schedule strings.
+ * @returns {Array<Array<string>>} A 2D array with the decoded planning schedules.
+ */
+const decodePlannings = (range) =>
+{
+	if (!Array.isArray(range))
+	{
+		return [['']];
+	}
+
+	return range.map(row =>
+	{
+		if (Array.isArray(row))
+		{
+			return row.map(cell => decodePlanning(cell));
+		}
+		else
+		{
+			// Handle single cell input
+			return [decodePlanning(row)];
+		}
+	});
+};
+
+/**
  * Takes an encoded schedule, compresses it, and returns it in a sorted canonical form.
  */
 const canonicalizeSchedule = (schedule) =>

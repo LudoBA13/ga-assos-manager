@@ -36,7 +36,8 @@ function runPlanningEncoderTests()
 		test_compressPlanning,
 		test_canonicalizeSchedule,
 		test_encodePlanning,
-		test_parseHumanReadable
+		test_parseHumanReadable,
+		test_decodePlannings
 	];
 
 	const results = {
@@ -93,7 +94,15 @@ function runPlanningEncoderTests()
  */
 function assertEqual(expected, actual, message)
 {
-	if (expected !== actual)
+	// For 2D arrays, compare stringified versions
+	if (Array.isArray(expected) && Array.isArray(actual) && Array.isArray(expected[0]) && Array.isArray(actual[0]))
+	{
+		if (JSON.stringify(expected) !== JSON.stringify(actual))
+		{
+			throw new Error(message + `\nExpected: "${JSON.stringify(expected)}"\nActual:   "${JSON.stringify(actual)}"`);
+		}
+	}
+	else if (expected !== actual)
 	{
 		throw new Error(message + `\nExpected: "${expected}"\nActual:   "${actual}"`);
 	}
@@ -246,4 +255,49 @@ function test_parseHumanReadable()
 	assertEqual('', parseHumanReadable(''), "Test 6: Empty schedule");
 	assertEqual('', parseHumanReadable(null), "Test 7: Null schedule");
 	assertEqual('', parseHumanReadable('Invalid text'), "Test 8: Invalid text");
+}
+
+function test_decodePlannings()
+{
+	const range1 = [
+		["1LuMdFr"],
+		["2MaApSe"]
+	];
+	const expected1 = [
+		["1er lundi 8h30: Frais."],
+		["2e mardi 14h00: Sec."]
+	];
+	assertEqual(expected1, decodePlannings(range1), "Test 1: Multiple rows, single column");
+
+	const range2 = [
+		["1LuMdFr", "2MaApSe"]
+	];
+	const expected2 = [
+		["1er lundi 8h30: Frais.", "2e mardi 14h00: Sec."]
+	];
+	assertEqual(expected2, decodePlannings(range2), "Test 2: Single row, multiple columns");
+
+	const range3 = [
+		["1LuMdFr", "2MaApSe"],
+		["3MeMfSu", "4JeMdFr"]
+	];
+	const expected3 = [
+		["1er lundi 8h30: Frais.", "2e mardi 14h00: Sec."],
+		["3e mercredi 10h00: Surgelé.", "4e jeudi 8h30: Frais."]
+	];
+	assertEqual(expected3, decodePlannings(range3), "Test 3: Multiple rows, multiple columns");
+
+	const range4 = [
+		[""],
+		[null]
+	];
+	const expected4 = [
+		[""],
+		[""]
+	];
+	assertEqual(expected4, decodePlannings(range4), "Test 4: Empty and null cells");
+
+	const range5 = [];
+	const expected5 = [['']]; // Expected behavior for empty range for custom functions
+	assertEqual(expected5, decodePlannings(range5), "Test 5: Empty input range");
 }
