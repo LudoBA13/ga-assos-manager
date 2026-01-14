@@ -23,6 +23,9 @@ function updateAssoConnectFromFile(fileData)
 	Importer.updateAssoConnectFromFile(fileData);
 }
 
+/**
+ * Runs all tests in the project.
+ */
 function runTests()
 {
 	runPlanningEncoderTests();
