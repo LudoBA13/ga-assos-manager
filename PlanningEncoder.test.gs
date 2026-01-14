@@ -182,42 +182,43 @@ function test_canonicalizeSchedule()
 function test_encodePlanning()
 {
 	const entries1 = [
-		{ week: '1', day: 'Lu', time: 'Md', product: 'Fr' }
+		['1', 'Lu', 'Md', 'Fr']
 	];
 	const expected1 = "1LuMdFr";
-	assertEqual(expected1, encodePlanning(entries1), "Test 1: Single entry");
+	assertEqual(expected1, encodePlanning(entries1), "Test 1: Single entry from 2D array");
 
 	const entries2 = [
-		{ week: '1', day: 'Lu', time: 'Md', product: 'Fr' },
-		{ week: '2', day: 'Ma', time: 'Ap', product: 'Se' }
+		['1', 'Lu', 'Md', 'Fr'],
+		['2', 'Ma', 'Ap', 'Se']
 	];
 	const expected2 = "1LuMdFr2MaApSe";
-	assertEqual(expected2, encodePlanning(entries2), "Test 2: Multiple entries");
+	assertEqual(expected2, encodePlanning(entries2), "Test 2: Multiple entries from 2D array");
 
 	const entries3 = [
-		{ week: '1', day: 'Lu', time: 'Md', products: ['Fr', 'Se'] }
+		['1', 'Lu', 'Md', 'Fr'],
+		['1', 'Lu', 'Md', 'Se']
 	];
 	const expected3 = "1LuMdFr1LuMdSe";
-	assertEqual(expected3, encodePlanning(entries3), "Test 3: Multiple products same slot");
+	assertEqual(expected3, encodePlanning(entries3), "Test 3: Multiple products same slot from 2D array");
 
 	const entries4 = [
-		{ week: '1', day: 'Lu', time: 'Md', product: 'Fr' },
-		{ week: '2', day: 'Lu', time: 'Md', product: 'Fr' },
-		{ week: '3', day: 'Lu', time: 'Md', product: 'Fr' },
-		{ week: '4', day: 'Lu', time: 'Md', product: 'Fr' }
+		['1', 'Lu', 'Md', 'Fr'],
+		['2', 'Lu', 'Md', 'Fr'],
+		['3', 'Lu', 'Md', 'Fr'],
+		['4', 'Lu', 'Md', 'Fr']
 	];
 	const expected4 = "0LuMdFr";
-	assertEqual(expected4, encodePlanning(entries4), "Test 4: Every week compression");
+	assertEqual(expected4, encodePlanning(entries4), "Test 4: Every week compression from 2D array");
 	
 	const entries5 = [
-		{ week: '0', day: 'Je', time: 'Md', product: 'Se' }
+		['0', 'Je', 'Md', 'Se']
 	];
 	const expected5 = "0JeMdSe";
-	assertEqual(expected5, encodePlanning(entries5), "Test 5: Every week pre-compressed");
+	assertEqual(expected5, encodePlanning(entries5), "Test 5: Every week pre-compressed from 2D array");
 
-	assertEqual('', encodePlanning([]), "Test 6: Empty schedule");
-	assertEqual('', encodePlanning(null), "Test 7: Null schedule");
-	assertEqual('', encodePlanning([{}]), "Test 8: Invalid entry");
+	assertEqual('', encodePlanning([]), "Test 6: Empty schedule (2D array)");
+	assertEqual('', encodePlanning(null), "Test 7: Null schedule (2D array)");
+	assertEqual('', encodePlanning([[]]), "Test 8: Invalid entry (empty inner array)");
 }
 
 function test_parseHumanReadable()
