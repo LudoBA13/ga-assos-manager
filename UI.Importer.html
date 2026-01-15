@@ -25,6 +25,8 @@
 				}
 
 				document.getElementById('status').innerHTML = '<progress indeterminate></progress>';
+				resize();
+
 				const reader = new FileReader;
 				reader.onload = function (e)
 				{
@@ -47,13 +49,22 @@
 			function onSuccess()
 			{
 				document.getElementById('status').innerHTML = `<p>${<?= JSON.stringify(_('Importation réussie')) ?>}</p>`;
+				resize();
 				setTimeout(() => google.script.host.close(), 2000);
 			}
 
 			function onFailure(error)
 			{
 				document.getElementById('status').innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+				resize();
 			}
-		</script>
-	</body>
-</html>
+
+			function resize()
+			{
+				// Add a small buffer to avoid scrollbars
+				const height = document.body.scrollHeight + 10;
+				google.script.host.setHeight(height);
+			}
+
+			// Initial resize on load
+			window.onload = resize;

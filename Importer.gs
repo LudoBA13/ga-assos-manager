@@ -2,8 +2,10 @@ class Importer
 {
 	static show()
 	{
-		const html = HtmlService.createTemplateFromFile('UI.Importer').evaluate().setWidth(300);
-		SpreadsheetApp.getUi().showSidebar(html);
+		const html = HtmlService.createTemplateFromFile('UI.Importer')
+			.evaluate()
+			.setWidth(400);
+		SpreadsheetApp.getUi().showModalDialog(html, _('Importer les structures'));
 	}
 
 	static updateAssoConnectFromFile(fileData)
