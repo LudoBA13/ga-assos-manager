@@ -6,6 +6,7 @@
 	</head>
 	<body>
 		<main class="container">
+			<p><?= _("Cette fonction permet d'importer les données Structures en provenance de AssoConnect pour les mettre à jour dans ce document.") ?></p>
 			<form onsubmit="event.preventDefault(); upload();">
 				<label for="file"><?= _('Fichier AssoConnect XLSX') ?></label>
 				<input type="file" id="file" name="file" accept=".xlsx, .xls" required>
