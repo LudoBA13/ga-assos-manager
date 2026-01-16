@@ -102,7 +102,8 @@ class Importer
 		{
 			const row = assoConnectData[i];
 			const id = row[idIdx];
-			const info = row[infoIdx] ? String(row[infoIdx]) : '';
+			const infoRaw = row[infoIdx] ? String(row[infoIdx]) : '';
+			const info = InfoPreprocessor.process(infoRaw);
 
 			const udMatch = info.match(udRegex);
 			const planningMatch = info.match(planningRegex);
