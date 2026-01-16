@@ -299,7 +299,7 @@ const decodePlanning = (schedule) =>
 		{
 			dayLabel += 's';
 		}
-		return `${item.week} ${dayLabel} ${item.time}: ${productString}.`;
+		return `${item.week} ${dayLabel} ${item.time} : ${productString}.`;
 	}).join(' ');
 };
 

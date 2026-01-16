@@ -114,23 +114,23 @@ function assertEqual(expected, actual, message)
 function test_decodePlanning()
 {
 	const schedule1 = "1LuMdFr";
-	const expected1 = "1er lundi 8h30: Frais.";
+	const expected1 = "1er lundi 8h30 : Frais.";
 	assertEqual(expected1, decodePlanning(schedule1), "Test 1: Single entry");
 
 	const schedule2 = "1LuMdFr2MaApSe";
-	const expected2 = "1er lundi 8h30: Frais. 2e mardi 14h: Sec.";
+	const expected2 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec.";
 	assertEqual(expected2, decodePlanning(schedule2), "Test 2: Multiple entries");
 
 	const schedule3 = "1LuMdFr1LuMdSe";
-	const expected3 = "1er lundi 8h30: Frais, Sec.";
+	const expected3 = "1er lundi 8h30 : Frais, Sec.";
 	assertEqual(expected3, decodePlanning(schedule3), "Test 3: Multiple products same slot");
 
 	const schedule4 = "1LuMdFr2LuMdFr3LuMdFr4LuMdFr";
-	const expected4 = "Tous les lundis 8h30: Frais.";
+	const expected4 = "Tous les lundis 8h30 : Frais.";
 	assertEqual(expected4, decodePlanning(schedule4), "Test 4: Every week compression");
 	
 	const schedule5 = "0JeMdSe";
-	const expected5 = "Tous les jeudis 8h30: Sec.";
+	const expected5 = "Tous les jeudis 8h30 : Sec.";
 	assertEqual(expected5, decodePlanning(schedule5), "Test 5: Every week pre-compressed");
 
 	assertEqual('', decodePlanning(''), "Test 6: Empty schedule");
@@ -251,23 +251,23 @@ function test_encodePlanning()
 
 function test_parseHumanReadable()
 {
-	const text1 = "1er lundi 8h30: Frais.";
+	const text1 = "1er lundi 8h30 : Frais.";
 	const expected1 = "1LuMdFr";
 	assertEqual(expected1, parseHumanReadable(text1), "Test 1: Single entry");
 
-	const text2 = "1er lundi 8h30: Frais. 2e mardi 14h: Sec.";
+	const text2 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec.";
 	const expected2 = "1LuMdFr2MaApSe";
 	assertEqual(expected2, parseHumanReadable(text2), "Test 2: Multiple entries");
 
-	const text3 = "1er lundi 8h30: Frais, Sec.";
+	const text3 = "1er lundi 8h30 : Frais, Sec.";
 	const expected3 = "1LuMdFr1LuMdSe";
 	assertEqual(expected3, parseHumanReadable(text3), "Test 3: Multiple products same slot");
 
-	const text4 = "Tous les lundis 8h30: Frais.";
+	const text4 = "Tous les lundis 8h30 : Frais.";
 	const expected4 = "0LuMdFr";
 	assertEqual(expected4, parseHumanReadable(text4), "Test 4: Every week");
 	
-	const text5 = "Tous les jeudis 8h30: Sec.";
+	const text5 = "Tous les jeudis 8h30 : Sec.";
 	const expected5 = "0JeMdSe";
 	assertEqual(expected5, parseHumanReadable(text5), "Test 5: Every week pre-compressed");
 
@@ -283,8 +283,8 @@ function test_decodePlannings()
 		["2MaApSe"]
 	];
 	const expected1 = [
-		["1er lundi 8h30: Frais."],
-		["2e mardi 14h: Sec."]
+		["1er lundi 8h30 : Frais."],
+		["2e mardi 14h : Sec."]
 	];
 	assertEqual(expected1, decodePlannings(range1), "Test 1: Multiple rows, single column");
 
@@ -292,7 +292,7 @@ function test_decodePlannings()
 		["1LuMdFr", "2MaApSe"]
 	];
 	const expected2 = [
-		["1er lundi 8h30: Frais.", "2e mardi 14h: Sec."]
+		["1er lundi 8h30 : Frais.", "2e mardi 14h : Sec."]
 	];
 	assertEqual(expected2, decodePlannings(range2), "Test 2: Single row, multiple columns");
 
@@ -301,8 +301,8 @@ function test_decodePlannings()
 		["3MeMfSu", "4JeMdFr"]
 	];
 	const expected3 = [
-		["1er lundi 8h30: Frais.", "2e mardi 14h: Sec."],
-		["3e mercredi 10h: Surgelé.", "4e jeudi 8h30: Frais."]
+		["1er lundi 8h30 : Frais.", "2e mardi 14h : Sec."],
+		["3e mercredi 10h : Surgelé.", "4e jeudi 8h30 : Frais."]
 	];
 	assertEqual(expected3, decodePlannings(range3), "Test 3: Multiple rows, multiple columns");
 
