@@ -94,7 +94,7 @@ class Importer
 		}
 
 		// 2. Extract data
-		const extraData = [['ID', 'planning', 'ud']];
+		const extraData = [['ID du Contact', 'planning', 'ud']];
 		const udRegex = /\$ud:(\d+)\$/;
 		const planningRegex = /\$planning:(\w+)\$/;
 
