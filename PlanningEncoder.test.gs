@@ -34,6 +34,7 @@ function runPlanningEncoderTests()
 	const testCases = [
 		test_decodePlanning,
 		test_compressPlanning,
+		test_decompressPlanning,
 		test_canonicalizeSchedule,
 		test_encodePlanning,
 		test_parseHumanReadable,
@@ -156,6 +157,24 @@ function test_compressPlanning()
 
 	assertEqual('', compressPlanning(''), "Test 5: Empty schedule");
 	assertEqual('', compressPlanning(null), "Test 6: Null schedule");
+}
+
+function test_decompressPlanning()
+{
+	const schedule1 = "0LuMdFr";
+	const expected1 = "1LuMdFr2LuMdFr3LuMdFr4LuMdFr";
+	assertEqual(expected1, decompressPlanning(schedule1), "Test 1: Expand all weeks");
+
+	const schedule2 = "1LuMdFr";
+	const expected2 = "1LuMdFr";
+	assertEqual(expected2, decompressPlanning(schedule2), "Test 2: Already expanded");
+
+	const schedule3 = "0LuMdFr1MaApSe";
+	const expected3 = "1LuMdFr1MaApSe2LuMdFr3LuMdFr4LuMdFr";
+	assertEqual(expected3, decompressPlanning(schedule3), "Test 3: Mixed expansion and sorting");
+
+	assertEqual('', decompressPlanning(''), "Test 4: Empty schedule");
+	assertEqual('', decompressPlanning(null), "Test 5: Null schedule");
 }
 
 function test_canonicalizeSchedule()

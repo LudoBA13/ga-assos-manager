@@ -161,6 +161,78 @@ const compressPlanning = (schedule) =>
 };
 
 /**
+ * Expands a compressed planning schedule into its full representation.
+ * Replaces '0' (all weeks) with individual entries for weeks 1, 2, 3, and 4.
+ * Use this when you need to manipulate individual occurrences.
+ *
+ * @param {string} schedule The compressed schedule string.
+ * @returns {string} The expanded schedule string, sorted canonically.
+ */
+const decompressPlanning = (schedule) =>
+{
+	if (!schedule)
+	{
+		return '';
+	}
+
+	const entries = [];
+	const allWeeks = ['1', '2', '3', '4'];
+
+	for (const { weekCode, dayCode, timeCode, productCode } of parseSchedule(schedule))
+	{
+		if (weekCode === '0')
+		{
+			for (const week of allWeeks)
+			{
+				entries.push({
+					weekCode: week,
+					dayCode,
+					timeCode,
+					productCode
+				});
+			}
+		}
+		else
+		{
+			entries.push({
+				weekCode,
+				dayCode,
+				timeCode,
+				productCode
+			});
+		}
+	}
+
+	const { DAY_ORDER, TIME_ORDER, PRODUCTS } = PLANNING_CONSTANTS;
+
+	entries.sort((a, b) =>
+	{
+		// Sort by Week Code (0 comes before 1, 2, 3, 4)
+		if (a.weekCode !== b.weekCode)
+		{
+			return a.weekCode.localeCompare(b.weekCode);
+		}
+		// Sort by Day Order
+		if (a.dayCode !== b.dayCode)
+		{
+			return DAY_ORDER[a.dayCode] - DAY_ORDER[b.dayCode];
+		}
+		// Sort by Time Order
+		if (a.timeCode !== b.timeCode)
+		{
+			return TIME_ORDER[a.timeCode] - TIME_ORDER[b.timeCode];
+		}
+		// Sort by Product Label (alphabetical)
+		const labelA = PRODUCTS[a.productCode] || '';
+		const labelB = PRODUCTS[b.productCode] || '';
+		return labelA.localeCompare(labelB, 'fr');
+	});
+
+	return entries.map(e => e.weekCode + e.dayCode + e.timeCode + e.productCode).join('');
+};
+
+
+/**
  * Groups entries by time slot and sorts them chronologically.
  * Also sorts the product list alphabetically within each group.
  */
