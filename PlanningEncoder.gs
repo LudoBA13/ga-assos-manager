@@ -312,7 +312,7 @@ const decodePlanning = (schedule) =>
  */
 const decodePlannings = (range) =>
 {
-	if (!Array.isArray(range))
+	if (!Array.isArray(range) || range.length === 0)
 	{
 		return [['']];
 	}
