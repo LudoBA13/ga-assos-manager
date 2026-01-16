@@ -152,6 +152,6 @@ function test_InfoPreprocessor_Planning()
 
 	// Complex multi-entry test with extra text
 	const input8 = "100 UD. Planning : 1er jeudi 14h : Frais, Sec, Surgelé. 2e mardi 14h : Frais. 3e lundi 14h : Frais. 3e jeudi 14h : Frais.";
-	const expected8 = "100 UD. $planning:1JeApFr1JeApSe1JeApSu2MaApFr3LuApFr3JeApFr$";
+	const expected8 = "$ud:100$$planning:1JeApFr1JeApSe1JeApSu2MaApFr3LuApFr3JeApFr$";
 	assertEqual(expected8, InfoPreprocessor.process(input8), "Complex multi-entry Planning with extra text");
 }
