@@ -30,7 +30,7 @@ const InfoPreprocessor = {
 		// Rule: /Planning\s*:((?:\s*[a-z ]+[0-9]+h[0-9]*\s*:\s*[^.]+\.)+)/i -> "$planning:<encoded>$"
 		// Expands "Planning: Tous les lundis 8h30: Frais." into "$planning:0LuMdFr$"
 		// We use a callback to encode the captured schedule string.
-		processed = processed.replace(/Planning\s*:((?:\s*[a-z ]+[0-9]+h[0-9]*\s*:\s*[^.]+\.)+)/gi, (match, p1) => {
+		processed = processed.replace(/Planning\s*:((?:\s*[0-9]*[a-z ]+[0-9]+h[0-9]*\s*:\s*[^.]+\.)+)/gi, (match, p1) => {
 			const encoded = parseHumanReadable(p1.trim());
 			return `$planning:${encoded}$`;
 		});
