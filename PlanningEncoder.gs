@@ -61,10 +61,10 @@
 const PLANNING_CONSTANTS = {
 	WEEKS: {
 		'0': 'Tous les',
-		'1': '1er',
-		'2': '2e',
-		'3': '3e',
-		'4': '4e'
+		'1': '1ᵉʳ',
+		'2': '2ᵉ',
+		'3': '3ᵉ',
+		'4': '4ᵉ'
 	},
 	DAYS: {
 		'Lu': 'lundi',
@@ -440,6 +440,12 @@ const parseHumanReadable = (text) =>
 
 	// Reverse mappings
 	const weeksRev = Object.fromEntries(Object.entries(WEEKS).map(([k, v]) => [v, k]));
+	// Add support for standard ordinals
+	weeksRev['1er'] = '1';
+	weeksRev['2e'] = '2';
+	weeksRev['3e'] = '3';
+	weeksRev['4e'] = '4';
+
 	const daysRev = Object.fromEntries(Object.entries(DAYS).map(([k, v]) => [v, k]));
 	const timesRev = Object.fromEntries(Object.entries(TIMES).map(([k, v]) => [v, k]));
 	const productsRev = Object.fromEntries(Object.entries(PRODUCTS).map(([k, v]) => [v, k]));
