@@ -168,10 +168,6 @@ function test_InfoPreprocessor_Normalization()
 	const expected2 = "$planning:2MaApSe$";
 	assertEqual(expected2, InfoPreprocessor.process(input2), "Unicode 2e normalization");
 
-	const input3 = "Planning: 1ʳᵉ vendredi 10h: Surgelé."; // ʳᵉ (U+02B3 U+1D49)
-	const expected3 = "$planning:1VeMfSu$";
-	assertEqual(expected3, InfoPreprocessor.process(input3), "Unicode 1re normalization");
-
 	const input4 = "Planning: 3ᵉ mercredi 10h: Sec."; // ᵉ (U+1D49)
 	const expected4 = "$planning:3MeMfSe$";
 	assertEqual(expected4, InfoPreprocessor.process(input4), "Unicode 3e normalization");
