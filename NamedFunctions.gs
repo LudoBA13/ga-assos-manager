@@ -10,14 +10,14 @@ function deployNamedFunctions()
 	const functions = [
 		{
 			name: 'AC',
-			description: _('Renvoie une colonne complète de la feuille DonnéesAssoConnect via son nom d\'en-tête.'),
-			definition: "=INDEX('DonnéesAssoConnect'!$A$2:$DZ, 0, MATCH(col_name, 'DonnéesAssoConnect'!$1:$1, 0))",
+			description: _('Renvoie une colonne complète de la feuille ACStructures via son nom d\'en-tête.'),
+			definition: "=INDEX('ACStructures'!$A$2:$DZ, 0, MATCH(col_name, 'ACStructures'!$1:$1, 0))",
 			argumentPlaceholders: [{ name: 'col_name' }]
 		},
 		{
 			name: 'AC_COLS',
-			description: _('Renvoie les colonnes de DonnéesAssoConnect correspondant aux en-têtes de la plage fournie.'),
-			definition: "=CHOOSECOLS(REDUCE(0, headers, LAMBDA(acc, h, HSTACK(acc, INDEX('DonnéesAssoConnect'!$A$2:$DZ, 0, MATCH(h, 'DonnéesAssoConnect'!$1:$1, 0))))), SEQUENCE(1, COLUMNS(headers), 2))",
+			description: _('Renvoie les colonnes de ACStructures correspondant aux en-têtes de la plage fournie.'),
+			definition: "=CHOOSECOLS(REDUCE(0, headers, LAMBDA(acc, h, HSTACK(acc, INDEX('ACStructures'!$A$2:$DZ, 0, MATCH(h, 'ACStructures'!$1:$1, 0))))), SEQUENCE(1, COLUMNS(headers), 2))",
 			argumentPlaceholders: [{ name: 'headers' }]
 		},
 		{

@@ -51,22 +51,27 @@ class Importer
 			throw new Error('No data passed to updateAssoConnectData.');
 		}
 
-		const table = this.getTable('AssoConnect');
-		if (!table)
+		const ss = SpreadsheetApp.getActiveSpreadsheet();
+		const sheet = ss.getSheetByName('ACStructures');
+		if (!sheet)
 		{
-			throw new Error('Cannot locate the AssoConnect table.');
+			throw new Error('Cannot locate the ACStructures sheet.');
 		}
 
-		this.updateTableData(table, data);
+		// Clear existing content
+		sheet.clearContents();
 
-		// Process and update Extra table
+		// Write new data
+		sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
+
+		// Process and update ACStructuresExtra sheet
 		try
 		{
 			this.updateExtraData(data);
 		}
 		catch (e)
 		{
-			console.warn('Failed to update Extra table: ' + e.message);
+			console.warn('Failed to update ACStructuresExtra sheet: ' + e.message);
 		}
 
 		// Process and update FuzzyDB
@@ -89,7 +94,7 @@ class Importer
 
 		if (idIdx === -1 || infoIdx === -1)
 		{
-			console.warn('Cannot update Extra table: Missing required columns in source data.');
+			console.warn('Cannot update ACStructuresExtra sheet: Missing required columns in source data.');
 			return;
 		}
 
@@ -114,15 +119,17 @@ class Importer
 			extraData.push([id, planning, ud]);
 		}
 
-		// 3. Update table
-		const table = this.getTable('Extra');
-		if (table)
+		// 3. Update sheet
+		const ss = SpreadsheetApp.getActiveSpreadsheet();
+		const sheet = ss.getSheetByName('ACStructuresExtra');
+		if (sheet)
 		{
-			this.updateTableData(table, extraData);
+			sheet.clearContents();
+			sheet.getRange(1, 1, extraData.length, extraData[0].length).setValues(extraData);
 		}
 		else
 		{
-			console.warn('Extra table not found.');
+			console.warn('ACStructuresExtra sheet not found.');
 		}
 	}
 

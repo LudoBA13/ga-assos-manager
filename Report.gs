@@ -10,10 +10,10 @@ function showReportDialog()
 
 function getStructureList()
 {
-	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('DonnéesAssoConnect');
+	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('ACStructures');
 	if (!sheet)
 	{
-		throw new Error("La feuille 'DonnéesAssoConnect' est introuvable.");
+		throw new Error("La feuille 'ACStructures' est introuvable.");
 	}
 
 	const data = sheet.getDataRange().getValues();
@@ -89,5 +89,5 @@ function getVisitReportFormUrl(id)
 
 function getAssoConnectRow(id)
 {
-	return getRowById('DonnéesAssoConnect', id);
+	return getRowById('ACStructures', id);
 }
