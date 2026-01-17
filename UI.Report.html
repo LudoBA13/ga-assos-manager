@@ -100,10 +100,10 @@
 		function createReport() {
 			const select = document.getElementById('structure-select');
 			const btn = document.getElementById('create-btn');
-			const vif = select.value;
+			const id = select.value;
 			const nom = select.options[select.selectedIndex].text;
 			
-			if (!vif) {
+			if (!id) {
 				alert("Veuillez sélectionner une structure.");
 				return;
 			}
@@ -115,12 +115,7 @@
 
 			google.script.run
 				.withSuccessHandler(function(url) {
-					// Encode values to ensure URL validity
-					const finalUrl = url
-						.replace('<<Code VIF>>', encodeURIComponent(vif))
-						.replace('<<Nom>>', encodeURIComponent(nom));
-					
-					window.open(finalUrl, '_blank');
+					window.open(url, '_blank');
 					google.script.host.close();
 				})
 				.withFailureHandler(function(err) {
@@ -128,7 +123,7 @@
 					btn.disabled = false;
 					btn.innerText = originalText;
 				})
-				.getVisitReportFormUrl();
+				.getVisitReportFormUrl(id);
 		}
 
 		function showError(error) {
