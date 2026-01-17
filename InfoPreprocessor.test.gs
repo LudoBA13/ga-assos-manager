@@ -6,7 +6,8 @@ function runInfoPreprocessorTests()
 {
 	const testCases = [
 		test_InfoPreprocessor_UD,
-		test_InfoPreprocessor_Planning
+		test_InfoPreprocessor_Planning,
+		test_InfoPreprocessor_Normalization
 	];
 
 	const results = {
@@ -155,3 +156,28 @@ function test_InfoPreprocessor_Planning()
 	const expected8 = "$ud:100$$planning:1JeApFr1JeApSe1JeApSu2MaApFr3LuApFr3JeApFr$";
 	assertEqual(expected8, InfoPreprocessor.process(input8), "Complex multi-entry Planning with extra text");
 }
+
+function test_InfoPreprocessor_Normalization()
+{
+	// Test Unicode superscript ordinals normalization
+	const input1 = "Planning: 1ᵉʳ lundi 8h30: Frais."; // ᵉʳ (U+1D49 U+02B3)
+	const expected1 = "$planning:1LuMdFr$";
+	assertEqual(expected1, InfoPreprocessor.process(input1), "Unicode 1er normalization");
+
+	const input2 = "Planning: 2ᵉ mardi 14h: Sec."; // ᵉ (U+1D49)
+	const expected2 = "$planning:2MaApSe$";
+	assertEqual(expected2, InfoPreprocessor.process(input2), "Unicode 2e normalization");
+
+	const input3 = "Planning: 1ʳᵉ vendredi 10h: Surgelé."; // ʳᵉ (U+02B3 U+1D49)
+	const expected3 = "$planning:1VeMfSu$";
+	assertEqual(expected3, InfoPreprocessor.process(input3), "Unicode 1re normalization");
+
+	const input4 = "Planning: 3ᵉ mercredi 10h: Sec."; // ᵉ (U+1D49)
+	const expected4 = "$planning:3MeMfSe$";
+	assertEqual(expected4, InfoPreprocessor.process(input4), "Unicode 3e normalization");
+
+	const input5 = "Planning: 4ᵉ jeudi 8h30: Frais."; // ᵉ (U+1D49)
+	const expected5 = "$planning:4JeMdFr$";
+	assertEqual(expected5, InfoPreprocessor.process(input5), "Unicode 4e normalization");
+}
+

@@ -19,6 +19,10 @@ const InfoPreprocessor = {
 
 		let processed = text;
 
+		// Normalize superscript letters for "e" and "r"
+		processed = processed.replaceAll("\u1D49", 'e');
+		processed = processed.replaceAll("\u02B3", 'r');
+
 		// Rule: /UD\s*:\s*(\d+)\W*/ -> "$ud:$1$"
 		// Expands "UD: 1" or "UD : 5." into "$ud:1$" or "$ud:5$"
 		processed = processed.replace(/UD\s*:\s*(\d+)\W*/gi, '$$ud:$1$$');
