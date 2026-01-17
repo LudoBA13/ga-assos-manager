@@ -3,12 +3,17 @@
  */
 function onOpen()
 {
-	SpreadsheetApp.getUi()
-		.createMenu('AssoConnect')
+	const ui = SpreadsheetApp.getUi();
+
+	ui.createMenu('AssoConnect')
 		.addItem(_('Importer les structures'), 'showImporter')
 		.addItem(_('Mettre à jour fonctions'), 'deployNamedFunctions')
 		.addSeparator()
 		.addItem(_('Lancer les tests'), 'runTests')
+		.addToUi();
+
+	ui.createMenu('CAR')
+		.addItem(_('Créer un rapport de visite'), 'showReportDialog')
 		.addToUi();
 }
 

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<base target="_top">
+	<style>
+		body {
+			font-family: 'Google Sans', Roboto, Arial, sans-serif;
+			padding: 20px;
+		}
+		.form-group {
+			margin-bottom: 15px;
+		}
+		label {
+			display: block;
+			margin-bottom: 5px;
+			font-weight: 500;
+		}
+		select {
+			width: 100%;
+			padding: 8px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-sizing: border-box; 
+		}
+		.loading {
+			color: #666;
+			font-style: italic;
+		}
+		.button-container {
+			margin-top: 20px;
+		}
+		button {
+			background-color: #1a73e8;
+			color: white;
+			border: none;
+			padding: 10px 24px;
+			border-radius: 4px;
+			font-weight: 500;
+			cursor: pointer;
+			width: 100%;
+		}
+		button:hover {
+			background-color: #1765cc;
+		}
+		button:disabled {
+			background-color: #ccc;
+			cursor: not-allowed;
+		}
+	</style>
+</head>
+<body>
+	<div class="form-group">
+		<label for="structure-select">Structure</label>
+		<select id="structure-select" disabled>
+			<option>Chargement...</option>
+		</select>
+	</div>
+
+	<div class="button-container">
+		<button id="create-btn" onclick="createReport()" disabled>Créer un rapport</button>
+	</div>
+
+	<script>
+		window.onload = function() {
+			google.script.run
+				.withSuccessHandler(populateSelect)
+				.withFailureHandler(showError)
+				.getStructureList();
+		};
+
+		function populateSelect(structures) {
+			const select = document.getElementById('structure-select');
+			const btn = document.getElementById('create-btn');
+			select.innerHTML = ''; // Clear "Loading..."
+
+			if (!structures || structures.length === 0) {
+				const option = document.createElement('option');
+				option.text = "Aucune structure trouvée";
+				select.add(option);
+				return;
+			}
+
+			// Add a default empty option
+			const defaultOption = document.createElement('option');
+			defaultOption.text = "Sélectionnez une structure...";
+			defaultOption.value = "";
+			select.add(defaultOption);
+
+			structures.forEach(function(item) {
+				const option = document.createElement('option');
+				option.value = item[0]; // Code VIF
+				option.text = item[1];  // Nom
+				select.add(option);
+			});
+
+			select.disabled = false;
+			btn.disabled = false;
+		}
+
+		function createReport() {
+			const select = document.getElementById('structure-select');
+			const btn = document.getElementById('create-btn');
+			const vif = select.value;
+			const nom = select.options[select.selectedIndex].text;
+			
+			if (!vif) {
+				alert("Veuillez sélectionner une structure.");
+				return;
+			}
+
+			// Loading state
+			const originalText = btn.innerText;
+			btn.disabled = true;
+			btn.innerText = "Chargement...";
+
+			google.script.run
+				.withSuccessHandler(function(url) {
+					// Encode values to ensure URL validity
+					const finalUrl = url
+						.replace('<<Code VIF>>', encodeURIComponent(vif))
+						.replace('<<Nom>>', encodeURIComponent(nom));
+					
+					window.open(finalUrl, '_blank');
+					google.script.host.close();
+				})
+				.withFailureHandler(function(err) {
+					alert("Erreur lors de la récupération de l'URL : " + err.message);
+					btn.disabled = false;
+					btn.innerText = originalText;
+				})
+				.getVisitReportFormUrl();
+		}
+
+		function showError(error) {
+			const select = document.getElementById('structure-select');
+			select.innerHTML = '';
+			const option = document.createElement('option');
+			option.text = "Erreur : " + error.message;
+			select.add(option);
+		}
+	</script>
+</body>
+</html>
