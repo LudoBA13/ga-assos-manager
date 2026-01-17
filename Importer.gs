@@ -16,6 +16,7 @@ class Importer
 			throw new Error('No data in file.');
 		}
 		this.updateAssoConnectData(data);
+		SpreadsheetApp.getActiveSpreadsheet().toast(_('Importation réussie'));
 	}
 
 	static getTable(tableName)

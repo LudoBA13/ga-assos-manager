@@ -49,9 +49,7 @@
 
 			function onSuccess()
 			{
-				document.getElementById('status').innerHTML = `<p>${<?= JSON.stringify(_('Importation réussie')) ?>}</p>`;
-				resize();
-				setTimeout(() => google.script.host.close(), 2000);
+				google.script.host.close();
 			}
 
 			function onFailure(error)
