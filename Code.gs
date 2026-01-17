@@ -23,9 +23,9 @@ function showImporter()
 	Importer.show();
 }
 
-function updateAssoConnectFromFile(fileData)
+function updateACStructuresFromFile(fileData)
 {
-	Importer.updateAssoConnectFromFile(fileData);
+	Importer.updateACStructuresFromFile(fileData);
 }
 
 function runTests()

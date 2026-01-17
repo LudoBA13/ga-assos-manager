@@ -8,7 +8,7 @@ class Importer
 		SpreadsheetApp.getUi().showModalDialog(html, _('Importer les structures'));
 	}
 
-	static updateAssoConnectFromFile(fileData)
+	static updateACStructuresFromFile(fileData)
 	{
 		const data = this.getDataFromXLSXFile(fileData);
 		if (!data || data.length === 0)
@@ -23,15 +23,15 @@ class Importer
 			throw new Error(_('Format incorrect. Impossible de trouver le champ Code VIF.'));
 		}
 
-		this.updateAssoConnectData(data);
+		this.updateACStructuresData(data);
 		SpreadsheetApp.getActiveSpreadsheet().toast(_('Importation réussie'));
 	}
 
-	static updateAssoConnectData(data)
+	static updateACStructuresData(data)
 	{
 		if (!data || data.length === 0)
 		{
-			throw new Error('No data passed to updateAssoConnectData.');
+			throw new Error('No data passed to updateACStructuresData.');
 		}
 
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -68,10 +68,10 @@ class Importer
 		}
 	}
 
-	static updateExtraData(assoConnectData)
+	static updateExtraData(acStructuresData)
 	{
 		// 1. Locate headers
-		const headers = assoConnectData[0];
+		const headers = acStructuresData[0];
 		const idIdx = headers.indexOf('ID du Contact');
 		const infoIdx = headers.indexOf('Informations complémentaires');
 
@@ -86,9 +86,9 @@ class Importer
 		const udRegex = /\$ud:(\d+)\$/;
 		const planningRegex = /\$planning:(\w+)\$/;
 
-		for (let i = 1; i < assoConnectData.length; i++)
+		for (let i = 1; i < acStructuresData.length; i++)
 		{
-			const row = assoConnectData[i];
+			const row = acStructuresData[i];
 			const id = row[idIdx];
 			const infoRaw = row[infoIdx] ? String(row[infoIdx]) : '';
 			const info = InfoPreprocessor.process(infoRaw);
@@ -116,10 +116,10 @@ class Importer
 		}
 	}
 
-	static updateFuzzyDB(assoConnectData)
+	static updateFuzzyDB(acStructuresData)
 	{
 		// 1. Locate headers
-		const headers = assoConnectData[0];
+		const headers = acStructuresData[0];
 		const nomIdx = headers.indexOf('Nom');
 		const codeIdx = headers.indexOf('Code VIF');
 
@@ -155,9 +155,9 @@ class Importer
 		const newEntries = [];
 		const seenInBatch = new Set();
 
-		for (let i = 1; i < assoConnectData.length; i++)
+		for (let i = 1; i < acStructuresData.length; i++)
 		{
-			const row = assoConnectData[i];
+			const row = acStructuresData[i];
 			const nom = row[nomIdx];
 			const code = row[codeIdx];
 

@@ -51,7 +51,7 @@ function getStructureList()
 function getVisitReportFormUrl(id)
 {
 	const rawUrl = getConfigValue('visitReportFormUrl');
-	const structure = getAssoConnectRow(id);
+	const structure = getACStructuresRow(id);
 
 	if (!structure)
 	{
@@ -87,7 +87,7 @@ function getVisitReportFormUrl(id)
 		.replace('<<Date de la dernière visite>>', encodeURIComponent(dateStr));
 }
 
-function getAssoConnectRow(id)
+function getACStructuresRow(id)
 {
 	return getRowById('ACStructures', id);
 }

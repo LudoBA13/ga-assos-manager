@@ -42,7 +42,7 @@
 					google.script.run
 						.withSuccessHandler(onSuccess)
 						.withFailureHandler(onFailure)
-						.updateAssoConnectFromFile(fileData);
+						.updateACStructuresFromFile(fileData);
 				};
 				reader.readAsDataURL(file);
 			}
