@@ -5,7 +5,7 @@ function showReportDialog()
 		.setWidth(400)
 		.setHeight(300);
 		
-	SpreadsheetApp.getUi().showModalDialog(html, _('Créer un rapport'));
+	SpreadsheetApp.getUi().showModalDialog(html, _('Créer un rapport de visite'));
 }
 
 function getStructureList()
