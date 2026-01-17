@@ -55,38 +55,5 @@ function getVisitReportFormUrl()
 
 function getAssoConnectRow(id)
 {
-	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('DonnéesAssoConnect');
-	if (!sheet)
-	{
-		throw new Error("La feuille 'DonnéesAssoConnect' est introuvable.");
-	}
-
-	const lastRow = sheet.getLastRow();
-	if (lastRow < 2) return null;
-
-	// 1. Read headers (Row 1)
-	const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-
-	// 2. Read IDs (Column A) - Search for the ID
-	// Note: We read A2:A... to match data rows
-	const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues().flat();
-	const rowIdx = ids.findIndex(val => val == id); // Loose equality for ID matching
-
-	if (rowIdx === -1)
-	{
-		return null;
-	}
-
-	// 3. Fetch specific row (Row index + 2 because of 0-based index and 1 header row)
-	const rowData = sheet.getRange(rowIdx + 2, 1, 1, sheet.getLastColumn()).getValues()[0];
-
-	// 4. Map to object
-	const result = {};
-	headers.forEach((header, index) => {
-		if (header) {
-			result[header] = rowData[index];
-		}
-	});
-
-	return result;
+	return getRowById('DonnéesAssoConnect', id);
 }
