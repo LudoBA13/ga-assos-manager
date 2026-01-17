@@ -175,5 +175,9 @@ function test_InfoPreprocessor_Normalization()
 	const input5 = "Planning: 4ᵉ jeudi 8h30: Frais."; // ᵉ (U+1D49)
 	const expected5 = "$planning:4JeMdFr$";
 	assertEqual(expected5, InfoPreprocessor.process(input5), "Unicode 4e normalization");
+
+	const input6 = "60 UD. Planning : 1ᵉʳ mercredi 8h30 : Frais, Sec, Surgelé.";
+	const expected6 = "$ud:60$$planning:1MeMdFr1MeMdSe1MeMdSu$";
+	assertEqual(expected6, InfoPreprocessor.process(input6), "Mixed UD and Unicode 1er");
 }
 
