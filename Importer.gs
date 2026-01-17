@@ -27,32 +27,6 @@ class Importer
 		SpreadsheetApp.getActiveSpreadsheet().toast(_('Importation réussie'));
 	}
 
-	static getTable(tableName)
-	{
-		const ss   = SpreadsheetApp.getActiveSpreadsheet();
-		const ssId = ss.getId();
-
-		const response = Sheets.Spreadsheets.get(ssId, {
-			fields: 'sheets(properties,tables)'
-		});
-
-		if (!response.sheets)
-		{
-			return null;
-		}
-
-		for (const s of response.sheets)
-		{
-			const table = s.tables?.find(t => t.name === tableName);
-			if (table)
-			{
-				return table;
-			}
-		}
-
-		return null;
-	}
-
 	static updateAssoConnectData(data)
 	{
 		if (!data || data.length === 0)
@@ -199,75 +173,6 @@ class Importer
 		{
 			fuzzySheet.getRange(lastRow + 1, 1, newEntries.length, 2).setValues(newEntries);
 		}
-	}
-
-	static updateTableData(table, data)
-	{
-		if (!data || data.length === 0)
-		{
-			throw new Error('No data passed to updateTableData.');
-		}
-
-		// Clear the old data range to avoid leftovers if the new data is smaller.
-		// We use the standard service for clearing content as it's easier
-		const ss = SpreadsheetApp.getActiveSpreadsheet();
-		const ssId = ss.getId();
-		const sheetId = table.range.sheetId;
-		const sheet = ss.getSheets().find(s => s.getSheetId() === sheetId);
-		if (sheet)
-		{
-			const curRowsCnt = table.range.endRowIndex - table.range.startRowIndex;
-			const curColsCnt = table.range.endColumnIndex - table.range.startColumnIndex;
-			const newRowsCnt = data.length;
-			const newColsCnt = data[0].length;
-
-			// Only clear if the target range is wider or taller than the new data
-			if (curRowsCnt > newRowsCnt || curColsCnt > newColsCnt)
-			{
-				// startRowIndex is 0-based, getRange uses 1-based
-				sheet.getRange(
-					table.range.startRowIndex + 1,
-					table.range.startColumnIndex + 1,
-					curRowsCnt,
-					curColsCnt
-				).clearContent();
-			}
-		}
-
-		// 3. Resize the table to fit the new data if necessary
-		const newEndRowIdx = table.range.startRowIndex + data.length;
-		const newEndColIdx = table.range.startColumnIndex + data[0].length;
-
-		if (table.range.endRowIndex !== newEndRowIdx || table.range.endColumnIndex !== newEndColIdx)
-		{
-			const newRange = {
-				sheetId:          sheetId,
-				startRowIndex:    table.range.startRowIndex,
-				startColumnIndex: table.range.startColumnIndex,
-				endRowIndex:      newEndRowIdx,
-				endColumnIndex:   newEndColIdx
-			};
-
-			const updateRequest = {
-				updateTable: {
-					table: {
-						tableId: table.tableId,
-						range:   newRange
-					},
-					fields: 'range'
-				}
-			};
-
-			Sheets.Spreadsheets.batchUpdate({ requests: [updateRequest] }, ssId);
-		}
-
-		// 4. Write the new data
-		sheet.getRange(
-			table.range.startRowIndex + 1,
-			table.range.startColumnIndex + 1,
-			data.length,
-			data[0].length
-		).setValues(data);
 	}
 
 	/**
