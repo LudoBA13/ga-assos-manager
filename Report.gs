@@ -50,21 +50,7 @@ function getStructureList()
 
 function getVisitReportFormUrl()
 {
-	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Config');
-	if (!sheet)
-	{
-		throw new Error("La feuille 'Config' est introuvable.");
-	}
-
-	const data = sheet.getDataRange().getValues();
-	const row = data.find(r => r[0] === 'visitReportFormUrl');
-
-	if (!row)
-	{
-		throw new Error("La configuration 'visitReportFormUrl' est manquante dans la feuille Config.");
-	}
-
-	return row[1];
+	return getConfigValue('visitReportFormUrl');
 }
 
 function getAssoConnectRow(id)
