@@ -25,6 +25,12 @@ function deployNamedFunctions()
 			description: _('Recherche la valeur associée à un nom dans la feuille FuzzyDB.'),
 			definition: "=XLOOKUP(name, FuzzyDB!$A:$A, FuzzyDB!$B:$B)",
 			argumentPlaceholders: [{ name: 'name' }]
+		},
+		{
+			name: 'CONFIG',
+			description: _('Récupère une valeur de configuration par son nom depuis la feuille Config.'),
+			definition: "=XLOOKUP(name, Config!$A:$A, Config!$B:$B)",
+			argumentPlaceholders: [{ name: 'name' }]
 		}
 	];
 
