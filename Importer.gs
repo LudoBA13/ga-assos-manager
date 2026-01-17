@@ -15,6 +15,14 @@ class Importer
 		{
 			throw new Error('No data in file.');
 		}
+
+		// Validate headers
+		const headers = data[0];
+		if (!headers.includes('Code VIF'))
+		{
+			throw new Error(_('Format incorrect. Impossible de trouver le champ Code VIF.'));
+		}
+
 		this.updateAssoConnectData(data);
 		SpreadsheetApp.getActiveSpreadsheet().toast(_('Importation réussie'));
 	}
