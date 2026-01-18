@@ -341,8 +341,8 @@ function test_formatPlanningForDisplay()
 	assertEqual(expected3, formatPlanningForDisplay(text3), "Test 3: Mixed ditto and new list");
 
 	const text4 = "1ᵉʳ lundi 8h30 : Product A. 2ᵉ mardi 14h : Product A.";
-	// "Product A." is 10 chars, floor(10/2) = 5 spaces
-	const expected4 = "1ᵉʳ lundi 8h30 : Product A.\n2ᵉ mardi 14h :      \u3003";
+	// "Product A." is 10 chars, ceil(10/2) = 5 spaces
+	const expected4 = "1ᵉʳ lundi 8h30 : Product A.\n2ᵉ mardi 14h :     \u3003";
 	assertEqual(expected4, formatPlanningForDisplay(text4), "Test 4: Ditto mark with longer string");
 
 	const textGrouping = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Sec. 3ᵉ mercredi 10h : Frais.";
@@ -351,7 +351,7 @@ function test_formatPlanningForDisplay()
 
 	const textOdd = "1ᵉʳ lundi 8h30 : Frais, Sec. 2ᵉ mardi 14h : Frais, Sec.";
 	// "Frais, Sec." is 11 chars. ceil(11/2) = 6 spaces.
-	const expectedOdd = "1ᵉʳ lundi 8h30 : Frais, Sec.\n2ᵉ mardi 14h :       \u3003";
+	const expectedOdd = "1ᵉʳ lundi 8h30 : Frais, Sec.\n2ᵉ mardi 14h :      \u3003";
 	assertEqual(expectedOdd, formatPlanningForDisplay(textOdd), "Test 6: Rounding up spaces for odd-length strings");
 
 	assertEqual('', formatPlanningForDisplay(''), "Test 7: Empty input");

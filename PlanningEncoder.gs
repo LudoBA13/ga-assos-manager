@@ -593,7 +593,7 @@ const formatPlanningForDisplay = (text) =>
 		if (lastRight !== null && parsed.trimmedRight === lastRight)
 		{
 			const halfSpaces = ' '.repeat(Math.ceil(parsed.trimmedRight.length / 2));
-			result.push(parsed.left + ' ' + halfSpaces + '\u3003');
+			result.push(parsed.left + halfSpaces + '\u3003');
 		}
 		else
 		{
