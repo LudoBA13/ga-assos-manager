@@ -81,9 +81,10 @@ function exportInterServicesData()
 			// Copy the sheet to the target spreadsheet (preserves formatting)
 			const copiedSheet = sheet.copyTo(targetSS);
 
-			// Replace formulae with values
-			const range = copiedSheet.getDataRange();
-			range.setValues(range.getValues());
+			// Replace formulae with values (using values from source sheet to avoid broken references)
+			const sourceRange = sheet.getDataRange();
+			const targetRange = copiedSheet.getRange(1, 1, sourceRange.getNumRows(), sourceRange.getNumColumns());
+			targetRange.setValues(sourceRange.getValues());
 
 			// Delete all other sheets in the target spreadsheet
 			const targetSheets = targetSS.getSheets();
