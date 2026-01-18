@@ -81,12 +81,16 @@ function exportInterServicesData()
 			// Copy the sheet to the target spreadsheet (preserves formatting)
 			const copiedSheet = sheet.copyTo(targetSS);
 
+			// Ensure the copied sheet is visible (it might be hidden in the source)
+			copiedSheet.showSheet();
+
 			// Replace formulae with values (using values from source sheet to avoid broken references)
 			const sourceRange = sheet.getDataRange();
 			const targetRange = copiedSheet.getRange(1, 1, sourceRange.getNumRows(), sourceRange.getNumColumns());
 			targetRange.setValues(sourceRange.getValues());
 
 			// Delete all other sheets in the target spreadsheet
+			SpreadsheetApp.flush();
 			const targetSheets = targetSS.getSheets();
 			for (const s of targetSheets)
 			{
@@ -95,6 +99,7 @@ function exportInterServicesData()
 					targetSS.deleteSheet(s);
 				}
 			}
+			SpreadsheetApp.flush();
 
 			// Rename the copied sheet to the target name
 			copiedSheet.setName(targetName);
