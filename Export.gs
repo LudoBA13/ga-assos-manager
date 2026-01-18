@@ -47,7 +47,7 @@ function exportInterServicesData()
 	}
 
 	const sheets = ss.getSheets();
-	let exportedCount = 0;
+	let exportedCnt = 0;
 
 	for (const sheet of sheets)
 	{
@@ -74,9 +74,9 @@ function exportInterServicesData()
 			const targetSheet = newSS.getSheets()[0];
 			targetSheet.getRange(1, 1, values.length, values[0].length).setValues(values);
 
-			exportedCount++;
+			exportedCnt++;
 		}
 	}
 
-	ui.alert(_('Export terminé. %s fichier(s) généré(s).', exportedCount));
+	ui.alert(_('Export terminé. %s fichier(s) généré(s).', exportedCnt));
 }
