@@ -39,7 +39,8 @@ function runPlanningEncoderTests()
 		test_encodePlanning,
 		test_parseHumanReadable,
 		test_decodePlannings,
-		test_formatPlanningForDisplay
+		test_formatPlanningForDisplay,
+		test_formatPlannings
 	];
 
 	const results = {
@@ -346,4 +347,27 @@ function test_formatPlanningForDisplay()
 
 	assertEqual('', formatPlanningForDisplay(''), "Test 5: Empty input");
 	assertEqual('', formatPlanningForDisplay(null), "Test 6: Null input");
+}
+
+function test_formatPlannings()
+{
+	const range1 = [
+		["1LuMdFr2MaApFr"],
+		["3MeMfSu"]
+	];
+	const expected1 = [
+		["1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003"],
+		["3ᵉ mercredi 10h : Surgelé."]
+	];
+	assertEqual(expected1, formatPlannings(range1), "Test 1: Multiple rows with internal formatting");
+
+	const range2 = [
+		["1LuMdFr", "2MaApFr"]
+	];
+	const expected2 = [
+		["1ᵉʳ lundi 8h30 : Frais.", "2ᵉ mardi 14h : Frais."]
+	];
+	// Note: formatPlanningForDisplay only does ditto marks WITHIN a single cell's decoded text (sentences), 
+	// not across different cells of the range.
+	assertEqual(expected2, formatPlannings(range2), "Test 2: Multiple columns, no cross-cell ditto marks");
 }

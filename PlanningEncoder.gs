@@ -331,6 +331,18 @@ const decodePlannings = (range) =>
 };
 
 /**
+ * Decodes and formats a 2D array (range) of planning schedules for display.
+ * This function can be used as a custom function in Google Sheets.
+ * @customfunction
+ * @param {Array<Array<string>>} range The 2D array (range) of encoded schedule strings.
+ * @returns {Array<Array<string>>} A 2D array with the formatted planning schedules.
+ */
+const formatPlannings = (range) =>
+{
+	return decodePlannings(range).map(row => row.map(cell => formatPlanningForDisplay(cell)));
+};
+
+/**
  * Takes an encoded schedule, compresses it, and returns it in a sorted canonical form.
  */
 const canonicalizeSchedule = (schedule) =>
