@@ -1,4 +1,4 @@
-function getConfigValue(name)
+function getConfig(name)
 {
 	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Config');
 	if (!sheet)

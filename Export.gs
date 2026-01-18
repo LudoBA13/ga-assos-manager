@@ -10,7 +10,7 @@ function exportInterServicesData()
 	let folderUrl;
 	try
 	{
-		folderUrl = getConfigValue('exportFolderUrl');
+		folderUrl = getConfig('exportFolderUrl');
 	}
 	catch (e)
 	{

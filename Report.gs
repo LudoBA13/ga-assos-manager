@@ -50,7 +50,7 @@ function getStructureList()
 
 function getVisitReportFormUrl(id)
 {
-	const rawUrl = getConfigValue('visitReportFormUrl');
+	const rawUrl = getConfig('visitReportFormUrl');
 	const structure = getACStructuresRow(id);
 
 	if (!structure)
