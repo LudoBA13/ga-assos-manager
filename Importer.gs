@@ -140,7 +140,7 @@ class Importer
 
 		// 3. Get existing names from FuzzyDB!$A:$A
 		const lastRow = fuzzySheet.getLastRow();
-		const existingNames = new Set();
+		const existingNames = new Set;
 
 		if (lastRow > 0)
 		{
@@ -153,7 +153,7 @@ class Importer
 
 		// 4. Identify new values
 		const newEntries = [];
-		const seenInBatch = new Set();
+		const seenInBatch = new Set;
 
 		for (let i = 1; i < acStructuresData.length; i++)
 		{

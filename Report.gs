@@ -28,7 +28,7 @@ function getStructureList()
 		return [];
 	}
 
-	const map = new Map();
+	const map = new Map;
 
 	for (let i = 1; i < data.length; i++)
 	{

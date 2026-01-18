@@ -17,7 +17,6 @@ function onOpen()
 		.addToUi();
 }
 
-
 function showImporter()
 {
 	Importer.show();
@@ -38,4 +37,3 @@ function runTests()
 	
 	Logger.log(`Total Tests: ${totalPassed} / ${totalTotal} passed.`);
 }
-

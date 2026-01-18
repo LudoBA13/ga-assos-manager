@@ -125,13 +125,13 @@ const compressPlanning = (schedule) =>
 		return '';
 	}
 
-	const groupedBySuffix = new Map();
+	const groupedBySuffix = new Map;
 
 	for (const { weekCode, suffix } of parseSchedule(schedule))
 	{
 		if (!groupedBySuffix.has(suffix))
 		{
-			groupedBySuffix.set(suffix, new Set());
+			groupedBySuffix.set(suffix, new Set);
 		}
 		groupedBySuffix.get(suffix).add(weekCode);
 	}
@@ -231,7 +231,6 @@ const decompressPlanning = (schedule) =>
 	return entries.map(e => e.weekCode + e.dayCode + e.timeCode + e.productCode).join('');
 };
 
-
 /**
  * Groups entries by time slot and sorts them chronologically.
  * Also sorts the product list alphabetically within each group.
@@ -239,7 +238,7 @@ const decompressPlanning = (schedule) =>
 const groupAndSortEntries = (schedule) =>
 {
 	const { DAY_ORDER, TIME_ORDER, WEEKS, DAYS, TIMES, PRODUCTS } = PLANNING_CONSTANTS;
-	const grouped = new Map();
+	const grouped = new Map;
 
 	for (const { weekCode, dayCode, timeCode, productCode } of parseSchedule(schedule))
 	{
@@ -509,4 +508,3 @@ const parseHumanReadable = (text) =>
 
 	return encodePlanning(entries);
 };
-

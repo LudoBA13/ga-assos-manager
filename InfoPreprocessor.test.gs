@@ -180,4 +180,3 @@ function test_InfoPreprocessor_Normalization()
 	const expected6 = "$ud:60$$planning:1MeMdFr1MeMdSe1MeMdSu$";
 	assertEqual(expected6, InfoPreprocessor.process(input6), "Mixed UD and Unicode 1er");
 }
-
