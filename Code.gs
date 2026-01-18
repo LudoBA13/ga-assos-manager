@@ -12,6 +12,10 @@ function onOpen()
 		.addItem(_('Lancer les tests'), 'runTests')
 		.addToUi();
 
+	ui.createMenu('Export')
+		.addItem(_('Données interservices'), 'exportInterServicesData')
+		.addToUi();
+
 	ui.createMenu('CAR')
 		.addItem(_('Créer un rapport de visite'), 'showReportDialog')
 		.addToUi();
