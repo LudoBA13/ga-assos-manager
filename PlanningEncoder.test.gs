@@ -38,7 +38,8 @@ function runPlanningEncoderTests()
 		test_canonicalizeSchedule,
 		test_encodePlanning,
 		test_parseHumanReadable,
-		test_decodePlannings
+		test_decodePlannings,
+		test_formatPlanningForDisplay
 	];
 
 	const results = {
@@ -322,4 +323,27 @@ function test_decodePlannings()
 	const range5 = [];
 	const expected5 = [['']]; // Expected behavior for empty range for custom functions
 	assertEqual(expected5, decodePlannings(range5), "Test 5: Empty input range");
+}
+
+function test_formatPlanningForDisplay()
+{
+	const text1 = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Sec.";
+	const expected1 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h : Sec.";
+	assertEqual(expected1, formatPlanningForDisplay(text1), "Test 1: Simple line break");
+
+	const text2 = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Frais.";
+	const expected2 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003"; // "Frais." is 6 chars, floor(6/2) = 3 spaces
+	assertEqual(expected2, formatPlanningForDisplay(text2), "Test 2: Ditto mark for same product list");
+
+	const text3 = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Frais. 3ᵉ mercredi 10h : Sec.";
+	const expected3 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003\n3ᵉ mercredi 10h : Sec.";
+	assertEqual(expected3, formatPlanningForDisplay(text3), "Test 3: Mixed ditto and new list");
+
+	const text4 = "1ᵉʳ lundi 8h30 : Product A. 2ᵉ mardi 14h : Product A.";
+	// "Product A." is 10 chars, floor(10/2) = 5 spaces
+	const expected4 = "1ᵉʳ lundi 8h30 : Product A.\n2ᵉ mardi 14h :      \u3003";
+	assertEqual(expected4, formatPlanningForDisplay(text4), "Test 4: Ditto mark with longer string");
+
+	assertEqual('', formatPlanningForDisplay(''), "Test 5: Empty input");
+	assertEqual('', formatPlanningForDisplay(null), "Test 6: Null input");
 }

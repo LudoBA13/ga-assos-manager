@@ -508,3 +508,54 @@ const parseHumanReadable = (text) =>
 
 	return encodePlanning(entries);
 };
+
+/**
+ * Formats a human-readable planning schedule for display.
+ * Breaks lines at periods and uses ditto marks (〃) for repeated product lists.
+ * @customfunction
+ * @param {string} text The human-readable schedule (e.g., from decodePlanning).
+ * @returns {string} The formatted schedule for display.
+ */
+const formatPlanningForDisplay = (text) =>
+{
+	if (!text)
+	{
+		return '';
+	}
+
+	// 1. Replace all ". " with ".\n" to break lines
+	const lines = text.replace(/\. /g, '.\n').split('\n');
+	const result = [];
+	let lastRight = null;
+
+	for (const line of lines)
+	{
+		// 2. Split each line at the first ":"
+		const colonIdx = line.indexOf(':');
+		if (colonIdx === -1)
+		{
+			result.push(line);
+			lastRight = null;
+			continue;
+		}
+
+		const left = line.substring(0, colonIdx + 1);
+		const right = line.substring(colonIdx + 1);
+		const trimmedRight = right.trim();
+
+		// 3. If the right side is the same as the previous line's right side
+		if (lastRight !== null && trimmedRight === lastRight)
+		{
+			// Replace its content with half as many spaces followed by "\u3003"
+			const halfSpaces = ' '.repeat(Math.floor(trimmedRight.length / 2));
+			result.push(left + ' ' + halfSpaces + '\u3003');
+		}
+		else
+		{
+			result.push(line);
+			lastRight = trimmedRight;
+		}
+	}
+
+	return result.join('\n');
+};
