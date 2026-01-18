@@ -63,32 +63,40 @@ function exportInterServicesData()
 				continue;
 			}
 
-			// Create the new spreadsheet file
-			const newSS = SpreadsheetApp.create(targetName);
-			const newFile = DriveApp.getFileById(newSS.getId());
+			let targetSS;
+			const files = folder.getFilesByName(targetName);
 
-			// Move the file to the target folder
-			newFile.moveTo(folder);
+			if (files.hasNext())
+			{
+				const file = files.next();
+				targetSS = SpreadsheetApp.open(file);
+			}
+			else
+			{
+				targetSS = SpreadsheetApp.create(targetName);
+				const newFile = DriveApp.getFileById(targetSS.getId());
+				newFile.moveTo(folder);
+			}
 
-			// Copy the sheet to the new spreadsheet (preserves formatting)
-			const copiedSheet = sheet.copyTo(newSS);
-			copiedSheet.setName(targetName);
+			// Copy the sheet to the target spreadsheet (preserves formatting)
+			const copiedSheet = sheet.copyTo(targetSS);
 
 			// Replace formulae with values
 			const range = copiedSheet.getDataRange();
 			range.setValues(range.getValues());
 
-			// Delete the default "Feuille 1" (or "Sheet1") created with the new spreadsheet
-			// We iterate to find the one that is NOT our target sheet
-			const sheets = newSS.getSheets();
-			if (sheets.length > 1)
+			// Delete all other sheets in the target spreadsheet
+			const targetSheets = targetSS.getSheets();
+			for (const s of targetSheets)
 			{
-				const defaultSheet = sheets.find(s => s.getSheetId() !== copiedSheet.getSheetId());
-				if (defaultSheet)
+				if (s.getSheetId() !== copiedSheet.getSheetId())
 				{
-					newSS.deleteSheet(defaultSheet);
+					targetSS.deleteSheet(s);
 				}
 			}
+
+			// Rename the copied sheet to the target name
+			copiedSheet.setName(targetName);
 
 			exportedCnt++;
 		}
