@@ -56,9 +56,9 @@ function exportInterServicesData()
 		if (sheetName.startsWith('Export-'))
 		{
 			const targetName = sheetName.substring('Export-'.length);
-			const values = sheet.getDataRange().getValues();
-
-			if (values.length === 0)
+			
+			// Check if the sheet is empty
+			if (sheet.getLastRow() === 0)
 			{
 				continue;
 			}
@@ -70,9 +70,25 @@ function exportInterServicesData()
 			// Move the file to the target folder
 			newFile.moveTo(folder);
 
-			// Write values to the first sheet of the new spreadsheet
-			const targetSheet = newSS.getSheets()[0];
-			targetSheet.getRange(1, 1, values.length, values[0].length).setValues(values);
+			// Copy the sheet to the new spreadsheet (preserves formatting)
+			const copiedSheet = sheet.copyTo(newSS);
+			copiedSheet.setName(targetName);
+
+			// Replace formulae with values
+			const range = copiedSheet.getDataRange();
+			range.setValues(range.getValues());
+
+			// Delete the default "Feuille 1" (or "Sheet1") created with the new spreadsheet
+			// We iterate to find the one that is NOT our target sheet
+			const sheets = newSS.getSheets();
+			if (sheets.length > 1)
+			{
+				const defaultSheet = sheets.find(s => s.getSheetId() !== copiedSheet.getSheetId());
+				if (defaultSheet)
+				{
+					newSS.deleteSheet(defaultSheet);
+				}
+			}
 
 			exportedCnt++;
 		}
