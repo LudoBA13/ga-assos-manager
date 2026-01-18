@@ -345,8 +345,17 @@ function test_formatPlanningForDisplay()
 	const expected4 = "1ᵉʳ lundi 8h30 : Product A.\n2ᵉ mardi 14h :      \u3003";
 	assertEqual(expected4, formatPlanningForDisplay(text4), "Test 4: Ditto mark with longer string");
 
-	assertEqual('', formatPlanningForDisplay(''), "Test 5: Empty input");
-	assertEqual('', formatPlanningForDisplay(null), "Test 6: Null input");
+	const textGrouping = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Sec. 3ᵉ mercredi 10h : Frais.";
+	const expectedGrouping = "1ᵉʳ lundi 8h30 : Frais.\n3ᵉ mercredi 10h :   \u3003\n2ᵉ mardi 14h : Sec.";
+	assertEqual(expectedGrouping, formatPlanningForDisplay(textGrouping), "Test 5: Grouping same product lists together");
+
+	const textOdd = "1ᵉʳ lundi 8h30 : Frais, Sec. 2ᵉ mardi 14h : Frais, Sec.";
+	// "Frais, Sec." is 11 chars. ceil(11/2) = 6 spaces.
+	const expectedOdd = "1ᵉʳ lundi 8h30 : Frais, Sec.\n2ᵉ mardi 14h :       \u3003";
+	assertEqual(expectedOdd, formatPlanningForDisplay(textOdd), "Test 6: Rounding up spaces for odd-length strings");
+
+	assertEqual('', formatPlanningForDisplay(''), "Test 7: Empty input");
+	assertEqual('', formatPlanningForDisplay(null), "Test 8: Null input");
 }
 
 function test_formatPlannings()

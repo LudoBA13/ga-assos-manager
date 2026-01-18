@@ -535,37 +535,70 @@ const formatPlanningForDisplay = (text) =>
 		return '';
 	}
 
-	// 1. Replace all ". " with ".\n" to break lines
-	const lines = text.replace(/\. /g, '.\n').split('\n');
-	const result = [];
-	let lastRight = null;
+	// 1. Split into lines
+	const rawLines = text.replace(/\. /g, '.\n').split('\n').filter(l => l.trim().length > 0);
 
-	for (const line of lines)
+	// 2. Parse lines
+	const parsedLines = rawLines.map(line =>
 	{
-		// 2. Split each line at the first ":"
 		const colonIdx = line.indexOf(':');
 		if (colonIdx === -1)
 		{
-			result.push(line);
+			return { full: line, left: line, trimmedRight: null };
+		}
+		const left = line.substring(0, colonIdx + 1);
+		const right = line.substring(colonIdx + 1);
+		return {
+			full: line,
+			left: left,
+			trimmedRight: right.trim()
+		};
+	});
+
+	// 3. Group by trimmedRight, preserving order of first appearance
+	const groups = new Map;
+
+	for (const parsed of parsedLines)
+	{
+		const key = parsed.trimmedRight === null ? Symbol('no_colon') : parsed.trimmedRight;
+		if (!groups.has(key))
+		{
+			groups.set(key, []);
+		}
+		groups.get(key).push(parsed);
+	}
+
+	const reorderedLines = [];
+	for (const group of groups.values())
+	{
+		for (const parsed of group)
+		{
+			reorderedLines.push(parsed);
+		}
+	}
+
+	// 4. Generate result with ditto marks
+	const result = [];
+	let lastRight = null;
+
+	for (const parsed of reorderedLines)
+	{
+		if (parsed.trimmedRight === null)
+		{
+			result.push(parsed.full);
 			lastRight = null;
 			continue;
 		}
 
-		const left = line.substring(0, colonIdx + 1);
-		const right = line.substring(colonIdx + 1);
-		const trimmedRight = right.trim();
-
-		// 3. If the right side is the same as the previous line's right side
-		if (lastRight !== null && trimmedRight === lastRight)
+		if (lastRight !== null && parsed.trimmedRight === lastRight)
 		{
-			// Replace its content with half as many spaces followed by "\u3003"
-			const halfSpaces = ' '.repeat(Math.floor(trimmedRight.length / 2));
-			result.push(left + ' ' + halfSpaces + '\u3003');
+			const halfSpaces = ' '.repeat(Math.ceil(parsed.trimmedRight.length / 2));
+			result.push(parsed.left + ' ' + halfSpaces + '\u3003');
 		}
 		else
 		{
-			result.push(line);
-			lastRight = trimmedRight;
+			result.push(parsed.full);
+			lastRight = parsed.trimmedRight;
 		}
 	}
 
