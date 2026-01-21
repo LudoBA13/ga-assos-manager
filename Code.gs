@@ -12,8 +12,8 @@ function onOpen()
 		.addItem(_('Lancer les tests'), 'runTests')
 		.addToUi();
 
-	ui.createMenu('Export')
-		.addItem(_('Données interservices'), 'exportInterServicesData')
+	ui.createMenu('Admin')
+		.addItem(_('Exporter les données interservices'), 'exportInterServicesData')
 		.addToUi();
 
 	ui.createMenu('CAR')
