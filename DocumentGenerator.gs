@@ -97,7 +97,7 @@ class DocumentGenerator
 
 			let replacementValue = value;
 
-			if (value instanceof Date)
+			if (value instanceof Date || (typeof value === 'object' && Object.prototype.toString.call(value) === '[object Date]'))
 			{
 				replacementValue = Utilities.formatDate(value, this._timeZone, _('dd/MM/yyyy'));
 			}
