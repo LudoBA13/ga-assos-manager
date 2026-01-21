@@ -101,7 +101,7 @@ class DocumentGenerator
 	 * Replaces all occurrences of placeholder keys with given values in the managed document.
 	 * @param {Map<string, string>} vars A map of key-value pairs for placeholder replacement.
 	 */
-	replacePlaceholders(vars)
+	#replacePlaceholders(vars)
 	{
 		if (!this.#outputDocument)
 		{
@@ -157,9 +157,9 @@ class DocumentGenerator
 		}
 
 		this.#outputDocument = DocumentApp.openById(newFile.getId());
-		this.replacePlaceholders(vars);
+		this.#replacePlaceholders(vars);
 		this.#outputDocument.getBody().replaceText(this.#placeholderRegex.source, '');
-		this.saveAndCloseDocument();
+		this.#saveAndCloseDocument();
 
 		// 4. Return the new document, reopened to ensure it's fresh.
 		return DocumentApp.openById(newFile.getId());
@@ -168,7 +168,7 @@ class DocumentGenerator
 	/**
 	 * Saves and closes the currently managed document.
 	 */
-	saveAndCloseDocument()
+	#saveAndCloseDocument()
 	{
 		if (this.#outputDocument)
 		{
