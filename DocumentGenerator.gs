@@ -90,21 +90,23 @@ class DocumentGenerator
 		const body = this._outputDocument.getBody();
 		for (const [key, value] of vars)
 		{
-			if (this._placeholders.has(key))
+			if (!this._placeholders.has(key))
 			{
-				let replacementValue = value;
-
-				if (value instanceof Date)
-				{
-					replacementValue = Utilities.formatDate(value, this._timeZone, _('dd/MM/yyyy'));
-				}
-
-				const specificPlaceholderPattern =
-					this._escapedPlaceholderStart +
-					this._escapeRegExp(key) +
-					this._escapedPlaceholderEnd;
-				body.replaceText(specificPlaceholderPattern, String(replacementValue));
+				continue;
 			}
+
+			let replacementValue = value;
+
+			if (value instanceof Date)
+			{
+				replacementValue = Utilities.formatDate(value, this._timeZone, _('dd/MM/yyyy'));
+			}
+
+			const specificPlaceholderPattern =
+				this._escapedPlaceholderStart +
+				this._escapeRegExp(key) +
+				this._escapedPlaceholderEnd;
+			body.replaceText(specificPlaceholderPattern, String(replacementValue));
 		}
 	}
 
