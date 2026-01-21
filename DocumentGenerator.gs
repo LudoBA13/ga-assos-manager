@@ -3,33 +3,6 @@
  */
 class DocumentGenerator
 {
-	/** @type {GoogleAppsScript.Drive.File} */
-	_templateFile;
-
-	/** @type {GoogleAppsScript.Document.Document} */
-	_templateDocument;
-
-	/** @type {GoogleAppsScript.Document.Document} */
-	_outputDocument;
-
-	/** @type {string} */
-	_placeholderStart;
-
-	/** @type {string} */
-	_placeholderEnd;
-
-	/** @type {RegExp} */
-	_placeholderRegex;
-
-	/** @type {string} */
-	_escapedPlaceholderStart;
-
-	/** @type {string} */
-	_escapedPlaceholderEnd;
-
-	/** @type {Set<string>} */
-	_placeholders;
-
 	/**
 	 * @param {string} docUrlOrId The URL or ID of the Google Document.
 	 * @param {string=} placeholderStart Optional. The starting delimiter for placeholders. Defaults to '<<'.
@@ -58,6 +31,9 @@ class DocumentGenerator
 		this._placeholderRegex = new RegExp(this._escapedPlaceholderStart + '(.*?)' + this._escapedPlaceholderEnd, 'g');
 
 		this._placeholders = this._getPlaceholders();
+		
+		/** @type {GoogleAppsScript.Document.Document} */
+		this._outputDocument = null;
 	}
 
 	/**
