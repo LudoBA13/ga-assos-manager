@@ -34,6 +34,37 @@ class Importer
 			throw new Error('No data passed to updateACStructuresData.');
 		}
 
+		// 1. Locate headers and extend them
+		const headers = data[0];
+		const infoIdx = headers.indexOf('Informations complémentaires');
+
+		headers.push('planning', 'ud');
+
+		// 2. Process rows to extract extra data
+		const udRegex = /\$ud:(\d+)\$/;
+		const planningRegex = /\$planning:(\w+)\$/;
+
+		for (let i = 1; i < data.length; i++)
+		{
+			const row = data[i];
+			let planning = '';
+			let ud = '';
+
+			if (infoIdx !== -1)
+			{
+				const infoRaw = row[infoIdx] ? String(row[infoIdx]) : '';
+				const info = InfoPreprocessor.process(infoRaw);
+
+				const udMatch = info.match(udRegex);
+				const planningMatch = info.match(planningRegex);
+
+				if (udMatch) ud = udMatch[1];
+				if (planningMatch) planning = planningMatch[1];
+			}
+
+			row.push(planning, ud);
+		}
+
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
 		const sheet = ss.getSheetByName('ACStructures');
 		if (!sheet)
@@ -47,16 +78,6 @@ class Importer
 		// Write new data
 		sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
 
-		// Process and update ACStructuresExtra sheet
-		try
-		{
-			this.updateExtraData(data);
-		}
-		catch (e)
-		{
-			console.warn('Failed to update ACStructuresExtra sheet: ' + e.message);
-		}
-
 		// Process and update FuzzyDB
 		try
 		{
@@ -65,54 +86,6 @@ class Importer
 		catch (e)
 		{
 			console.warn('Failed to update FuzzyDB: ' + e.message);
-		}
-	}
-
-	static updateExtraData(acStructuresData)
-	{
-		// 1. Locate headers
-		const headers = acStructuresData[0];
-		const idIdx = headers.indexOf('ID du Contact');
-		const infoIdx = headers.indexOf('Informations complémentaires');
-
-		if (idIdx === -1 || infoIdx === -1)
-		{
-			console.warn('Cannot update ACStructuresExtra sheet: Missing required columns in source data.');
-			return;
-		}
-
-		// 2. Extract data
-		const extraData = [['ID du Contact', 'planning', 'ud']];
-		const udRegex = /\$ud:(\d+)\$/;
-		const planningRegex = /\$planning:(\w+)\$/;
-
-		for (let i = 1; i < acStructuresData.length; i++)
-		{
-			const row = acStructuresData[i];
-			const id = row[idIdx];
-			const infoRaw = row[infoIdx] ? String(row[infoIdx]) : '';
-			const info = InfoPreprocessor.process(infoRaw);
-
-			const udMatch = info.match(udRegex);
-			const planningMatch = info.match(planningRegex);
-
-			const ud = udMatch ? udMatch[1] : '';
-			const planning = planningMatch ? planningMatch[1] : '';
-
-			extraData.push([id, planning, ud]);
-		}
-
-		// 3. Update sheet
-		const ss = SpreadsheetApp.getActiveSpreadsheet();
-		const sheet = ss.getSheetByName('ACStructuresExtra');
-		if (sheet)
-		{
-			sheet.clearContents();
-			sheet.getRange(1, 1, extraData.length, extraData[0].length).setValues(extraData);
-		}
-		else
-		{
-			console.warn('ACStructuresExtra sheet not found.');
 		}
 	}
 
