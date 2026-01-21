@@ -34,6 +34,9 @@ class DocumentGenerator
 		
 		/** @type {GoogleAppsScript.Document.Document} */
 		this._outputDocument = null;
+
+		/** @type {string} */
+		this._timeZone = Session.getScriptTimeZone();
 	}
 
 	/**
@@ -75,7 +78,7 @@ class DocumentGenerator
 
 	/**
 	 * Replaces all occurrences of placeholder keys with given values in the managed document.
-	 * @param {Map<string, string>} vars A map of key-value pairs for placeholder replacement.
+	 * @param {Map<string, any>} vars A map of key-value pairs for placeholder replacement.
 	 */
 	_replacePlaceholders(vars)
 	{
@@ -89,11 +92,18 @@ class DocumentGenerator
 		{
 			if (this._placeholders.has(key))
 			{
+				let replacementValue = value;
+
+				if (value instanceof Date)
+				{
+					replacementValue = Utilities.formatDate(value, this._timeZone, _('dd/MM/yyyy'));
+				}
+
 				const specificPlaceholderPattern =
 					this._escapedPlaceholderStart +
 					this._escapeRegExp(key) +
 					this._escapedPlaceholderEnd;
-				body.replaceText(specificPlaceholderPattern, value);
+				body.replaceText(specificPlaceholderPattern, String(replacementValue));
 			}
 		}
 	}

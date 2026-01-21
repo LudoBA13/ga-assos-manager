@@ -57,7 +57,7 @@ class DocumentManager
 			const vars = new Map();
 			headers.forEach((header, index) =>
 			{
-				vars.set(header, String(row[index]));
+				vars.set(header, row[index]);
 			});
 
 			const documentName = `FIP ${codeVif} ${nom}`;
