@@ -54,10 +54,16 @@ class DocumentManager
 				continue;
 			}
 
-			const vars = new Map();
+			const vars = new Map;
+			const timeZone = Session.getScriptTimeZone();
 			headers.forEach((header, index) =>
 			{
-				vars.set(header, row[index]);
+				let value = row[index];
+				if (value instanceof Date || (typeof value === 'object' && Object.prototype.toString.call(value) === '[object Date]'))
+				{
+					value = Utilities.formatDate(value, timeZone, _('dd/MM/yyyy'));
+				}
+				vars.set(header, value);
 			});
 
 			const documentName = `FIP ${codeVif} ${nom}`;

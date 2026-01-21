@@ -34,9 +34,6 @@ class DocumentGenerator
 		
 		/** @type {GoogleAppsScript.Document.Document} */
 		this._outputDocument = null;
-
-		/** @type {string} */
-		this._timeZone = Session.getScriptTimeZone();
 	}
 
 	/**
@@ -95,18 +92,11 @@ class DocumentGenerator
 				continue;
 			}
 
-			let replacementValue = value;
-
-			if (value instanceof Date || (typeof value === 'object' && Object.prototype.toString.call(value) === '[object Date]'))
-			{
-				replacementValue = Utilities.formatDate(value, this._timeZone, _('dd/MM/yyyy'));
-			}
-
 			const specificPlaceholderPattern =
 				this._escapedPlaceholderStart +
 				this._escapeRegExp(key) +
 				this._escapedPlaceholderEnd;
-			body.replaceText(specificPlaceholderPattern, String(replacementValue));
+			body.replaceText(specificPlaceholderPattern, String(value));
 		}
 	}
 
