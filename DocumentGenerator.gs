@@ -112,32 +112,33 @@ class DocumentGenerator
 	/**
 	 * Generates a new document from the template, replacing placeholders with the provided variables.
 	 * @param {Iterable<[string, string]>} vars An iterable of key-value pairs for placeholder replacement.
-	 * @param {string=} documentName Optional. The name for the new document. If not provided, a default name will be used.
-	 * @param {string=} destinationFolderId Optional. The ID of the destination folder. If provided, the new document will be moved to this folder.
+	 * @param {string} documentName The name for the new document.
+	 * @param {string} destinationFolderId The ID of the destination folder.
 	 * @return {GoogleAppsScript.Document.Document} The newly generated document.
 	 */
 	generateDocument(vars, documentName, destinationFolderId)
 	{
-		// 1. Create a copy
-		const finalName = documentName || `Copy of ${this._templateFile.getName()} - ${(new Date).toLocaleString()}`;
-		let newFile;
+		if (!documentName || !destinationFolderId)
+		{
+			throw new Error("documentName and destinationFolderId are required.");
+		}
 
-		if (destinationFolderId)
+		const destinationFolder = DriveApp.getFolderById(destinationFolderId);
+		const existingFiles = destinationFolder.getFilesByName(documentName);
+
+		while (existingFiles.hasNext())
 		{
-			const destinationFolder = DriveApp.getFolderById(destinationFolderId);
-			newFile = this._templateFile.makeCopy(finalName, destinationFolder);
+			existingFiles.next().setTrashed(true);
 		}
-		else
-		{
-			newFile = this._templateFile.makeCopy(finalName);
-		}
+
+		const newFile = this._templateFile.makeCopy(documentName, destinationFolder);
 
 		this._outputDocument = DocumentApp.openById(newFile.getId());
 		this._replacePlaceholders(vars);
 		this._outputDocument.getBody().replaceText(this._placeholderRegex.source, '');
 		this._saveAndCloseDocument();
 
-		// 4. Return the new document, reopened to ensure it's fresh.
+		// Return the new document, reopened to ensure it's fresh.
 		return DocumentApp.openById(newFile.getId());
 	}
 
