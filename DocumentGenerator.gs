@@ -4,31 +4,31 @@
 class DocumentGenerator
 {
 	/** @type {GoogleAppsScript.Drive.File} */
-	#templateFile;
+	_templateFile;
 
 	/** @type {GoogleAppsScript.Document.Document} */
-	#templateDocument;
+	_templateDocument;
 
 	/** @type {GoogleAppsScript.Document.Document} */
-	#outputDocument;
+	_outputDocument;
 
 	/** @type {string} */
-	#placeholderStart;
+	_placeholderStart;
 
 	/** @type {string} */
-	#placeholderEnd;
+	_placeholderEnd;
 
 	/** @type {RegExp} */
-	#placeholderRegex;
+	_placeholderRegex;
 
 	/** @type {string} */
-	#escapedPlaceholderStart;
+	_escapedPlaceholderStart;
 
 	/** @type {string} */
-	#escapedPlaceholderEnd;
+	_escapedPlaceholderEnd;
 
 	/** @type {Set<string>} */
-	#placeholders;
+	_placeholders;
 
 	/**
 	 * @param {string} docUrlOrId The URL or ID of the Google Document.
@@ -40,24 +40,24 @@ class DocumentGenerator
 		if (docUrlOrId.startsWith('https://'))
 		{
 			const doc = DocumentApp.openByUrl(docUrlOrId);
-			this.#templateFile = DriveApp.getFileById(doc.getId());
+			this._templateFile = DriveApp.getFileById(doc.getId());
 		}
 		else
 		{
-			this.#templateFile = DriveApp.getFileById(docUrlOrId);
+			this._templateFile = DriveApp.getFileById(docUrlOrId);
 		}
 
-		this.#templateDocument = DocumentApp.openById(this.#templateFile.getId());
+		this._templateDocument = DocumentApp.openById(this._templateFile.getId());
 
-		this.#placeholderStart = placeholderStart;
-		this.#placeholderEnd = placeholderEnd;
+		this._placeholderStart = placeholderStart;
+		this._placeholderEnd = placeholderEnd;
 
-		this.#escapedPlaceholderStart = this.#escapeRegExp(placeholderStart);
-		this.#escapedPlaceholderEnd = this.#escapeRegExp(placeholderEnd);
+		this._escapedPlaceholderStart = this._escapeRegExp(placeholderStart);
+		this._escapedPlaceholderEnd = this._escapeRegExp(placeholderEnd);
 
-		this.#placeholderRegex = new RegExp(this.#escapedPlaceholderStart + '(.*?)' + this.#escapedPlaceholderEnd, 'g');
+		this._placeholderRegex = new RegExp(this._escapedPlaceholderStart + '(.*?)' + this._escapedPlaceholderEnd, 'g');
 
-		this.#placeholders = this.#getPlaceholders();
+		this._placeholders = this._getPlaceholders();
 	}
 
 	/**
@@ -65,9 +65,9 @@ class DocumentGenerator
 	 * @param {string} str The string to escape.
 	 * @return {string} The escaped string.
 	 */
-	#escapeRegExp(str)
+	_escapeRegExp(str)
 	{
-		return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+		return str.replace(/[.*+?^${}()|[\\]/g, '\\$&'); // $& means the whole matched string
 	}
 
 	/**
@@ -76,7 +76,7 @@ class DocumentGenerator
 	 */
 	getTemplateFile()
 	{
-		return this.#templateFile;
+		return this._templateFile;
 	}
 
 	/**
@@ -85,7 +85,7 @@ class DocumentGenerator
 	 */
 	getTemplateFileId()
 	{
-		return this.#templateFile.getId();
+		return this._templateFile.getId();
 	}
 
 	/**
@@ -94,29 +94,29 @@ class DocumentGenerator
 	 */
 	getAllPlaceholders()
 	{
-		return this.#placeholders;
+		return this._placeholders;
 	}
 
 	/**
 	 * Replaces all occurrences of placeholder keys with given values in the managed document.
 	 * @param {Map<string, string>} vars A map of key-value pairs for placeholder replacement.
 	 */
-	#replacePlaceholders(vars)
+	_replacePlaceholders(vars)
 	{
-		if (!this.#outputDocument)
+		if (!this._outputDocument)
 		{
 			throw new Error("Output document not initialized. Call generateDocument() first.");
 		}
 
-		const body = this.#outputDocument.getBody();
+		const body = this._outputDocument.getBody();
 		for (const [key, value] of vars)
 		{
-			if (this.#placeholders.has(key))
+			if (this._placeholders.has(key))
 			{
 				const specificPlaceholderPattern =
-					this.#escapedPlaceholderStart +
-					this.#escapeRegExp(key) +
-					this.#escapedPlaceholderEnd;
+					this._escapedPlaceholderStart +
+					this._escapeRegExp(key) +
+					this._escapedPlaceholderEnd;
 				body.replaceText(specificPlaceholderPattern, value);
 			}
 		}
@@ -126,10 +126,10 @@ class DocumentGenerator
 	 * Collects all unique placeholder keys from the document.
 	 * @return {Set<string>} A set of unique placeholder keys.
 	 */
-	#getPlaceholders()
+	_getPlaceholders()
 	{
-		const text = this.#templateDocument.getBody().getText();
-		const matches = text.matchAll(this.#placeholderRegex);
+		const text = this._templateDocument.getBody().getText();
+		const matches = text.matchAll(this._placeholderRegex);
 		return new Set(Array.from(matches, match => match[1]));
 	}
 
@@ -143,23 +143,23 @@ class DocumentGenerator
 	generateDocument(vars, documentName, destinationFolderId)
 	{
 		// 1. Create a copy
-		const finalName = documentName || `Copy of ${this.#templateFile.getName()} - ${(new Date).toLocaleString()}`;
+		const finalName = documentName || `Copy of ${this._templateFile.getName()} - ${(new Date).toLocaleString()}`;
 		let newFile;
 
 		if (destinationFolderId)
 		{
 			const destinationFolder = DriveApp.getFolderById(destinationFolderId);
-			newFile = this.#templateFile.makeCopy(finalName, destinationFolder);
+			newFile = this._templateFile.makeCopy(finalName, destinationFolder);
 		}
 		else
 		{
-			newFile = this.#templateFile.makeCopy(finalName);
+			newFile = this._templateFile.makeCopy(finalName);
 		}
 
-		this.#outputDocument = DocumentApp.openById(newFile.getId());
-		this.#replacePlaceholders(vars);
-		this.#outputDocument.getBody().replaceText(this.#placeholderRegex.source, '');
-		this.#saveAndCloseDocument();
+		this._outputDocument = DocumentApp.openById(newFile.getId());
+		this._replacePlaceholders(vars);
+		this._outputDocument.getBody().replaceText(this._placeholderRegex.source, '');
+		this._saveAndCloseDocument();
 
 		// 4. Return the new document, reopened to ensure it's fresh.
 		return DocumentApp.openById(newFile.getId());
@@ -168,11 +168,11 @@ class DocumentGenerator
 	/**
 	 * Saves and closes the currently managed document.
 	 */
-	#saveAndCloseDocument()
+	_saveAndCloseDocument()
 	{
-		if (this.#outputDocument)
+		if (this._outputDocument)
 		{
-			this.#outputDocument.saveAndClose();
+			this._outputDocument.saveAndClose();
 		}
 	}
 

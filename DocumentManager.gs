@@ -47,7 +47,7 @@ class DocumentManager
 				continue;
 			}
 
-			const folderId = this.#extractFolderId(folderLink);
+			const folderId = this._extractFolderId(folderLink);
 			if (!folderId)
 			{
 				console.warn(`Skipping row ${i + 1}: Invalid folder link '${folderLink}'.`);
@@ -78,10 +78,10 @@ class DocumentManager
 	 * @param {string} url The Google Drive URL or ID.
 	 * @return {string|null} The extracted Folder ID or null if invalid.
 	 */
-	static #extractFolderId(url)
+	static _extractFolderId(url)
 	{
 		if (!url) return null;
-		
+
 		// If it's already a clean ID (alphanumeric, no slashes)
 		if (/^[a-zA-Z0-9_-]+$/.test(url))
 		{
