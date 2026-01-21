@@ -9,6 +9,9 @@ class DocumentGenerator
 	/** @type {GoogleAppsScript.Document.Document} */
 	#templateDocument;
 
+	/** @type {GoogleAppsScript.Document.Document} */
+	#outputDocument;
+
 	/** @type {string} */
 	#placeholderStart;
 
@@ -100,7 +103,12 @@ class DocumentGenerator
 	 */
 	replacePlaceholders(vars)
 	{
-		const body = this.#templateDocument.getBody();
+		if (!this.#outputDocument)
+		{
+			throw new Error("Output document not initialized. Call generateDocument() first.");
+		}
+
+		const body = this.#outputDocument.getBody();
 		for (const [key, value] of vars)
 		{
 			if (this.#placeholders.has(key))
@@ -148,10 +156,10 @@ class DocumentGenerator
 			newFile = this.#templateFile.makeCopy(finalName);
 		}
 
-		const outputDocGenerator = new DocumentGenerator(newFile.getId(), this.#placeholderStart, this.#placeholderEnd);
-		outputDocGenerator.replacePlaceholders(vars);
-		outputDocGenerator.#templateDocument.getBody().replaceText(outputDocGenerator.#placeholderRegex.source, '');
-		outputDocGenerator.saveAndCloseDocument();
+		this.#outputDocument = DocumentApp.openById(newFile.getId());
+		this.replacePlaceholders(vars);
+		this.#outputDocument.getBody().replaceText(this.#placeholderRegex.source, '');
+		this.saveAndCloseDocument();
 
 		// 4. Return the new document, reopened to ensure it's fresh.
 		return DocumentApp.openById(newFile.getId());
@@ -162,7 +170,10 @@ class DocumentGenerator
 	 */
 	saveAndCloseDocument()
 	{
-		this.#templateDocument.saveAndClose();
+		if (this.#outputDocument)
+		{
+			this.#outputDocument.saveAndClose();
+		}
 	}
 
 	/**
