@@ -34,6 +34,19 @@ class DocumentGenerator
 		
 		/** @type {GoogleAppsScript.Document.Document} */
 		this._outputDocument = null;
+
+		try
+		{
+			const fileInfo = Drive.Files.get(this._templateFile.getId(), { fields: 'headRevisionId', supportsAllDrives: true });
+			this._templateHeadRevisionId = fileInfo.headRevisionId;
+		}
+		catch (e)
+		{
+			console.warn('Could not fetch template revision ID:', e);
+			this._templateHeadRevisionId = 'unknown-' + Math.floor(Math.random() * 1000000);
+		}
+
+		this._templateId = `${this._templateFile.getId()}:${this._templateHeadRevisionId}`;
 	}
 
 	/**
@@ -125,15 +138,83 @@ class DocumentGenerator
 			throw new Error("documentName and destinationFolderId are required.");
 		}
 
+		// Remove entries with strictly empty string values
+		const filteredVars = new Map;
+		for (const [key, value] of vars)
+		{
+			if (value !== '')
+			{
+				filteredVars.set(key, value);
+			}
+		}
+		vars = filteredVars;
+
 		const destinationFolder = DriveApp.getFolderById(destinationFolderId);
 		const existingFiles = destinationFolder.getFilesByName(documentName);
 
+		// Prepare metadata for comparison
+		const usedVars = {};
+		for (const [key, value] of vars)
+		{
+			if (this._placeholders.has(key))
+			{
+				usedVars[key] = value;
+			}
+		}
+		const currentVarsJson = JSON.stringify(usedVars);
+
+		let fileToReturn = null;
+
 		while (existingFiles.hasNext())
 		{
-			existingFiles.next().setTrashed(true);
+			const file = existingFiles.next();
+
+			// Check if we can reuse this file
+			if (!fileToReturn)
+			{
+				try
+				{
+					const fileInfo = Drive.Files.get(file.getId(), { fields: 'description', supportsAllDrives: true });
+					if (fileInfo.description && fileInfo.description.startsWith('GA_METADATA:'))
+					{
+						const metadata = JSON.parse(fileInfo.description.substring(12));
+						if (metadata.templateId === this._templateId && JSON.stringify(metadata.vars) === currentVarsJson)
+						{
+							console.log(`Skipping generation for "${documentName}": cache match found.`);
+							fileToReturn = file;
+							continue; // Keep this file, don't trash it
+						}
+					}
+				}
+				catch (e)
+				{
+					console.warn('Failed to read file metadata for caching check:', e);
+				}
+			}
+
+			file.setTrashed(true);
+		}
+
+		if (fileToReturn)
+		{
+			return DocumentApp.openById(fileToReturn.getId());
 		}
 
 		const newFile = this._templateFile.makeCopy(documentName, destinationFolder);
+
+		const metadata = {
+			templateId: this._templateId,
+			vars: usedVars
+		};
+
+		try
+		{
+			Drive.Files.update({ description: 'GA_METADATA:' + JSON.stringify(metadata) }, newFile.getId(), null, { supportsAllDrives: true });
+		}
+		catch (e)
+		{
+			console.warn('Failed to set file metadata in description:', e);
+		}
 
 		this._outputDocument = DocumentApp.openById(newFile.getId());
 		this._replacePlaceholders(vars);

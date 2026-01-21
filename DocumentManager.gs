@@ -1,3 +1,8 @@
+function generateFIPDocuments()
+{
+	DocumentManager.generateAllDocuments();
+}
+
 /**
  * Manages the batch generation of documents based on ACStructures data.
  */
@@ -86,7 +91,10 @@ class DocumentManager
 	 */
 	static _extractFolderId(url)
 	{
-		if (!url) return null;
+		if (typeof url !== 'string' || !url)
+		{
+			return null;
+		}
 
 		// If it's already a clean ID (alphanumeric, no slashes)
 		if (/^[a-zA-Z0-9_-]+$/.test(url))
