@@ -9,7 +9,7 @@ class DocumentManager
 	 */
 	static generateAllDocuments()
 	{
-		const templateId = getConfig('FIP Template ID');
+		const templateId = getConfig('fipTemplateDocUrl');
 		const generator = new DocumentGenerator(templateId);
 
 		const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('ACStructures');
