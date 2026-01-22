@@ -551,7 +551,7 @@ const formatPlanningForDisplay = (text) =>
 		return {
 			full: line,
 			left: left,
-			rimmedRight: right.trim()
+			trimmedRight: right.trim()
 		};
 	});
 
