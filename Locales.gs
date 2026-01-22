@@ -7,7 +7,8 @@ const CATALOG = {
 		"SansDateHabilitation"    : "La date d'habilitation régionale est manquante",
 		"SansHabilitation"        : "Pas d'habilitation régionale, nationale, ou CCAS/CIAS",
 		"SiretManquant"           : "Numéro SIRET manquant",
-		"HabilitationIncohérente" : "Les données d'habilitation sont incohérentes"
+		"HabilitationIncohérente" : "Les données d'habilitation sont incohérentes",
+		"Générer les Fiches d'Informations Partenaires": "Générer les Fiches d'Informations Partenaires"
 	}
 };
 

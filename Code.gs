@@ -14,6 +14,7 @@ function onOpen()
 
 	ui.createMenu('Admin')
 		.addItem(_('Exporter les données interservices'), 'exportInterServicesData')
+		.addItem(_("Générer les Fiches d'Informations Partenaires"), 'generateFIPDocuments')
 		.addToUi();
 
 	ui.createMenu('CAR')

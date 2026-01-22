@@ -1,6 +1,6 @@
 function generateFIPDocuments()
 {
-	DocumentManager.generateAllDocuments();
+	DocumentManager.generateFIPDocuments();
 }
 
 /**
@@ -12,7 +12,7 @@ class DocumentManager
 	 * Generates FIP documents for all structures in the ACStructures sheet.
 	 * It uses a template defined in the Config sheet under 'FIP Template ID'.
 	 */
-	static generateAllDocuments()
+	static generateFIPDocuments()
 	{
 		const templateId = getConfig('fipTemplateDocUrl');
 		const generator = new DocumentGenerator(templateId);
