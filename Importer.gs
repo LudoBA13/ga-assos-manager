@@ -38,7 +38,7 @@ class Importer
 		const headers = data[0];
 		const infoIdx = headers.indexOf('Informations complémentaires');
 
-		headers.push('$planning', 'UD', 'Planning');
+		headers.push('$planning', 'UD', 'Planning', 'Passages Frais', 'Passages Sec', 'Passages Surgelé');
 
 		// 2. Process rows to extract extra data
 		const udRegex = /\$ud:(\d+)\$/;
@@ -63,7 +63,8 @@ class Importer
 			}
 
 			const formattedPlanning = formatPlanningForDisplay(decodePlanning(planning));
-			row.push(planning, ud, formattedPlanning);
+			const counts = countProductOccurrences(planning);
+			row.push(planning, ud, formattedPlanning, counts['Frais'], counts['Sec'], counts['Surgelé']);
 		}
 
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
