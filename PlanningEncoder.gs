@@ -551,7 +551,7 @@ const formatPlanningForDisplay = (text) =>
 		return {
 			full: line,
 			left: left,
-			trimmedRight: right.trim()
+			rimmedRight: right.trim()
 		};
 	});
 
@@ -603,4 +603,49 @@ const formatPlanningForDisplay = (text) =>
 	}
 
 	return result.join('\n');
+};
+
+/**
+ * Counts the occurrences of each product type in the schedule.
+ * Values 1, 2, 3, 4 for the week count as 1.
+ * Value 0 for the week counts as 4.
+ * 
+ * @param {string} schedule The encoded planning schedule.
+ * @returns {Object} An object with counts for 'Frais', 'Sec', and 'Surgelé'.
+ */
+const countProductOccurrences = (schedule) =>
+{
+	const counts = {
+		'Frais': 0,
+		'Sec': 0,
+		'Surgelé': 0
+	};
+
+	if (!schedule)
+	{
+		return counts;
+	}
+
+	const regex = /([0-4])\w{4}(Fr|Se|Su)/g;
+	let match;
+
+	while ((match = regex.exec(schedule)) !== null)
+	{
+		const week = match[1];
+		const productCode = match[2];
+		const count = (week === '0') ? 4 : 1;
+		const productMap = {
+			'Fr': 'Frais',
+			'Se': 'Sec',
+			'Su': 'Surgelé'
+		};
+		const productName = productMap[productCode];
+
+		if (productName)
+		{
+			counts[productName] += count;
+		}
+	}
+
+	return counts;
 };

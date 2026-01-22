@@ -40,7 +40,8 @@ function runPlanningEncoderTests()
 		test_parseHumanReadable,
 		test_decodePlannings,
 		test_formatPlanningForDisplay,
-		test_formatPlannings
+		test_formatPlannings,
+		test_countProductOccurrences
 	];
 
 	const results = {
@@ -99,6 +100,14 @@ function assertEqual(expected, actual, message)
 {
 	// For 2D arrays, compare stringified versions
 	if (Array.isArray(expected) && Array.isArray(actual) && Array.isArray(expected[0]) && Array.isArray(actual[0]))
+	{
+		if (JSON.stringify(expected) !== JSON.stringify(actual))
+		{
+			throw new Error(message + `\nExpected: "${JSON.stringify(expected)}"\nActual:   "${JSON.stringify(actual)}"`);
+		}
+	}
+	// For objects (including 1D arrays)
+	else if (typeof expected === 'object' && expected !== null && typeof actual === 'object' && actual !== null)
 	{
 		if (JSON.stringify(expected) !== JSON.stringify(actual))
 		{
@@ -379,4 +388,27 @@ function test_formatPlannings()
 	// Note: formatPlanningForDisplay only does ditto marks WITHIN a single cell's decoded text (sentences), 
 	// not across different cells of the range.
 	assertEqual(expected2, formatPlannings(range2), "Test 2: Multiple columns, no cross-cell ditto marks");
+}
+
+function test_countProductOccurrences()
+{
+	const schedule1 = "1LuMdFr";
+	const expected1 = { 'Frais': 1, 'Sec': 0, 'Surgelé': 0 };
+	assertEqual(expected1, countProductOccurrences(schedule1), "Test 1: Single Frais");
+
+	const schedule2 = "0LuMdFr";
+	const expected2 = { 'Frais': 4, 'Sec': 0, 'Surgelé': 0 };
+	assertEqual(expected2, countProductOccurrences(schedule2), "Test 2: Every week Frais (counts 4)");
+
+	const schedule3 = "1LuMdFr2MaApSe";
+	const expected3 = { 'Frais': 1, 'Sec': 1, 'Surgelé': 0 };
+	assertEqual(expected3, countProductOccurrences(schedule3), "Test 3: Mixed products");
+
+	const schedule4 = "0JeMdSe3MeMfSu";
+	const expected4 = { 'Frais': 0, 'Sec': 4, 'Surgelé': 1 };
+	assertEqual(expected4, countProductOccurrences(schedule4), "Test 4: Mixed with every week");
+
+	const schedule5 = "";
+	const expected5 = { 'Frais': 0, 'Sec': 0, 'Surgelé': 0 };
+	assertEqual(expected5, countProductOccurrences(schedule5), "Test 5: Empty schedule");
 }
