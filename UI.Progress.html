@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base target="_top">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
+		<style>
+			body { padding: 20px; }
+			progress { width: 100%; }
+			.error { color: #d32f2f; }
+		</style>
+	</head>
+	<body>
+		<main>
+			<h3 id="title"><?= _('Initialisation...') ?></h3>
+			<progress id="progress-bar" value="0" max="100"></progress>
+			<p id="status-message"><?= _('Préparation des données...') ?></p>
+			<button id="close-btn" onclick="google.script.host.close()" style="display:none;"><?= _('Fermer') ?></button>
+		</main>
+
+		<script>
+			window.onload = function()
+			{
+				startProcess();
+				pollStatus();
+			};
+
+			function startProcess()
+			{
+				google.script.run
+					.withSuccessHandler(onComplete)
+					.withFailureHandler(onError)
+					.startFIPGeneration();
+			}
+
+			function pollStatus()
+			{
+				const interval = setInterval(function()
+				{
+					google.script.run
+						.withSuccessHandler(function(statusJson)
+						{
+							if (!statusJson)
+							{
+								return;
+							}
+							
+							const status = JSON.parse(statusJson);
+							updateUI(status.progress, status.message);
+
+							if (status.progress >= 100)
+							{
+								clearInterval(interval);
+							}
+						})
+						.withFailureHandler(function(e)
+						{
+							console.error('Polling failed', e);
+						})
+						.getFIPGenerationStatus();
+				}, 1000); // Poll every 1 second
+			}
+
+			function updateUI(progress, message)
+			{
+				const progressBar = document.getElementById('progress-bar');
+				const statusMsg = document.getElementById('status-message');
+				const title = document.getElementById('title');
+
+				if (progressBar)
+				{
+					progressBar.value = progress;
+				}
+				if (statusMsg)
+				{
+					statusMsg.textContent = message;
+				}
+				if (title)
+				{
+					title.textContent = Math.floor(progress) + '%';
+				}
+			}
+
+			function onComplete()
+			{
+				updateUI(100, "<?= _('Génération terminée avec succès.') ?>");
+				document.getElementById('close-btn').style.display = 'block';
+				document.getElementById('progress-bar').removeAttribute('indeterminate');
+			}
+
+			function onError(e)
+			{
+				updateUI(100, "<?= _('Erreur critique : ') ?>" + e.message);
+				document.getElementById('status-message').className = 'error';
+			}
+		</script>
+	</body>
+</html>

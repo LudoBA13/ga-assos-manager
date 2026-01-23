@@ -35,11 +35,40 @@ function generateFIPDocuments()
 class DocumentManager
 {
 	/**
-	 * Generates FIP documents for all structures in the ACStructures sheet.
-	 * It uses a template defined in the Config sheet under 'FIP Template ID'.
+	 * Opens the modal dialog to start the batch generation of FIP documents.
 	 */
 	static generateFIPDocuments()
 	{
+		const html = HtmlService.createTemplateFromFile('UI.Progress')
+			.evaluate()
+			.setWidth(400)
+			.setHeight(250);
+		SpreadsheetApp.getUi().showModalDialog(html, _('Génération des fiches'));
+	}
+
+	/**
+	 * Gets the current batch process status from the cache.
+	 * @return {string} JSON string containing progress and message.
+	 */
+	static getBatchProgress()
+	{
+		return CacheService.getUserCache().get('FIP_PROGRESS');
+	}
+
+	/**
+	 * Generates FIP documents for all structures in the ACStructures sheet.
+	 * Updates progress in CacheService for the UI to poll.
+	 */
+	static processFIPBatch()
+	{
+		const cache = CacheService.getUserCache();
+		const updateProgress = (pct, msg) =>
+		{
+			cache.put('FIP_PROGRESS', JSON.stringify({ progress: pct, message: msg }), 21600);
+		};
+
+		updateProgress(0, _('Initialisation...'));
+
 		const templateId = getConfig('fipTemplateDocUrl');
 		const generator = new DocumentGenerator(templateId);
 
@@ -52,7 +81,8 @@ class DocumentManager
 		const data = sheet.getDataRange().getValues();
 		if (data.length < 2)
 		{
-			return; // No data to process
+			updateProgress(100, _('Aucune donnée à traiter.'));
+			return;
 		}
 
 		const headers = data[0];
@@ -66,7 +96,6 @@ class DocumentManager
 		}
 
 		const total = data.length - 1;
-		const ss = SpreadsheetApp.getActiveSpreadsheet();
 
 		for (let i = 1; i < data.length; i++)
 		{
@@ -77,8 +106,7 @@ class DocumentManager
 
 			// Update Progress
 			const progress = Math.round(((i - 1) / total) * 100);
-			const bar = '█'.repeat(Math.floor(progress / 5)) + '░'.repeat(20 - Math.floor(progress / 5));
-			ss.toast(`${bar} ${progress}%`, _('Génération de %s (%s/%s)', nom, i, total));
+			updateProgress(progress, _('Génération de %s (%s/%s)', nom, i, total));
 
 			if (!folderLink)
 			{
@@ -117,7 +145,7 @@ class DocumentManager
 			}
 		}
 
-		ss.toast(_('Toutes les fiches ont été générées.'), _('Génération terminée'), 5);
+		updateProgress(100, _('Terminé.'));
 	}
 
 	/**

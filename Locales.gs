@@ -37,7 +37,15 @@ const CATALOG = {
 		"Générer les Fiches d'Informations Partenaires": "Générer les Fiches d'Informations Partenaires",
 		"Génération de %s (%s/%s)": "Génération de %s (%s/%s)",
 		"Toutes les fiches ont été générées.": "Toutes les fiches ont été générées.",
-		"Génération terminée": "Génération terminée"
+		"Génération terminée": "Génération terminée",
+		"Initialisation...": "Initialisation...",
+		"Préparation des données...": "Préparation des données...",
+		"Génération des fiches": "Génération des fiches",
+		"Aucune donnée à traiter.": "Aucune donnée à traiter.",
+		"Terminé.": "Terminé.",
+		"Génération terminée avec succès.": "Génération terminée avec succès.",
+		"Erreur critique : ": "Erreur critique : ",
+		"Fermer": "Fermer"
 	}
 };
 

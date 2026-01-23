@@ -58,6 +58,16 @@ function updateACStructuresFromFile(fileData)
 	Importer.updateACStructuresFromFile(fileData);
 }
 
+function startFIPGeneration()
+{
+	DocumentManager.processFIPBatch();
+}
+
+function getFIPGenerationStatus()
+{
+	return DocumentManager.getBatchProgress();
+}
+
 function runTests()
 {
 	const encoderResults = runPlanningEncoderTests();
