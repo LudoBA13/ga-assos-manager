@@ -171,7 +171,10 @@ class DocumentGenerator
 
 		// Prepare metadata for comparison
 		const varsObject = Object.fromEntries(vars);
-		const currentVarsJson = JSON.stringify(varsObject);
+		const metadataHash = this._computeMetadataHash({
+			templateId: this._templateId,
+			vars: varsObject
+		});
 
 		let fileToReturn = null;
 
@@ -184,16 +187,12 @@ class DocumentGenerator
 			{
 				try
 				{
-					const fileInfo = Drive.Files.get(file.getId(), { fields: 'description', supportsAllDrives: true });
-					if (fileInfo.description && fileInfo.description.startsWith('GA_METADATA:'))
+					const fileInfo = Drive.Files.get(file.getId(), { fields: 'appProperties', supportsAllDrives: true });
+					if (fileInfo.appProperties && fileInfo.appProperties.ga_metadata_hash === metadataHash)
 					{
-						const metadata = JSON.parse(fileInfo.description.substring(12));
-						if (metadata.templateId === this._templateId && JSON.stringify(metadata.vars) === currentVarsJson)
-						{
-							console.log(`Skipping generation for "${documentName}": cache match found.`);
-							fileToReturn = file;
-							continue; // Keep this file, don't trash it
-						}
+						console.log(`Skipping generation for "${documentName}": cache match found.`);
+						fileToReturn = file;
+						continue; // Keep this file, don't trash it
 					}
 				}
 				catch (e)
@@ -212,18 +211,13 @@ class DocumentGenerator
 
 		const newFile = this._templateFile.makeCopy(documentName, destinationFolder);
 
-		const metadata = {
-			templateId: this._templateId,
-			vars: varsObject
-		};
-
 		try
 		{
-			Drive.Files.update({ description: 'GA_METADATA:' + JSON.stringify(metadata) }, newFile.getId(), null, { supportsAllDrives: true });
+			Drive.Files.update({ appProperties: { ga_metadata_hash: metadataHash } }, newFile.getId(), null, { supportsAllDrives: true });
 		}
 		catch (e)
 		{
-			console.warn('Failed to set file metadata in description:', e);
+			console.warn('Failed to set file metadata in appProperties:', e);
 		}
 
 		this._outputDocument = DocumentApp.openById(newFile.getId());
@@ -233,6 +227,19 @@ class DocumentGenerator
 
 		// Return the new document, reopened to ensure it's fresh.
 		return DocumentApp.openById(newFile.getId());
+	}
+
+	/**
+	 * Computes a SHA-256 hash of the metadata object.
+	 * @param {Object} metadata The metadata object.
+	 * @return {string} The computed hash.
+	 * @private
+	 */
+	_computeMetadataHash(metadata)
+	{
+		const json = JSON.stringify(metadata);
+		const rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, json);
+		return rawHash.map(b => ('0' + (b & 0xFF).toString(16)).slice(-2)).join('');
 	}
 
 	/**
