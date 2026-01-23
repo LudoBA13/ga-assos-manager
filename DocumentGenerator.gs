@@ -164,16 +164,7 @@ class DocumentGenerator
 			throw new Error('documentName and destinationFolderId are required.');
 		}
 
-		// Filter variables: keep only non-empty values that are present in the template
-		const filteredVars = new Map;
-		for (const [key, value] of vars)
-		{
-			if (value !== '' && this._placeholders.has(key))
-			{
-				filteredVars.set(key, value);
-			}
-		}
-		vars = filteredVars;
+		vars = this._filterVars(vars);
 
 		const destinationFolder = DriveApp.getFolderById(destinationFolderId);
 		const existingFiles = destinationFolder.getFilesByName(documentName);
@@ -242,6 +233,25 @@ class DocumentGenerator
 
 		// Return the new document, reopened to ensure it's fresh.
 		return DocumentApp.openById(newFile.getId());
+	}
+
+	/**
+	 * Filters variables: keeps only non-empty values that are present in the template.
+	 * @param {Iterable<[string, any]>} vars The variables to filter.
+	 * @return {Map<string, any>} The filtered variables.
+	 * @private
+	 */
+	_filterVars(vars)
+	{
+		const filteredVars = new Map();
+		for (const [key, value] of vars)
+		{
+			if (value !== '' && this._placeholders.has(key))
+			{
+				filteredVars.set(key, value);
+			}
+		}
+		return filteredVars;
 	}
 
 	/**
