@@ -164,11 +164,11 @@ class DocumentGenerator
 			throw new Error("documentName and destinationFolderId are required.");
 		}
 
-		// Remove entries with strictly empty string values
+		// Filter variables: keep only non-empty values that are present in the template
 		const filteredVars = new Map;
 		for (const [key, value] of vars)
 		{
-			if (value !== '')
+			if (value !== '' && this._placeholders.has(key))
 			{
 				filteredVars.set(key, value);
 			}
@@ -179,15 +179,8 @@ class DocumentGenerator
 		const existingFiles = destinationFolder.getFilesByName(documentName);
 
 		// Prepare metadata for comparison
-		const usedVars = {};
-		for (const [key, value] of vars)
-		{
-			if (this._placeholders.has(key))
-			{
-				usedVars[key] = value;
-			}
-		}
-		const currentVarsJson = JSON.stringify(usedVars);
+		const varsObject = Object.fromEntries(vars);
+		const currentVarsJson = JSON.stringify(varsObject);
 
 		let fileToReturn = null;
 
@@ -230,7 +223,7 @@ class DocumentGenerator
 
 		const metadata = {
 			templateId: this._templateId,
-			vars: usedVars
+			vars: varsObject
 		};
 
 		try
