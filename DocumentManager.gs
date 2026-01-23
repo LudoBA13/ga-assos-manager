@@ -105,7 +105,7 @@ class DocumentManager
 			const folderLink = row[folderLinkIdx];
 
 			// Update Progress
-			const progress = Math.round(((i - 1) / total) * 100);
+			const progress = (((i - 1) / total) * 100).toFixed(1);
 			updateProgress(progress, _('Génération de %s (%s/%s)', nom, i, total));
 
 			if (!folderLink)
