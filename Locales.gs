@@ -34,7 +34,10 @@ const CATALOG = {
 		"SansHabilitation"        : "Pas d'habilitation régionale, nationale, ou CCAS/CIAS",
 		"SiretManquant"           : "Numéro SIRET manquant",
 		"HabilitationIncohérente" : "Les données d'habilitation sont incohérentes",
-		"Générer les Fiches d'Informations Partenaires": "Générer les Fiches d'Informations Partenaires"
+		"Générer les Fiches d'Informations Partenaires": "Générer les Fiches d'Informations Partenaires",
+		"Génération de %s (%s/%s)": "Génération de %s (%s/%s)",
+		"Toutes les fiches ont été générées.": "Toutes les fiches ont été générées.",
+		"Génération terminée": "Génération terminée"
 	}
 };
 

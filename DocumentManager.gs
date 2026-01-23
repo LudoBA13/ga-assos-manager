@@ -65,12 +65,20 @@ class DocumentManager
 			throw new Error("Missing required columns: 'Code VIF', 'Nom', or 'Lien vers les documents stockés sur le Drive'.");
 		}
 
+		const total = data.length - 1;
+		const ss = SpreadsheetApp.getActiveSpreadsheet();
+
 		for (let i = 1; i < data.length; i++)
 		{
 			const row = data[i];
 			const codeVif = row[codeVifIdx];
 			const nom = row[nomIdx];
 			const folderLink = row[folderLinkIdx];
+
+			// Update Progress
+			const progress = Math.round(((i - 1) / total) * 100);
+			const bar = '█'.repeat(Math.floor(progress / 5)) + '░'.repeat(20 - Math.floor(progress / 5));
+			ss.toast(`${bar} ${progress}%`, _('Génération de %s (%s/%s)', nom, i, total));
 
 			if (!folderLink)
 			{
@@ -108,6 +116,8 @@ class DocumentManager
 				console.error(`Failed to generate document for '${nom}' (Row ${i + 1}): ${e.message}`);
 			}
 		}
+
+		ss.toast(_('Toutes les fiches ont été générées.'), _('Génération terminée'), 5);
 	}
 
 	/**
