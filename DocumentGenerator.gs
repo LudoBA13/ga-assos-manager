@@ -120,7 +120,7 @@ class DocumentGenerator
 	{
 		if (!this._outputDocument)
 		{
-			throw new Error("Output document not initialized. Call generateDocument() first.");
+			throw new Error('Output document not initialized. Call generateDocument() first.');
 		}
 
 		const body = this._outputDocument.getBody();
@@ -161,7 +161,7 @@ class DocumentGenerator
 	{
 		if (!documentName || !destinationFolderId)
 		{
-			throw new Error("documentName and destinationFolderId are required.");
+			throw new Error('documentName and destinationFolderId are required.');
 		}
 
 		// Filter variables: keep only non-empty values that are present in the template
