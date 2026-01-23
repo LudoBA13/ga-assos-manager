@@ -18,10 +18,15 @@
 		</main>
 
 		<script>
+			let targetProgress = 0;
+			let displayProgress = 0;
+			let animationFrameId;
+
 			window.onload = function()
 			{
 				startProcess();
 				pollStatus();
+				animateProgress();
 			};
 
 			function startProcess()
@@ -45,9 +50,10 @@
 							}
 							
 							const status = JSON.parse(statusJson);
-							updateUI(status.progress, status.message);
+							targetProgress = Number(status.progress);
+							updateMessage(status.message);
 
-							if (status.progress >= 100)
+							if (targetProgress >= 100)
 							{
 								clearInterval(interval);
 							}
@@ -60,37 +66,60 @@
 				}, 1000); // Poll every 1 second
 			}
 
-			function updateUI(progress, message)
+			function animateProgress()
+			{
+				// Smooth interpolation: move displayProgress 10% of the way to targetProgress per frame
+				if (Math.abs(displayProgress - targetProgress) > 0.01)
+				{
+					displayProgress += (targetProgress - displayProgress) * 0.1;
+				}
+				else
+				{
+					displayProgress = targetProgress;
+				}
+
+				updateVisuals(displayProgress);
+				animationFrameId = requestAnimationFrame(animateProgress);
+			}
+
+			function updateMessage(message)
+			{
+				const statusMsg = document.getElementById('status-message');
+				if (statusMsg)
+				{
+					statusMsg.textContent = message;
+				}
+			}
+
+			function updateVisuals(progress)
 			{
 				const progressBar = document.getElementById('progress-bar');
-				const statusMsg = document.getElementById('status-message');
 				const title = document.getElementById('title');
 
 				if (progressBar)
 				{
 					progressBar.value = progress;
 				}
-				if (statusMsg)
-				{
-					statusMsg.textContent = message;
-				}
 				if (title)
 				{
-					title.textContent = Number(progress).toFixed(1) + '%';
+					title.textContent = progress.toFixed(1) + '%';
 				}
 			}
 
 			function onComplete()
 			{
-				updateUI(100, "<?= _('Génération terminée avec succès.') ?>");
+				targetProgress = 100; // Ensure we finish filling
+				updateMessage("<?= _('Génération terminée avec succès.') ?>");
 				document.getElementById('close-btn').style.display = 'block';
-				document.getElementById('progress-bar').removeAttribute('indeterminate');
 			}
 
 			function onError(e)
 			{
-				updateUI(100, "<?= _('Erreur critique : ') ?>" + e.message);
+				targetProgress = 100;
+				updateMessage("<?= _('Erreur critique : ') ?>" + e.message);
 				document.getElementById('status-message').className = 'error';
+				cancelAnimationFrame(animationFrameId);
+				updateVisuals(100);
 			}
 		</script>
 	</body>
