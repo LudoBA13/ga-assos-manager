@@ -243,7 +243,7 @@ class DocumentGenerator
 	 */
 	_filterVars(vars)
 	{
-		const filteredVars = new Map();
+		const filteredVars = new Map;
 		for (const [key, value] of vars)
 		{
 			if (value !== '' && this._placeholders.has(key))
