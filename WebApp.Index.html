@@ -6,26 +6,173 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>GA Assos Manager</title>
 		<style>
+			:root {
+				--primary-color: #1a73e8;
+				--primary-hover: #1765cc;
+				--bg-color: #f5f5f5;
+				--text-secondary: #666;
+				--border-color: #ccc;
+				--shadow: 0 4px 6px rgba(0,0,0,0.1);
+			}
+
 			body {
-				font-family: Arial, sans-serif;
+				font-family: 'Google Sans', Roboto, Arial, sans-serif;
 				display: flex;
 				justify-content: center;
 				align-items: center;
-				height: 100vh;
+				min-height: 100vh;
 				margin: 0;
-				background-color: #f5f5f5;
+				background-color: var(--bg-color);
+				padding: 20px;
+				box-sizing: border-box;
 			}
+
 			.card {
 				background: white;
 				padding: 2rem;
 				border-radius: 8px;
-				box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+				box-shadow: var(--shadow);
 				text-align: center;
+				width: 100%;
+				max-width: 400px;
 			}
+
+			h1 {
+				margin-top: 0;
+				font-size: 1.5rem;
+			}
+
 			.count {
 				font-size: 3rem;
 				font-weight: bold;
-				color: #1a73e8;
+				color: var(--primary-color);
+				margin: 1rem 0;
+			}
+
+			.user-info {
+				margin-top: 20px;
+				color: var(--text-secondary);
+				font-size: 0.9rem;
+			}
+
+			.action-container {
+				margin-top: 30px;
+			}
+
+			.btn {
+				background-color: var(--primary-color);
+				color: white;
+				border: none;
+				padding: 12px 24px;
+				border-radius: 4px;
+				font-size: 1rem;
+				font-weight: 500;
+				cursor: pointer;
+				transition: background-color 0.2s;
+				width: 100%;
+			}
+
+			.btn:hover {
+				background-color: var(--primary-hover);
+			}
+
+			.btn:disabled {
+				background-color: var(--border-color);
+				cursor: not-allowed;
+			}
+
+			/* Modal Styles */
+			.modal-overlay {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0,0,0,0.5);
+				z-index: 1000;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.modal-content {
+				background: white;
+				width: 95%;
+				max-width: 500px;
+				padding: 24px;
+				border-radius: 8px;
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				box-sizing: border-box;
+			}
+
+			.modal-header {
+				margin-bottom: 20px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.modal-header h3 {
+				margin: 0;
+				font-size: 1.25rem;
+			}
+
+			.close-btn {
+				background: none;
+				border: none;
+				font-size: 1.5rem;
+				cursor: pointer;
+				padding: 5px;
+				line-height: 1;
+			}
+
+			.form-group {
+				margin-bottom: 20px;
+				text-align: left;
+			}
+
+			.form-group label {
+				display: block;
+				margin-bottom: 8px;
+				font-weight: 500;
+			}
+
+			.form-control {
+				width: 100%;
+				padding: 10px;
+				border: 1px solid var(--border-color);
+				border-radius: 4px;
+				box-sizing: border-box;
+				font-size: 1rem;
+			}
+
+			/* Mobile Adjustments */
+			@media (max-width: 480px) {
+				body {
+					align-items: flex-start;
+					padding-top: 40px;
+				}
+
+				.card {
+					padding: 1.5rem;
+				}
+
+				.count {
+					font-size: 2.5rem;
+				}
+
+				.modal-content {
+					width: 100%;
+					height: 100%;
+					border-radius: 0;
+					padding: 20px;
+				}
+
+				.modal-header h3 {
+					font-size: 1.1rem;
+				}
 			}
 		</style>
 	</head>
@@ -34,35 +181,35 @@
 			<h1>ACStructures</h1>
 			<p>Nombre de lignes :</p>
 			<div class="count"><?= rowCount ?></div>
-			<p style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+			<p class="user-info">
 				Connecté en tant que : <strong><?= userEmail ?></strong>
 			</p>
 			
-			<div style="margin-top: 30px;">
-				<button onclick="openReportModal()" style="background-color: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 1rem; cursor: pointer;">
+			<div class="action-container">
+				<button onclick="openReportModal()" class="btn">
 					Ouvrir le compte rendu
 				</button>
 			</div>
 		</div>
 
 		<!-- Modal Structure -->
-		<div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-			<div style="background: white; width: 90%; max-width: 500px; padding: 20px; border-radius: 8px; position: relative; display: flex; flex-direction: column; font-family: 'Google Sans', Roboto, Arial, sans-serif;">
+		<div id="reportModal" class="modal-overlay">
+			<div class="modal-content">
 				
-				<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-					<h3 style="margin: 0;">Créer un compte rendu de visite</h3>
-					<button onclick="closeReportModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+				<div class="modal-header">
+					<h3>Créer un compte rendu de visite</h3>
+					<button onclick="closeReportModal()" class="close-btn">&times;</button>
 				</div>
 
-				<div class="form-group" style="margin-bottom: 15px;">
-					<label for="structure-select" style="display: block; margin-bottom: 5px; font-weight: 500;">Structure</label>
-					<select id="structure-select" disabled style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+				<div class="form-group">
+					<label for="structure-select">Structure</label>
+					<select id="structure-select" class="form-control" disabled>
 						<option>Chargement...</option>
 					</select>
 				</div>
 
-				<div class="button-container" style="margin-top: 20px;">
-					<button id="create-btn" onclick="createReport()" disabled style="background-color: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 500; cursor: pointer; width: 100%;">Créer un compte rendu de visite</button>
+				<div class="action-container">
+					<button id="create-btn" onclick="createReport()" class="btn" disabled>Créer un compte rendu de visite</button>
 				</div>
 
 			</div>
