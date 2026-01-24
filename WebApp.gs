@@ -16,6 +16,7 @@ function doGet(e)
 		return HtmlService.createTemplateFromFile('UI.Report')
 			.evaluate()
 			.setTitle('GA Assos Manager - Compte rendu')
+			.addMetaTag('viewport', 'width=device-width, initial-scale=1')
 			.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 	}
 
@@ -28,6 +29,7 @@ function doGet(e)
 	
 	return template.evaluate()
 		.setTitle('GA Assos Manager - Web App')
+		.addMetaTag('viewport', 'width=device-width, initial-scale=1')
 		.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
