@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<base target="_top">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>GA Assos Manager</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				margin: 0;
+				background-color: #f5f5f5;
+			}
+			.card {
+				background: white;
+				padding: 2rem;
+				border-radius: 8px;
+				box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+				text-align: center;
+			}
+			.count {
+				font-size: 3rem;
+				font-weight: bold;
+				color: #1a73e8;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<h1>ACStructures</h1>
+			<p>Nombre de lignes :</p>
+			<div class="count"><?= rowCount ?></div>
+			<p style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+				Connecté en tant que : <strong><?= userEmail ?></strong>
+			</p>
+			
+			<div style="margin-top: 30px;">
+				<button onclick="openReportModal()" style="background-color: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 1rem; cursor: pointer;">
+					Ouvrir le compte rendu
+				</button>
+			</div>
+		</div>
+
+		<!-- Modal Structure -->
+		<div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+			<div style="background: white; width: 90%; max-width: 500px; padding: 20px; border-radius: 8px; position: relative; display: flex; flex-direction: column; font-family: 'Google Sans', Roboto, Arial, sans-serif;">
+				
+				<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+					<h3 style="margin: 0;">Créer un compte rendu de visite</h3>
+					<button onclick="closeReportModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+				</div>
+
+				<div class="form-group" style="margin-bottom: 15px;">
+					<label for="structure-select" style="display: block; margin-bottom: 5px; font-weight: 500;">Structure</label>
+					<select id="structure-select" disabled style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+						<option>Chargement...</option>
+					</select>
+				</div>
+
+				<div class="button-container" style="margin-top: 20px;">
+					<button id="create-btn" onclick="createReport()" disabled style="background-color: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 500; cursor: pointer; width: 100%;">Créer un compte rendu de visite</button>
+				</div>
+
+			</div>
+		</div>
+
+		<script>
+			window.onload = function() {
+				loadStructureList();
+			};
+
+			function openReportModal() {
+				document.getElementById('reportModal').style.display = 'flex';
+			}
+
+			function closeReportModal() {
+				document.getElementById('reportModal').style.display = 'none';
+			}
+
+			// Close modal if clicking outside
+			window.onclick = function(event) {
+				const modal = document.getElementById('reportModal');
+				if (event.target == modal) {
+					closeReportModal();
+				}
+			}
+
+			function loadStructureList() {
+				const select = document.getElementById('structure-select');
+				// Only load if not already loaded (or reload every time if preferred)
+				if (select.options.length > 1 && select.options[1].value !== "") return;
+				
+				select.innerHTML = '<option>Chargement...</option>';
+				select.disabled = true;
+				document.getElementById('create-btn').disabled = true;
+
+				google.script.run
+					.withSuccessHandler(populateSelect)
+					.withFailureHandler(showError)
+					.getStructureList();
+			}
+
+			function populateSelect(structures) {
+				const select = document.getElementById('structure-select');
+				const btn = document.getElementById('create-btn');
+				select.innerHTML = ''; // Clear "Loading..."
+
+				if (!structures || structures.length === 0) {
+					const option = document.createElement('option');
+					option.text = "Aucune structure trouvée";
+					select.add(option);
+					return;
+				}
+
+				// Add a default empty option
+				const defaultOption = document.createElement('option');
+				defaultOption.text = "Sélectionnez une structure...";
+				defaultOption.value = "";
+				select.add(defaultOption);
+
+				structures.forEach(function(item) {
+					const option = document.createElement('option');
+					option.value = item[0]; // Code VIF
+					option.text = item[1];  // Nom
+					select.add(option);
+				});
+
+				select.disabled = false;
+				btn.disabled = false;
+			}
+
+			function createReport() {
+				const select = document.getElementById('structure-select');
+				const btn = document.getElementById('create-btn');
+				const id = select.value;
+				
+				if (!id) {
+					alert("Veuillez sélectionner une structure.");
+					return;
+				}
+
+				// Loading state
+				const originalText = btn.innerText;
+				btn.disabled = true;
+				btn.innerText = "Chargement...";
+
+				google.script.run
+					.withSuccessHandler(function(url) {
+						window.open(url, '_blank');
+						btn.disabled = false;
+						btn.innerText = originalText;
+						closeReportModal();
+					})
+					.withFailureHandler(function(err) {
+						alert("Erreur lors de la récupération de l'URL : " + err.message);
+						btn.disabled = false;
+						btn.innerText = originalText;
+					})
+					.getVisitReportFormUrl(id);
+			}
+
+			function showError(error) {
+				const select = document.getElementById('structure-select');
+				select.innerHTML = '';
+				const option = document.createElement('option');
+				option.text = "Erreur : " + error.message;
+				select.add(option);
+			}
+		</script>
+	</body>
+</html>
