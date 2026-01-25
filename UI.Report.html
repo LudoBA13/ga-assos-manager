@@ -63,41 +63,47 @@
 	<script>
 		let structures = {};
 
-		window.onload = function() {
+		window.onload = function()
+		{
 			google.script.run
 				.withSuccessHandler(populateSelect)
 				.withFailureHandler(showError)
 				.getStructureList();
 
 			google.script.run
-				.withSuccessHandler(function(data) {
+				.withSuccessHandler(function(data)
+				{
 					structures = data;
 				})
-				.withFailureHandler(function(err) {
-					console.error("Erreur lors du chargement des structures : " + err.message);
+				.withFailureHandler(function(err)
+				{
+					console.error('Erreur lors du chargement des structures : ' + err.message);
 				})
 				.getACStructures();
 		};
 
-		function populateSelect(structureList) {
+		function populateSelect(structureList)
+		{
 			const select = document.getElementById('structure-select');
 			const btn = document.getElementById('create-btn');
 			select.innerHTML = ''; // Clear "Loading..."
 
-			if (!structureList || structureList.length === 0) {
+			if (!structureList || structureList.length === 0)
+			{
 				const option = document.createElement('option');
-				option.text = "Aucune structure trouvée";
+				option.text = 'Aucune structure trouvée';
 				select.add(option);
 				return;
 			}
 
 			// Add a default empty option
 			const defaultOption = document.createElement('option');
-			defaultOption.text = "Sélectionnez une structure...";
-			defaultOption.value = "";
+			defaultOption.text = 'Sélectionnez une structure...';
+			defaultOption.value = '';
 			select.add(defaultOption);
 
-			structureList.forEach(function(item) {
+			structureList.forEach(function(item)
+			{
 				const option = document.createElement('option');
 				option.value = item[0]; // URL
 				option.text = item[1];  // Nom
@@ -108,30 +114,33 @@
 			btn.disabled = false;
 		}
 
-		function createReport() {
+		function createReport()
+		{
 			const select = document.getElementById('structure-select');
 			const btn = document.getElementById('create-btn');
 			const url = select.value;
 			
-			if (!url) {
-				alert("Veuillez sélectionner une structure.");
+			if (!url)
+			{
+				alert('Veuillez sélectionner une structure.');
 				return;
 			}
 
 			// Loading state
 			const originalText = btn.innerText;
 			btn.disabled = true;
-			btn.innerText = "Chargement...";
+			btn.innerText = 'Chargement...';
 
 			window.open(url, '_blank');
 			google.script.host.close();
 		}
 
-		function showError(error) {
+		function showError(error)
+		{
 			const select = document.getElementById('structure-select');
 			select.innerHTML = '';
 			const option = document.createElement('option');
-			option.text = "Erreur : " + error.message;
+			option.text = 'Erreur : ' + error.message;
 			select.add(option);
 		}
 	</script>

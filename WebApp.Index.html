@@ -37,14 +37,6 @@
 					align-items: flex-start;
 					padding-top: 2rem;
 				}
-				
-				dialog article {
-					width: 100%;
-					height: 100%;
-					max-height: 100%;
-					border-radius: 0;
-					margin: 0;
-				}
 			}
 		</style>
 	</head>
@@ -53,23 +45,11 @@
 			<header>
 				<h1 style="margin-bottom: 0;">ACStructures</h1>
 			</header>
-			
+
 			<p class="user-info">
 				Connecté en tant que :<br>
 				<strong><?= userEmail ?></strong>
 			</p>
-			
-			<footer>
-				<button onclick="openReportModal()">
-					Créer un compte rendu de visite
-				</button>
-			</footer>
-		</article>
-
-		<article class="card" style="max-width: 600px;">
-			<header>
-				<h2 style="margin-bottom: 0;">Consultation</h2>
-			</header>
 
 			<label for="consult-select">
 				Sélectionner une association
@@ -89,59 +69,42 @@
 			</div>
 		</article>
 
-		<!-- Modal Structure -->
-		<dialog id="reportModal">
-			<article>
-				<header>
-					<button aria-label="Close" rel="prev" onclick="closeReportModal()"></button>
-					<p><strong>Créer un compte rendu de visite</strong></p>
-				</header>
-				
-				<label for="structure-select">
-					Structure
-					<select id="structure-select" disabled>
-						<option>Chargement...</option>
-					</select>
-				</label>
-
-				<footer>
-					<button id="create-btn" onclick="createReport()" disabled>
-						Créer un compte rendu de visite
-					</button>
-				</footer>
-			</article>
-		</dialog>
-
 		<script>
 			let structures = {};
-			const visitReportFormUrlTemplate = "<?= visitReportFormUrl ?>";
+			const visitReportFormUrlTemplate = '<?= visitReportFormUrl ?>';
 
-			window.onload = function() {
-				loadStructureList();
+			window.onload = function()
+			{
 				loadFullStructures();
 			};
 
-			function loadFullStructures() {
+			function loadFullStructures()
+			{
 				google.script.run
-					.withSuccessHandler(function(data) {
+					.withSuccessHandler(function(data)
+					{
 						structures = data;
 						populateConsultSelect(data);
 					})
-					.withFailureHandler(function(err) {
-						console.error("Erreur lors du chargement des structures : " + err.message);
+					.withFailureHandler(function(err)
+					{
+						console.error('Erreur lors du chargement des structures : ' + err.message);
 					})
 					.getACStructures();
 			}
 
-			function populateConsultSelect(data) {
+			function populateConsultSelect(data)
+			{
 				const select = document.getElementById('consult-select');
 				select.innerHTML = '<option value="">Choisir une association...</option>';
 				
-				const sortedIds = Object.keys(data).sort((a, b) => {
+				const sortedIds = Object.keys(data).sort((a, b) =>
+				{
 					return data[a].Nom.localeCompare(data[b].Nom);
 				});
 
-				sortedIds.forEach(id => {
+				sortedIds.forEach(id =>
+				{
 					const option = document.createElement('option');
 					option.value = id;
 					option.text = data[id].Nom;
@@ -149,9 +112,11 @@
 				});
 			}
 
-			function displayStructureDetails(id) {
+			function displayStructureDetails(id)
+			{
 				const container = document.getElementById('details-container');
-				if (!id || !structures[id]) {
+				if (!id || !structures[id])
+				{
 					container.style.display = 'none';
 					return;
 				}
@@ -162,77 +127,21 @@
 				
 				const driveLink = document.getElementById('detail-drive');
 				const driveUrl = s['Lien vers les documents stockés sur le Drive'];
-				if (driveUrl) {
+				if (driveUrl)
+				{
 					driveLink.href = driveUrl;
 					driveLink.style.display = 'inline';
-				} else {
+				}
+				else
+				{
 					driveLink.style.display = 'none';
 				}
 
 				container.style.display = 'block';
 			}
 
-			function openReportModal() {
-				const modal = document.getElementById('reportModal');
-				modal.setAttribute('open', true);
-			}
-
-			function closeReportModal() {
-				const modal = document.getElementById('reportModal');
-				modal.removeAttribute('open');
-			}
-
-			// Close modal if clicking outside
-			document.addEventListener('click', event => {
-				const modal = document.getElementById('reportModal');
-				if (event.target === modal) {
-					closeReportModal();
-				}
-			});
-
-			function loadStructureList() {
-				const select = document.getElementById('structure-select');
-				if (select.options.length > 1 && select.options[1].value !== "") return;
-				
-				select.innerHTML = '<option>Chargement...</option>';
-				select.disabled = true;
-				document.getElementById('create-btn').disabled = true;
-
-				google.script.run
-					.withSuccessHandler(populateSelect)
-					.withFailureHandler(showError)
-					.getStructureList();
-			}
-
-			function populateSelect(structureList) {
-				const select = document.getElementById('structure-select');
-				const btn = document.getElementById('create-btn');
-				select.innerHTML = '';
-
-				if (!structureList || structureList.length === 0) {
-					const option = document.createElement('option');
-					option.text = "Aucune structure trouvée";
-					select.add(option);
-					return;
-				}
-
-				const defaultOption = document.createElement('option');
-				defaultOption.text = "Sélectionnez une structure...";
-				defaultOption.value = "";
-				select.add(defaultOption);
-
-				structureList.forEach(function(item) {
-					const option = document.createElement('option');
-					option.value = item[0];
-					option.text = item[1];
-					select.add(option);
-				});
-
-				select.disabled = false;
-				btn.disabled = false;
-			}
-
-			function createReportFromConsultation() {
+			function createReportFromConsultation()
+			{
 				const select = document.getElementById('consult-select');
 				const id = select.value;
 				if (!id || !structures[id])
@@ -244,7 +153,7 @@
 				let dateStr = s['Date de la dernière visite'] || '';
 
 				// Convert DD/MM/YYYY to YYYY-MM-DD if needed
-				dateStr = dateStr.replace(/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/, "$3-$2-$1");
+				dateStr = dateStr.replace(/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/, '$3-$2-$1');
 
 				const url = visitReportFormUrlTemplate
 					.replace('<<Nom>>', encodeURIComponent(s.Nom || ''))
@@ -252,34 +161,6 @@
 					.replace('<<Date de la dernière visite>>', encodeURIComponent(dateStr));
 
 				window.open(url, '_blank');
-			}
-
-			function createReport() {
-				const select = document.getElementById('structure-select');
-				const btn = document.getElementById('create-btn');
-				const url = select.value;
-				
-				if (!url) {
-					alert("Veuillez sélectionner une structure.");
-					return;
-				}
-
-				const originalText = btn.innerText;
-				btn.disabled = true;
-				btn.innerText = "Chargement...";
-
-				window.open(url, '_blank');
-				btn.disabled = false;
-				btn.innerText = originalText;
-				closeReportModal();
-			}
-
-			function showError(error) {
-				const select = document.getElementById('structure-select');
-				select.innerHTML = '';
-				const option = document.createElement('option');
-				option.text = "Erreur : " + error.message;
-				select.add(option);
 			}
 		</script>
 	</body>
