@@ -4,7 +4,7 @@
 		<base target="_top">
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>GA Assos Manager</title>
+		<title>Console de pilotage Associations</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 		<style>
 			:root {
@@ -71,7 +71,7 @@
 			
 			<footer>
 				<button onclick="openReportModal()">
-					Ouvrir le compte rendu
+					Créer un compte rendu de visite
 				</button>
 			</footer>
 		</article>
@@ -167,9 +167,9 @@
 			function createReport() {
 				const select = document.getElementById('structure-select');
 				const btn = document.getElementById('create-btn');
-				const id = select.value;
+				const url = select.value;
 				
-				if (!id) {
+				if (!url) {
 					alert("Veuillez sélectionner une structure.");
 					return;
 				}
@@ -178,19 +178,10 @@
 				btn.disabled = true;
 				btn.innerText = "Chargement...";
 
-				google.script.run
-					.withSuccessHandler(function(url) {
-						window.open(url, '_blank');
-						btn.disabled = false;
-						btn.innerText = originalText;
-						closeReportModal();
-					})
-					.withFailureHandler(function(err) {
-						alert("Erreur lors de la récupération de l'URL : " + err.message);
-						btn.disabled = false;
-						btn.innerText = originalText;
-					})
-					.getVisitReportFormUrl(id);
+				window.open(url, '_blank');
+				btn.disabled = false;
+				btn.innerText = originalText;
+				closeReportModal();
 			}
 
 			function showError(error) {

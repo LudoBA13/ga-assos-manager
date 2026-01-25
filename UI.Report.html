@@ -88,7 +88,7 @@
 
 			structures.forEach(function(item) {
 				const option = document.createElement('option');
-				option.value = item[0]; // Code VIF
+				option.value = item[0]; // URL
 				option.text = item[1];  // Nom
 				select.add(option);
 			});
@@ -100,10 +100,9 @@
 		function createReport() {
 			const select = document.getElementById('structure-select');
 			const btn = document.getElementById('create-btn');
-			const id = select.value;
-			const nom = select.options[select.selectedIndex].text;
+			const url = select.value;
 			
-			if (!id) {
+			if (!url) {
 				alert("Veuillez sélectionner une structure.");
 				return;
 			}
@@ -113,17 +112,8 @@
 			btn.disabled = true;
 			btn.innerText = "Chargement...";
 
-			google.script.run
-				.withSuccessHandler(function(url) {
-					window.open(url, '_blank');
-					google.script.host.close();
-				})
-				.withFailureHandler(function(err) {
-					alert("Erreur lors de la récupération de l'URL : " + err.message);
-					btn.disabled = false;
-					btn.innerText = originalText;
-				})
-				.getVisitReportFormUrl(id);
+			window.open(url, '_blank');
+			google.script.host.close();
 		}
 
 		function showError(error) {

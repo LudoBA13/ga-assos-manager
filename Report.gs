@@ -42,12 +42,16 @@ function getStructureList()
 		throw new Error("La feuille 'ACStructures' est introuvable.");
 	}
 
+	const urlTemplate = getConfig('visitReportFormUrl');
+
 	const data = sheet.getDataRange().getValues();
 	if (data.length < 2) return [];
 
 	const headers = data[0];
 	const idIdx = headers.indexOf('ID du Contact');
 	const nomIdx = headers.indexOf('Nom');
+	const codeVifIdx = headers.indexOf('Code VIF');
+	const dateLastVisitIdx = headers.indexOf('Date de la dernière visite');
 
 	if (idIdx === -1 || nomIdx === -1)
 	{
@@ -61,16 +65,45 @@ function getStructureList()
 		const row = data[i];
 		const id = row[idIdx];
 		const nom = row[nomIdx];
+		const codeVif = codeVifIdx !== -1 ? row[codeVifIdx] : '';
+		const dateLastVisit = dateLastVisitIdx !== -1 ? row[dateLastVisitIdx] : '';
 
 		if (id && nom && !map.has(id))
 		{
-			map.set(id, nom);
+			let dateStr = '';
+
+			if (dateLastVisit instanceof Date)
+			{
+				const year = dateLastVisit.getFullYear();
+				const month = String(dateLastVisit.getMonth() + 1).padStart(2, '0');
+				const day = String(dateLastVisit.getDate()).padStart(2, '0');
+				dateStr = `${year}-${month}-${day}`;
+			}
+			else if (typeof dateLastVisit === 'string')
+			{
+				const parts = dateLastVisit.split('/');
+				if (parts.length === 3)
+				{
+					dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+				}
+				else
+				{
+					dateStr = dateLastVisit;
+				}
+			}
+
+			const url = urlTemplate
+				.replace('<<Nom>>', encodeURIComponent(nom || ''))
+				.replace('<<Code VIF>>', encodeURIComponent(codeVif || ''))
+				.replace('<<Date de la dernière visite>>', encodeURIComponent(dateStr));
+
+			map.set(id, [url, nom]);
 		}
 	}
 
-	// Return array of [id, nom], sorted by nom
-	return Array.from(map.entries())
-		.map(([id, nom]) => [id, nom])
+	// Return array of [url, nom], sorted by nom
+	return Array.from(map.values())
+		.map(([url, nom]) => [url, nom])
 		.sort((a, b) => a[1].localeCompare(b[1]));
 }
 

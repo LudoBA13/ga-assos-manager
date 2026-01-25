@@ -15,7 +15,7 @@ function doGet(e)
 	{
 		return HtmlService.createTemplateFromFile('UI.Report')
 			.evaluate()
-			.setTitle('GA Assos Manager - Compte rendu')
+			.setTitle('Console de pilotage Associations - Compte rendu')
 			.addMetaTag('viewport', 'width=device-width, initial-scale=1')
 			.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 	}
@@ -28,7 +28,7 @@ function doGet(e)
 	template.scriptUrl = ScriptApp.getService().getUrl();
 	
 	return template.evaluate()
-		.setTitle('GA Assos Manager - Web App')
+		.setTitle('Console de pilotage Associations')
 		.addMetaTag('viewport', 'width=device-width, initial-scale=1')
 		.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
