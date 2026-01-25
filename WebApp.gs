@@ -71,18 +71,6 @@ class WebApp
  */
 function doGet(e)
 {
-	const page = e.parameter.page || 'index';
-
-	if (page === 'report')
-	{
-		const template = HtmlService.createTemplateFromFile('UI.Report');
-		template.configs = getAllConfigs();
-		return template.evaluate()
-			.setTitle('Console de pilotage Associations - Compte rendu')
-			.addMetaTag('viewport', 'width=device-width, initial-scale=1')
-			.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-	}
-
 	const template = HtmlService.createTemplateFromFile('WebApp.Index');
 	
 	// Pass the user identity to the template

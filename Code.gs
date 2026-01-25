@@ -42,10 +42,6 @@ function onOpen()
 		.addItem(_('Exporter les données interservices'), 'exportInterServicesData')
 		.addItem(_("Générer les Fiches d'Informations Partenaires"), 'generateFIPDocuments')
 		.addToUi();
-
-	ui.createMenu('CAR')
-		.addItem(_('Créer un rapport de visite'), 'showReportDialog')
-		.addToUi();
 }
 
 function showImporter()
