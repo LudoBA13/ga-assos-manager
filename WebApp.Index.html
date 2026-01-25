@@ -62,6 +62,10 @@
 				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
 				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
 				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank">Ouvrir le dossier</a></p>
+				<p><strong>AssoConnect :</strong> 
+					<a id="detail-ac-view" href="#" target="_blank">Voir</a> | 
+					<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
+				</p>
 				
 				<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
 					Créer un compte rendu de visite
@@ -136,6 +140,29 @@
 				else
 				{
 					driveLink.style.display = 'none';
+				}
+
+				const acViewLink = document.getElementById('detail-ac-view');
+				const acEditLink = document.getElementById('detail-ac-edit');
+
+				if (Config.acStructureProfileUrl)
+				{
+					acViewLink.href = Config.acStructureProfileUrl.replace('<<ID du Contact>>', id);
+					acViewLink.style.display = 'inline';
+				}
+				else
+				{
+					acViewLink.style.display = 'none';
+				}
+
+				if (Config.acStructureProfileEditUrl)
+				{
+					acEditLink.href = Config.acStructureProfileEditUrl.replace('<<ID du Contact>>', id);
+					acEditLink.style.display = 'inline';
+				}
+				else
+				{
+					acEditLink.style.display = 'none';
 				}
 
 				container.style.display = 'block';
