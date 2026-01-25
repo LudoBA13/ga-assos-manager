@@ -82,6 +82,10 @@
 				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
 				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
 				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank">Ouvrir le dossier</a></p>
+				
+				<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
+					Créer un compte rendu de visite
+				</button>
 			</div>
 		</article>
 
@@ -110,6 +114,7 @@
 
 		<script>
 			let structures = {};
+			const visitReportFormUrlTemplate = "<?= visitReportFormUrl ?>";
 
 			window.onload = function() {
 				loadStructureList();
@@ -225,6 +230,28 @@
 
 				select.disabled = false;
 				btn.disabled = false;
+			}
+
+			function createReportFromConsultation() {
+				const select = document.getElementById('consult-select');
+				const id = select.value;
+				if (!id || !structures[id])
+				{
+					return;
+				}
+
+				const s = structures[id];
+				let dateStr = s['Date de la dernière visite'] || '';
+
+				// Convert DD/MM/YYYY to YYYY-MM-DD if needed
+				dateStr = dateStr.replace(/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/, "$3-$2-$1");
+
+				const url = visitReportFormUrlTemplate
+					.replace('<<Nom>>', encodeURIComponent(s.Nom || ''))
+					.replace('<<Code VIF>>', encodeURIComponent(s['Code VIF'] || ''))
+					.replace('<<Date de la dernière visite>>', encodeURIComponent(dateStr));
+
+				window.open(url, '_blank');
 			}
 
 			function createReport() {

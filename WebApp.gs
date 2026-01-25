@@ -87,6 +87,7 @@ function doGet(e)
 	// Pass the user identity to the template
 	template.userEmail = Session.getActiveUser().getEmail();
 	template.scriptUrl = ScriptApp.getService().getUrl();
+	template.visitReportFormUrl = getConfig('visitReportFormUrl');
 	
 	return template.evaluate()
 		.setTitle('Console de pilotage Associations')
