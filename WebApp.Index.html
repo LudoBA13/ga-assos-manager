@@ -112,6 +112,9 @@
 					.withSuccessHandler(function(data) {
 						structures = data;
 					})
+					.withFailureHandler(function(err) {
+						console.error("Erreur lors du chargement des structures : " + err.message);
+					})
 					.getACStructures();
 			}
 
