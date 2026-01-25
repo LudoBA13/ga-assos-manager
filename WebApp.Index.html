@@ -26,13 +26,6 @@
 				text-align: center;
 			}
 
-			.count {
-				font-size: 3.5rem;
-				font-weight: bold;
-				color: var(--pico-primary);
-				margin: 1.5rem 0;
-			}
-
 			.user-info {
 				color: var(--pico-muted-color);
 				font-size: 0.85rem;
@@ -61,9 +54,6 @@
 				<h1 style="margin-bottom: 0;">ACStructures</h1>
 			</header>
 			
-			<p>Nombre de lignes :</p>
-			<div class="count"><?= rowCount ?></div>
-			
 			<p class="user-info">
 				Connecté en tant que :<br>
 				<strong><?= userEmail ?></strong>
@@ -74,6 +64,25 @@
 					Créer un compte rendu de visite
 				</button>
 			</footer>
+		</article>
+
+		<article class="card" style="max-width: 600px;">
+			<header>
+				<h2 style="margin-bottom: 0;">Consultation</h2>
+			</header>
+
+			<label for="consult-select">
+				Sélectionner une association
+				<select id="consult-select" onchange="displayStructureDetails(this.value)">
+					<option value="">Chargement des données...</option>
+				</select>
+			</label>
+
+			<div id="details-container" style="text-align: left; display: none; margin-top: 1rem; border-top: 1px solid var(--pico-border-color); padding-top: 1rem;">
+				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
+				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
+				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank">Ouvrir le dossier</a></p>
+			</div>
 		</article>
 
 		<!-- Modal Structure -->
@@ -111,11 +120,51 @@
 				google.script.run
 					.withSuccessHandler(function(data) {
 						structures = data;
+						populateConsultSelect(data);
 					})
 					.withFailureHandler(function(err) {
 						console.error("Erreur lors du chargement des structures : " + err.message);
 					})
 					.getACStructures();
+			}
+
+			function populateConsultSelect(data) {
+				const select = document.getElementById('consult-select');
+				select.innerHTML = '<option value="">Choisir une association...</option>';
+				
+				const sortedIds = Object.keys(data).sort((a, b) => {
+					return data[a].Nom.localeCompare(data[b].Nom);
+				});
+
+				sortedIds.forEach(id => {
+					const option = document.createElement('option');
+					option.value = id;
+					option.text = data[id].Nom;
+					select.add(option);
+				});
+			}
+
+			function displayStructureDetails(id) {
+				const container = document.getElementById('details-container');
+				if (!id || !structures[id]) {
+					container.style.display = 'none';
+					return;
+				}
+
+				const s = structures[id];
+				document.getElementById('detail-nom').innerText = s.Nom;
+				document.getElementById('detail-vif').innerText = s['Code VIF'];
+				
+				const driveLink = document.getElementById('detail-drive');
+				const driveUrl = s['Lien vers les documents stockés sur le Drive'];
+				if (driveUrl) {
+					driveLink.href = driveUrl;
+					driveLink.style.display = 'inline';
+				} else {
+					driveLink.style.display = 'none';
+				}
+
+				container.style.display = 'block';
 			}
 
 			function openReportModal() {

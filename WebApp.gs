@@ -41,10 +41,21 @@ class WebApp
 
 			if (!id) continue;
 
+			const dateVal = dateIdx !== -1 ? row[dateIdx] : '';
+			let dateStr = '';
+			if (dateVal instanceof Date)
+			{
+				dateStr = dateVal.toLocaleDateString('fr-FR');
+			}
+			else
+			{
+				dateStr = dateVal;
+			}
+
 			result[id] = {
 				'Code VIF': vifIdx !== -1 ? row[vifIdx] : '',
 				'Nom': nomIdx !== -1 ? row[nomIdx] : '',
-				'Date de la dernière visite': dateIdx !== -1 ? row[dateIdx] : '',
+				'Date de la dernière visite': dateStr,
 				'Lien vers les documents stockés sur le Drive': driveIdx !== -1 ? row[driveIdx] : ''
 			};
 		}
@@ -73,8 +84,7 @@ function doGet(e)
 
 	const template = HtmlService.createTemplateFromFile('WebApp.Index');
 	
-	// Pass the row count and user identity to the template
-	template.rowCount = getACStructuresRowCount();
+	// Pass the user identity to the template
 	template.userEmail = Session.getActiveUser().getEmail();
 	template.scriptUrl = ScriptApp.getService().getUrl();
 	
@@ -82,20 +92,4 @@ function doGet(e)
 		.setTitle('Console de pilotage Associations')
 		.addMetaTag('viewport', 'width=device-width, initial-scale=1')
 		.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-}
-
-/**
- * Gets the number of rows in the ACStructures sheet.
- *
- * @returns {number} The last row index or 0 if sheet doesn't exist.
- */
-function getACStructuresRowCount()
-{
-	const ss = SpreadsheetApp.getActiveSpreadsheet();
-	const sheet = ss.getSheetByName('ACStructures');
-	if (!sheet)
-	{
-		return 0;
-	}
-	return sheet.getLastRow();
 }
