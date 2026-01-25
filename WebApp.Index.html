@@ -100,9 +100,20 @@
 		</dialog>
 
 		<script>
+			let structures = {};
+
 			window.onload = function() {
 				loadStructureList();
+				loadFullStructures();
 			};
+
+			function loadFullStructures() {
+				google.script.run
+					.withSuccessHandler(function(data) {
+						structures = data;
+					})
+					.getACStructures();
+			}
 
 			function openReportModal() {
 				const modal = document.getElementById('reportModal');
@@ -136,12 +147,12 @@
 					.getStructureList();
 			}
 
-			function populateSelect(structures) {
+			function populateSelect(structureList) {
 				const select = document.getElementById('structure-select');
 				const btn = document.getElementById('create-btn');
 				select.innerHTML = '';
 
-				if (!structures || structures.length === 0) {
+				if (!structureList || structureList.length === 0) {
 					const option = document.createElement('option');
 					option.text = "Aucune structure trouvée";
 					select.add(option);
@@ -153,7 +164,7 @@
 				defaultOption.value = "";
 				select.add(defaultOption);
 
-				structures.forEach(function(item) {
+				structureList.forEach(function(item) {
 					const option = document.createElement('option');
 					option.value = item[0];
 					option.text = item[1];

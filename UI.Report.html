@@ -61,19 +61,27 @@
 	</div>
 
 	<script>
+		let structures = {};
+
 		window.onload = function() {
 			google.script.run
 				.withSuccessHandler(populateSelect)
 				.withFailureHandler(showError)
 				.getStructureList();
+
+			google.script.run
+				.withSuccessHandler(function(data) {
+					structures = data;
+				})
+				.getACStructures();
 		};
 
-		function populateSelect(structures) {
+		function populateSelect(structureList) {
 			const select = document.getElementById('structure-select');
 			const btn = document.getElementById('create-btn');
 			select.innerHTML = ''; // Clear "Loading..."
 
-			if (!structures || structures.length === 0) {
+			if (!structureList || structureList.length === 0) {
 				const option = document.createElement('option');
 				option.text = "Aucune structure trouvée";
 				select.add(option);
@@ -86,7 +94,7 @@
 			defaultOption.value = "";
 			select.add(defaultOption);
 
-			structures.forEach(function(item) {
+			structureList.forEach(function(item) {
 				const option = document.createElement('option');
 				option.value = item[0]; // URL
 				option.text = item[1];  // Nom
