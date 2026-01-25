@@ -24,6 +24,28 @@
  * SOFTWARE.
  */
 
+function getAllConfigs()
+{
+	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Config');
+	if (!sheet)
+	{
+		throw new Error("The 'Config' sheet was not found.");
+	}
+
+	const data = sheet.getDataRange().getValues();
+	const config = {};
+
+	data.forEach(row =>
+	{
+		if (row[0])
+		{
+			config[row[0]] = row[1];
+		}
+	});
+
+	return config;
+}
+
 function getConfig(name)
 {
 	const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Config');

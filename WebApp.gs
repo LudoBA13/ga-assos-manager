@@ -75,8 +75,9 @@ function doGet(e)
 
 	if (page === 'report')
 	{
-		return HtmlService.createTemplateFromFile('UI.Report')
-			.evaluate()
+		const template = HtmlService.createTemplateFromFile('UI.Report');
+		template.configs = getAllConfigs();
+		return template.evaluate()
 			.setTitle('Console de pilotage Associations - Compte rendu')
 			.addMetaTag('viewport', 'width=device-width, initial-scale=1')
 			.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -87,7 +88,7 @@ function doGet(e)
 	// Pass the user identity to the template
 	template.userEmail = Session.getActiveUser().getEmail();
 	template.scriptUrl = ScriptApp.getService().getUrl();
-	template.visitReportFormUrl = getConfig('visitReportFormUrl');
+	template.configs = getAllConfigs();
 	
 	return template.evaluate()
 		.setTitle('Console de pilotage Associations')
