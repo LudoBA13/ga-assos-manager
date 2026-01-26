@@ -29,6 +29,8 @@ const ACTIVE_LOCALE = 'fr';
 
 const CATALOG = {
 	'fr': {
+		"FraisSansRéfrigérateur"  : "Souhaite recevoir du Frais mais n'est pas équippé de Chambre froide positive ou Réfrigérateur",
+		"SurgeléSansCongélateur"  : "Souhaite recevoir du Surgelé mais n'est pas équippé de Chambre froide negative ou Congélateur",
 		"HabilitationExpirée"     : "La date d'habilitation régionale a expiré",
 		"SansDateHabilitation"    : "La date d'habilitation régionale est manquante",
 		"SansHabilitation"        : "Pas d'habilitation régionale, nationale, ou CCAS/CIAS",
