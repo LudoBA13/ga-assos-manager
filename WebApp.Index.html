@@ -76,7 +76,6 @@
 
 		<script>
 			const Config = <?!= JSON.stringify(configs) ?>;
-			const ScriptUrl = '<?= scriptUrl ?>';
 			let structures = {};
 			const visitReportFormUrlTemplate = Config.visitReportFormUrl;
 
@@ -145,7 +144,11 @@
 				}
 
 				const fipLink = document.getElementById('detail-fip');
-				fipLink.href = ScriptUrl + '?fip=' + encodeURIComponent(id);
+				fipLink.href = '#';
+				fipLink.onclick = function(e) {
+					e.preventDefault();
+					openFip(id);
+				};
 
 				const acViewLink = document.getElementById('detail-ac-view');
 				const acEditLink = document.getElementById('detail-ac-edit');
@@ -194,6 +197,40 @@
 					.replace('<<Date de la dernière visite>>', encodeURIComponent(dateStr));
 
 				window.open(url, '_blank');
+			}
+
+			function openFip(id)
+			{
+				if (!id) return;
+				
+				// Show a loading state or feedback if desired
+				const link = document.getElementById('detail-fip');
+				const originalText = link.innerText;
+				link.innerText = 'Chargement...';
+				link.style.cursor = 'wait';
+
+				google.script.run
+					.withSuccessHandler(function(url)
+					{
+						link.innerText = originalText;
+						link.style.cursor = 'pointer';
+						if (url)
+						{
+							window.open(url, '_blank');
+						}
+						else
+						{
+							alert('Impossible de trouver le lien.');
+						}
+					})
+					.withFailureHandler(function(err)
+					{
+						link.innerText = originalText;
+						link.style.cursor = 'pointer';
+						console.error('Erreur lors de la récupération du lien FIP : ' + err.message);
+						alert('Erreur : ' + err.message);
+					})
+					.getFipUrl(id);
 			}
 		</script>
 	</body>

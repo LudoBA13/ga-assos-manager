@@ -7,6 +7,12 @@ function getACStructures()
 	return (new WebApp).getACStructures();
 }
 
+function getFipUrl(id)
+{
+	return (new WebApp).getFipUrl(id);
+}
+
+
 class WebApp
 {
 	getACStructures()
@@ -135,21 +141,6 @@ class WebApp
  */
 function doGet(e)
 {
-	if (e.parameter.fip)
-	{
-		try
-		{
-			const url = (new WebApp).getFipUrl(e.parameter.fip);
-			return HtmlService.createHtmlOutput(
-				`<script>window.top.location.href = "${url}";</script>`
-			);
-		}
-		catch (err)
-		{
-			return HtmlService.createHtmlOutput(`Erreur : ${err.message}`);
-		}
-	}
-
 	const template = HtmlService.createTemplateFromFile('WebApp.Index');
 	
 	// Pass the user identity to the template
