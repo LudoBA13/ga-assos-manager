@@ -62,12 +62,14 @@
 				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
 				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
 				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank">Ouvrir le dossier</a></p>
-				<p><strong>Fiche info partenaire :</strong> <a id="detail-fip" href="#" target="_blank">Ouvrir</a></p>
 				<p><strong>AssoConnect :</strong> 
 					<a id="detail-ac-view" href="#" target="_blank">Voir</a> | 
 					<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
 				</p>
 				
+				<button class="outline" id="detail-fip-btn">
+					Ouvrir la fiche info partenaire
+				</button>
 				<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
 					Créer un compte rendu de visite
 				</button>
@@ -143,10 +145,8 @@
 					driveLink.style.display = 'none';
 				}
 
-				const fipLink = document.getElementById('detail-fip');
-				fipLink.href = '#';
-				fipLink.onclick = function(e) {
-					e.preventDefault();
+				const fipBtn = document.getElementById('detail-fip-btn');
+				fipBtn.onclick = function() {
 					openFip(id);
 				};
 
@@ -203,17 +203,16 @@
 			{
 				if (!id) return;
 				
-				// Show a loading state or feedback if desired
-				const link = document.getElementById('detail-fip');
-				const originalText = link.innerText;
-				link.innerText = 'Chargement...';
-				link.style.cursor = 'wait';
+				const btn = document.getElementById('detail-fip-btn');
+				const originalText = btn.innerText;
+				btn.innerText = 'Chargement...';
+				btn.disabled = true;
 
 				google.script.run
 					.withSuccessHandler(function(url)
 					{
-						link.innerText = originalText;
-						link.style.cursor = 'pointer';
+						btn.innerText = originalText;
+						btn.disabled = false;
 						if (url)
 						{
 							window.open(url, '_blank');
@@ -225,8 +224,8 @@
 					})
 					.withFailureHandler(function(err)
 					{
-						link.innerText = originalText;
-						link.style.cursor = 'pointer';
+						btn.innerText = originalText;
+						btn.disabled = false;
 						console.error('Erreur lors de la récupération du lien FIP : ' + err.message);
 						alert('Erreur : ' + err.message);
 					})
