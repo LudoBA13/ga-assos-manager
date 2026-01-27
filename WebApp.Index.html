@@ -62,6 +62,7 @@
 				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
 				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
 				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank">Ouvrir le dossier</a></p>
+				<p><strong>Fiche info partenaire :</strong> <a id="detail-fip" href="#" target="_blank">Ouvrir</a></p>
 				<p><strong>AssoConnect :</strong> 
 					<a id="detail-ac-view" href="#" target="_blank">Voir</a> | 
 					<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
@@ -75,6 +76,7 @@
 
 		<script>
 			const Config = <?!= JSON.stringify(configs) ?>;
+			const ScriptUrl = '<?= scriptUrl ?>';
 			let structures = {};
 			const visitReportFormUrlTemplate = Config.visitReportFormUrl;
 
@@ -141,6 +143,9 @@
 				{
 					driveLink.style.display = 'none';
 				}
+
+				const fipLink = document.getElementById('detail-fip');
+				fipLink.href = ScriptUrl + '?fip=' + encodeURIComponent(id);
 
 				const acViewLink = document.getElementById('detail-ac-view');
 				const acEditLink = document.getElementById('detail-ac-edit');

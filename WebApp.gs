@@ -62,6 +62,70 @@ class WebApp
 
 		return result;
 	}
+
+	getFipUrl(id)
+	{
+		const structures = this.getACStructures();
+		const structure = structures[id];
+
+		if (!structure)
+		{
+			throw new Error("Structure introuvable.");
+		}
+
+		const driveUrl = structure['Lien vers les documents stockés sur le Drive'];
+		if (!driveUrl)
+		{
+			throw new Error("Aucun lien Drive configuré pour cette structure.");
+		}
+
+		let folderId = null;
+		// Pattern for folders/ID
+		const matchFolders = driveUrl.match(/folders\/([a-zA-Z0-9-_]+)/);
+		if (matchFolders)
+		{
+			folderId = matchFolders[1];
+		}
+		else
+		{
+			// Pattern for id=ID
+			const matchId = driveUrl.match(/[?&]id=([a-zA-Z0-9-_]+)/);
+			if (matchId)
+			{
+				folderId = matchId[1];
+			}
+		}
+
+		if (!folderId)
+		{
+			// Fallback: assume the whole URL is the redirect if we can't parse it,
+			// or try to open it to see if it redirects (not possible here).
+			// If we can't get the folder ID, we can't search inside it.
+			// Just return the drive URL.
+			return driveUrl;
+		}
+
+		try
+		{
+			const folder = DriveApp.getFolderById(folderId);
+			const files = folder.getFiles();
+			while (files.hasNext())
+			{
+				const file = files.next();
+				if (file.getName().startsWith("FIP "))
+				{
+					return file.getUrl();
+				}
+			}
+		}
+		catch (e)
+		{
+			// Permission error or invalid ID, fallback to Drive URL
+			console.error("Error searching Drive: " + e.message);
+		}
+
+		return driveUrl;
+	}
 }
 
 /**
@@ -71,6 +135,21 @@ class WebApp
  */
 function doGet(e)
 {
+	if (e.parameter.fip)
+	{
+		try
+		{
+			const url = (new WebApp).getFipUrl(e.parameter.fip);
+			return HtmlService.createHtmlOutput(
+				`<script>window.top.location.href = "${url}";</script>`
+			);
+		}
+		catch (err)
+		{
+			return HtmlService.createHtmlOutput(`Erreur : ${err.message}`);
+		}
+	}
+
 	const template = HtmlService.createTemplateFromFile('WebApp.Index');
 	
 	// Pass the user identity to the template
