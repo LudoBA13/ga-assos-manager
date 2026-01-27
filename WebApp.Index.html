@@ -36,6 +36,10 @@
 				text-align: center;
 			}
 
+			button + button {
+				margin-top: .5em;
+			}
+
 			/* Ensure select text is as centered as possible (browser dependent) */
 			select {
 				text-align-last: center;
@@ -48,12 +52,29 @@
 					padding-top: 2rem;
 				}
 			}
+
+			.icon-prefixed-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.25rem;
+			}
+
+			#details-container {
+				text-align: left;
+				margin-top: 1rem;
+				border-top: 1px solid var(--pico-border-color);
+				padding-top: 1rem;
+			}
+
+			.no-margin-bottom {
+				margin-bottom: 0;
+			}
 		</style>
 	</head>
 	<body class="container">
 		<article class="card">
 			<header>
-				<h1 style="margin-bottom: 0;">ACStructures</h1>
+				<h1 class="no-margin-bottom">ACStructures</h1>
 			</header>
 
 			<p class="user-info">
@@ -68,12 +89,12 @@
 				</select>
 			</label>
 
-			<div id="details-container" style="text-align: left; display: none; margin-top: 1rem; border-top: 1px solid var(--pico-border-color); padding-top: 1rem;">
+			<div id="details-container" style="display: none;">
 				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
 				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
-				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank">Ouvrir le dossier</a></p>
+				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
 				<p><strong>AssoConnect :</strong> 
-					<a id="detail-ac-view" href="#" target="_blank">Voir</a> | 
+					<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> | 
 					<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
 				</p>
 				
@@ -148,7 +169,7 @@
 				if (driveUrl)
 				{
 					driveLink.href = driveUrl;
-					driveLink.style.display = 'inline';
+					driveLink.style.display = 'inline-flex';
 				}
 				else
 				{
@@ -166,7 +187,7 @@
 				if (Config.acStructureProfileUrl)
 				{
 					acViewLink.href = Config.acStructureProfileUrl.replace('<<ID du Contact>>', id);
-					acViewLink.style.display = 'inline';
+					acViewLink.style.display = 'inline-flex';
 				}
 				else
 				{
