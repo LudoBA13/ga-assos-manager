@@ -115,7 +115,7 @@ class ReportManager
 			throw new Error(_("Le lien vers le dossier Drive est manquant pour l'association VIF '%s'.", vif));
 		}
 
-		const destinationFolderId = extractIdFromUrl(folderUrl);
+		const destinationFolderId = extractDriveIdFromUrl(folderUrl);
 
 		const generator = new DocumentGenerator(templateDocUrl);
 

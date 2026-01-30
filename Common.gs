@@ -110,7 +110,7 @@ function getRowById(sheetName, id)
  * @param {string} url The URL to parse.
  * @return {string} The extracted ID, or the input string if no URL structure is detected.
  */
-function extractIdFromUrl(url)
+function extractDriveIdFromUrl(url)
 {
 	if (!url || !url.startsWith('https://'))
 	{
