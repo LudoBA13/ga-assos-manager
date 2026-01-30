@@ -100,6 +100,26 @@ function getRowById(sheetName, id)
 	return result;
 }
 
+/**
+ * Extracts the ID from a Google Drive URL (file or folder).
+ * Supports formats like:
+ * - https://drive.google.com/drive/folders/ID
+ * - https://docs.google.com/document/d/ID/edit
+ * - https://drive.google.com/open?id=ID
+ *
+ * @param {string} url The URL to parse.
+ * @return {string} The extracted ID, or the input string if no URL structure is detected.
+ */
+function extractIdFromUrl(url)
+{
+	if (!url || !url.startsWith('https://'))
+	{
+		return url;
+	}
+
+	const match = url.match(/[-\w]{25,}/);
+	return match ? match[0] : url;
+}
 function getAssoByVif(vif)
 {
 	const sheetName = 'ACStructures';

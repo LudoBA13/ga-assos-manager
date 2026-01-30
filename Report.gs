@@ -115,20 +115,7 @@ class ReportManager
 			throw new Error(_("Le lien vers le dossier Drive est manquant pour l'association VIF '%s'.", vif));
 		}
 
-		let destinationFolderId = folderUrl;
-		if (folderUrl.startsWith('https://'))
-		{
-			// Extract ID from URL (supports both /folders/ID and id=ID formats)
-			const match = folderUrl.match(/[-\w]{25,}/);
-			if (match)
-			{
-				destinationFolderId = match[0];
-			}
-			else
-			{
-				throw new Error(_("Impossible d'extraire l'ID du dossier depuis l'URL : %s", folderUrl));
-			}
-		}
+		const destinationFolderId = extractIdFromUrl(folderUrl);
 
 		const generator = new DocumentGenerator(templateDocUrl);
 
