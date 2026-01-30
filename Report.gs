@@ -69,23 +69,32 @@ class ReportManager
 			throw new Error(_("La colonne 'Horodateur' est manquante dans la feuille '%s'.", 'CRVisites'));
 		}
 
+		const timeZone = Session.getScriptTimeZone();
+		const dateFormat = _('dd/MM/yyyy HH:mm:ss');
+
+		// Helper to normalize values for comparison (handles Date objects and strings)
+		const normalize = (val) => {
+			if (val instanceof Date)
+			{
+				return Utilities.formatDate(val, timeZone, dateFormat);
+			}
+			return String(val);
+		};
+
 		// Find the row matching the timestamp.
-		// We use String conversion to ensure comparison works regardless of type (Date object vs string).
-		const timestampStr = String(timestamp);
+		const targetTimestamp = normalize(timestamp);
 		const timestampValues = sheet.getRange(2, timestampIdx + 1, lastRow - 1, 1).getValues();
-		const matchIndex = timestampValues.findIndex(r => String(r[0]) === timestampStr);
+		const matchIndex = timestampValues.findIndex(r => normalize(r[0]) === targetTimestamp);
 
 		if (matchIndex === -1)
 		{
-			throw new Error(_("Aucun enregistrement trouvé pour le timestamp '%s'.", timestampStr));
+			throw new Error(_("Aucun enregistrement trouvé pour le timestamp '%s'.", targetTimestamp));
 		}
 
 		// Fetch the specific row. matchIndex is 0-based from row 2, so add 2 to get the sheet row number.
 		const row = sheet.getRange(matchIndex + 2, 1, 1, sheet.getLastColumn()).getValues()[0];
 
 		const vars = new Map;
-		const timeZone = Session.getScriptTimeZone();
-		const dateFormat = _('dd/MM/yyyy HH:mm:ss');
 
 		headers.forEach((header, index) =>
 		{
