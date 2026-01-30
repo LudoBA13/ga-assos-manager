@@ -47,7 +47,6 @@ class ReportManager
 	static generateVisitReport(timestamp)
 	{
 		const templateDocUrl = getConfig('visitReportTemplateDocUrl');
-		const destinationFolderId = getConfig('visitReportFolderId');
 
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
 		const sheet = ss.getSheetByName('CRVisites');
@@ -97,6 +96,39 @@ class ReportManager
 			}
 			vars.set(header, value);
 		});
+
+		const vif = vars.get('N° VIF de la structure visitée');
+		if (!vif)
+		{
+			throw new Error(_("Le 'N° VIF de la structure visitée' est manquant pour cet enregistrement."));
+		}
+
+		const asso = getAssoByVif(vif);
+		if (!asso)
+		{
+			throw new Error(_("L'association avec le VIF '%s' est introuvable.", vif));
+		}
+
+		const folderUrl = asso['Lien vers les documents stockés sur le Drive'];
+		if (!folderUrl)
+		{
+			throw new Error(_("Le lien vers le dossier Drive est manquant pour l'association VIF '%s'.", vif));
+		}
+
+		let destinationFolderId = folderUrl;
+		if (folderUrl.startsWith('https://'))
+		{
+			// Extract ID from URL (supports both /folders/ID and id=ID formats)
+			const match = folderUrl.match(/[-\w]{25,}/);
+			if (match)
+			{
+				destinationFolderId = match[0];
+			}
+			else
+			{
+				throw new Error(_("Impossible d'extraire l'ID du dossier depuis l'URL : %s", folderUrl));
+			}
+		}
 
 		const generator = new DocumentGenerator(templateDocUrl);
 
