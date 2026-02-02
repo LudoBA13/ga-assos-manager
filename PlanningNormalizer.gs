@@ -55,31 +55,23 @@ class PlanningNormalizer
 		// 2e-4e
 		text = text.replace(/\b([2-4])\s*(?:e|eme|ème|èm)\b/gi, '$1e');
 		// Handle "4 mercredi" -> "4e mercredi" (implicit ordinal before day)
-		text = text.replace(/\b([2-4])\s+(?=(?:lundi|mardi|mercredi|jeudi|vendredi))/gi, '$1e ');
-		text = text.replace(/\b1\s+(?=(?:lundi|mardi|mercredi|jeudi|vendredi))/gi, '1er ');
+		text = text.replace(/\b([2-4])\s+(?=(?:lun|mar|mercre|jeu|vendre)di)/gi, '$1e ');
+		text = text.replace(/\b1\s+(?=(?:lun|mar|mercre|jeu|vendre)di)/gi, '1er ');
 		// Tous les
-		text = text.replace(/\btou[st]\s*les?\b/gi, 'Tous les');
+		text = text.replace(/\bto[iu][st]\s*les?\b/gi, 'Tous les');
 
 		// 3. Normalize Days
-		const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'];
-		for (const day of days)
-		{
-			// Match day followed by optional 's'
-			// Double escape backslashes for RegExp constructor string
-			const regex = new RegExp(`\\b${day}s?\\b`, 'gi');
-			text = text.replace(regex, day);
-		}
+		text = text.replace(/\b((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, '$1');
 
 		// 4. Normalize Times (8h30, 10h, 14h)
 		// Fix missing space between day and time (e.g., "mardi8h30")
-		text = text.replace(/([a-z])(0?8|10|14)/gi, '$1 $2');
+		text = text.replace(/([a-z])(0?8|1[04])/gi, '$1 $2');
 		
 		// 8h30: match 08 or 8 followed by optional h/H/: and optional 2 digits
 		text = text.replace(/\b0?8(?:[:hH]\d{0,2}|[0-5]\d)?\b/g, '8h30');
 		// 10h
-		text = text.replace(/\b10(?:[:hH]\d{0,2}|[0-5]\d)?\b/g, '10h');
 		// 14h
-		text = text.replace(/\b14(?:[:hH]\d{0,2}|[0-5]\d)?\b/g, '14h');
+		text = text.replace(/\b(1[04])(?:[:hH]\d{0,2}|[0-5]\d)?\b/g, '$1h');
 
 		// 5. Normalize Products
 		text = text.replace(/\bfrais\b/gi, 'Frais');
@@ -121,8 +113,7 @@ class PlanningNormalizer
 		// Fix double separators
 		text = text.replace(/,\s*,/g, ', ');
 		text = text.replace(/\.\s*\./g, '. ');
-		text = text.replace(/:\s*:/g, ': ');
-		text = text.replace(/:\s*,/g, ': '); // Colon followed by comma
+		text = text.replace(/:\s*[:,]/g, ': '); // Colon followed by comma
 		text = text.replace(/,\s*\./g, '.'); // Comma followed by dot
 
 		// Remove leading period if any (from " . 1er")
