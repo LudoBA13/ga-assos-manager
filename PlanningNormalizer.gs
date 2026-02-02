@@ -129,4 +129,37 @@ class PlanningNormalizer
 
 		return text;
 	}
+
+	/**
+	 * Normalizes a 2D array (range) of planning schedules.
+	 * This function can be used as a custom function in Google Sheets.
+	 * @customfunction
+	 * @param {Array<Array<string>>} range The 2D array (range) of planning schedules.
+	 * @returns {Array<Array<string>>} A 2D array with the normalized planning schedules.
+	 */
+	static normalizeRange(range)
+	{
+		if (!Array.isArray(range) || range.length === 0)
+		{
+			return [['']];
+		}
+
+		return range.map(row =>
+		{
+			if (Array.isArray(row))
+			{
+				return row.map(cell => PlanningNormalizer.normalize(cell));
+			}
+			else
+			{
+				return [PlanningNormalizer.normalize(row)];
+			}
+		});
+	}
 }
+
+/**
+ * Normalizes a range of planning schedules.
+ * @customfunction
+ */
+const NORMALIZE_PLANNING = (range) => PlanningNormalizer.normalizeRange(range);

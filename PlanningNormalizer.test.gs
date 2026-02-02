@@ -11,6 +11,7 @@ function runPlanningNormalizerTests()
 {
 	const testCases = [
 		test_PlanningNormalizer_Unit,
+		test_PlanningNormalizer_Range,
 		test_PlanningNormalizer_Idempotency,
 		test_PlanningNormalizer_CSVSamples
 	];
@@ -183,5 +184,23 @@ function test_PlanningNormalizer_CSVSamples()
 		const reEncoded = parseHumanReadable(decoded);
 		
 		assertEqual(encoded, reEncoded, `Round-trip stability for: ${normalized}`);
+	}
+}
+
+function test_PlanningNormalizer_Range()
+{
+	const range = [
+		["1er lundi 8h30: Frais", "2e mardi 10h: Sec"],
+		["Tous les vendredis 14h: Surgelé", ""]
+	];
+	const expected = [
+		["1er lundi 8h30 : Frais.", "2e mardi 10h : Sec."],
+		["Tous les vendredi 14h : Surgelé.", ""]
+	];
+	const actual = PlanningNormalizer.normalizeRange(range);
+
+	if (JSON.stringify(expected) !== JSON.stringify(actual))
+	{
+		throw new Error("test_PlanningNormalizer_Range FAILED\nExpected: " + JSON.stringify(expected) + "\nActual: " + JSON.stringify(actual));
 	}
 }
