@@ -148,6 +148,14 @@ class PlanningNormalizer
 		// Ensure space after punctuation
 		text = text.replace(/([.,:])(?=[^\s])/g, '$1 ');
 
+		// Final canonicalization via encode/decode
+		const encoded = parseHumanReadable(text);
+		if (encoded)
+		{
+			return decodePlanning(encoded);
+		}
+
+		console.warn('PlanningNormalizer: Could not encode normalized text: ' + text);
 		return text;
 	}
 
