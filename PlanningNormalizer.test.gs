@@ -81,7 +81,7 @@ function test_PlanningNormalizer_Unit()
 	assertEqual("1er lundi 8h30 : Frais.", PlanningNormalizer.normalize("1 lundi 8h30 Frais"), "Implicit 1er");
 	assertEqual("2e mardi 10h : Sec.", PlanningNormalizer.normalize("2 eme mardi 10:00 Sec"), "2 eme -> 2e, 10:00 -> 10h");
 	assertEqual("3e mercredi 14h : Surgelé.", PlanningNormalizer.normalize("3ème mercredi 14h Surgeles"), "3ème -> 3e, Surgeles -> Surgelé");
-	assertEqual("Tous les jeudi 8h30 : Frais.", PlanningNormalizer.normalize("tout les jeudi 8h30 frais"), "tout les -> Tous les, plural day");
+	assertEqual("Tous les jeudis 8h30 : Frais.", PlanningNormalizer.normalize("tout les jeudi 8h30 frais"), "tout les -> Tous les, plural day");
 
 	// 3. Time Normalization
 	assertEqual("1er lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 08:30 Frais"), "08:30 -> 8h30");
@@ -195,7 +195,7 @@ function test_PlanningNormalizer_Range()
 	];
 	const expected = [
 		["1er lundi 8h30 : Frais.", "2e mardi 10h : Sec."],
-		["Tous les vendredi 14h : Surgelé.", ""]
+		["Tous les vendredis 14h : Surgelé.", ""]
 	];
 	const actual = PlanningNormalizer.normalizeRange(range);
 

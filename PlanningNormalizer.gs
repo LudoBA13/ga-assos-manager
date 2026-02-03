@@ -62,6 +62,8 @@ class PlanningNormalizer
 
 		// 3. Normalize Days
 		text = text.replace(/\b((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, '$1');
+		// Pluralize day for recurring entries
+		text = text.replace(/(Tous les)\s+((?:lun|mar|mercre|jeu|vendre)di)\b/gi, '$1 $2s');
 
 		// 4. Normalize Times (8h30, 10h, 14h)
 		// Fix missing space between day and time (e.g., "mardi8h30")
