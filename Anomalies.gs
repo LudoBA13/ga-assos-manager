@@ -79,7 +79,7 @@ function updateAnomaliesFormula(e)
 	}
 
 	// 2. Build and write the final multi-line VSTACK formula
-	const trgRange = trgSheet.getRange("A1");
+	const trgRange = trgSheet.getRange("A2");
 	if (rangeStrings.length > 0)
 	{
 		const formula = "=SORT(VSTACK\n(\n" + rangeStrings.join(";\n") + "\n); 2; TRUE)";
