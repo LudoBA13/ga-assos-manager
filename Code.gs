@@ -68,9 +68,9 @@ function runTests()
 {
 	const encoderResults = runPlanningEncoderTests();
 	const preprocessorResults = runInfoPreprocessorTests();
-	
+
 	const totalPassed = encoderResults.passed + preprocessorResults.passed;
 	const totalTotal = encoderResults.total + preprocessorResults.total;
-	
+
 	Logger.log(`Total Tests: ${totalPassed} / ${totalTotal} passed.`);
 }

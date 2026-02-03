@@ -97,11 +97,11 @@
 				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
 				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
 				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
-				<p><strong>AssoConnect :</strong> 
-					<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> | 
+				<p><strong>AssoConnect :</strong>
+					<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> |
 					<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
 				</p>
-				
+
 				<button class="outline" id="detail-fip-btn">
 					Ouvrir la fiche info partenaire
 				</button>
@@ -140,7 +140,7 @@
 			{
 				const select = document.getElementById('consult-select');
 				select.innerHTML = '<option value="">Choisir une association...</option>';
-				
+
 				const sortedIds = Object.keys(data).sort((a, b) =>
 				{
 					return data[a].Nom.localeCompare(data[b].Nom);
@@ -167,7 +167,7 @@
 				const s = structures[id];
 				document.getElementById('detail-nom').innerText = s.Nom;
 				document.getElementById('detail-vif').innerText = s['Code VIF'];
-				
+
 				const driveLink = document.getElementById('detail-drive');
 				const driveUrl = s['Lien vers les documents stockés sur le Drive'];
 				if (driveUrl)
@@ -237,7 +237,7 @@
 			function openFip(id)
 			{
 				if (!id) return;
-				
+
 				const btn = document.getElementById('detail-fip-btn');
 				const originalText = btn.innerText;
 				btn.innerText = 'Chargement...';

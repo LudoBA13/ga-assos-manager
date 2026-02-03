@@ -142,12 +142,12 @@ class WebApp
 function doGet(e)
 {
 	const template = HtmlService.createTemplateFromFile('WebApp.Index');
-	
+
 	// Pass the user identity to the template
 	template.userEmail = Session.getActiveUser().getEmail();
 	template.scriptUrl = ScriptApp.getService().getUrl();
 	template.configs = getAllConfigs();
-	
+
 	return template.evaluate()
 		.setTitle('Console Associations')
 		.addMetaTag('viewport', 'width=device-width, initial-scale=1')

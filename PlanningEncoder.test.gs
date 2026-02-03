@@ -139,7 +139,7 @@ function test_decodePlanning()
 	const schedule4 = "1LuMdFr2LuMdFr3LuMdFr4LuMdFr";
 	const expected4 = "Tous les lundis 8h30 : Frais.";
 	assertEqual(expected4, decodePlanning(schedule4), "Test 4: Every week compression");
-	
+
 	const schedule5 = "0JeMdSe";
 	const expected5 = "Tous les jeudis 8h30 : Sec.";
 	assertEqual(expected5, decodePlanning(schedule5), "Test 5: Every week pre-compressed");
@@ -157,7 +157,7 @@ function test_compressPlanning()
 	const schedule2 = "1LuMdFr2LuMdFr3LuMdFr";
 	const expected2 = "1LuMdFr2LuMdFr3LuMdFr";
 	assertEqual(expected2, compressPlanning(schedule2), "Test 2: Partial week no compression");
-	
+
 	const schedule3 = "1LuMdFr2MaApSe3LuMdFr4LuMdFr1MaApSe2LuMdFr";
 	const expected3 = "0LuMdFr1MaApSe2MaApSe";
 	assertEqual(expected3, compressPlanning(schedule3), "Test 3: Mixed compression");
@@ -201,7 +201,7 @@ function test_canonicalizeSchedule()
 	const schedule3 = "1LuMfFr1LuMdFr";
 	const expected3 = "1LuMdFr1LuMfFr";
 	assertEqual(expected3, canonicalizeSchedule(schedule3), "Test 3: Time sort");
-	
+
 	const schedule4 = "1MaMdFr1LuMdFr";
 	const expected4 = "1LuMdFr1MaMdFr";
 	assertEqual(expected4, canonicalizeSchedule(schedule4), "Test 4: Day sort");
@@ -248,7 +248,7 @@ function test_encodePlanning()
 	];
 	const expected4 = "0LuMdFr";
 	assertEqual(expected4, encodePlanning(entries4), "Test 4: Every week compression from 2D array");
-	
+
 	const entries5 = [
 		['0', 'Je', 'Md', 'Se']
 	];
@@ -277,7 +277,7 @@ function test_parseHumanReadable()
 	const text4 = "Tous les lundis 8h30 : Frais.";
 	const expected4 = "0LuMdFr";
 	assertEqual(expected4, parseHumanReadable(text4), "Test 4: Every week");
-	
+
 	const text5 = "Tous les jeudis 8h30 : Sec.";
 	const expected5 = "0JeMdSe";
 	assertEqual(expected5, parseHumanReadable(text5), "Test 5: Every week pre-compressed");
@@ -385,7 +385,7 @@ function test_formatPlannings()
 	const expected2 = [
 		["1ᵉʳ lundi 8h30 : Frais.", "2ᵉ mardi 14h : Frais."]
 	];
-	// Note: formatPlanningForDisplay only does ditto marks WITHIN a single cell's decoded text (sentences), 
+	// Note: formatPlanningForDisplay only does ditto marks WITHIN a single cell's decoded text (sentences),
 	// not across different cells of the range.
 	assertEqual(expected2, formatPlannings(range2), "Test 2: Multiple columns, no cross-cell ditto marks");
 }

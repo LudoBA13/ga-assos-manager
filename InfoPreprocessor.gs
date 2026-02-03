@@ -28,7 +28,7 @@ const InfoPreprocessor = {
 	/**
 	 * Preprocesses the "Informations complémentaires" field to normalize human-readable data
 	 * into machine-parsable tags.
-	 * 
+	 *
 	 * @param {string} text The raw text from the info field.
 	 * @returns {string} The processed text with tags.
 	 */

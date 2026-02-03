@@ -76,7 +76,7 @@ function test_PlanningNormalizer_Unit()
 {
 	// 1. Basic Formatting
 	assertEqual("1er lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8h30: Frais"), "Basic single entry");
-	
+
 	// 2. Week Normalization
 	assertEqual("1er lundi 8h30 : Frais.", PlanningNormalizer.normalize("1 lundi 8h30 Frais"), "Implicit 1er");
 	assertEqual("2e mardi 10h : Sec.", PlanningNormalizer.normalize("2 eme mardi 10:00 Sec"), "2 eme -> 2e, 10:00 -> 10h");
@@ -89,19 +89,19 @@ function test_PlanningNormalizer_Unit()
 	assertEqual("1er lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10h00 Frais"), "10h00 -> 10h");
 	assertEqual("1er lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10h30 Frais"), "10h30 -> 10h");
 	assertEqual("1er lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8h45 Frais"), "8h45 -> 8h30");
-	
+
 	assertEqual("1er lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 1030 Frais"), "1030 -> 10h");
 	assertEqual("1er lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 830 Frais"), "830 -> 8h30");
-	
+
 	assertEqual("1er lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10 Frais"), "10 -> 10h");
 	assertEqual("1er lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8 Frais"), "8 -> 8h30");
-	
+
 	// 4. Separators & Structure
 	assertEqual("1er lundi 8h30 : Frais, Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais Sec"), "Missing commas between products");
 	assertEqual("1er lundi 8h30 : Frais, Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais+Sec"), "Plus separator");
 	assertEqual("1er lundi 8h30 : Frais. 2e mardi 10h : Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais\n2e mardi 10h Sec"), "Newline separation");
 	assertEqual("1er lundi 8h30 : Frais. 2e mardi 10h : Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais. 2e mardi 10h Sec"), "Period separation");
-	
+
 	// 5. Edge cases
 	assertEqual("3e mardi 8h30 : Sec, Frais, Surgelé.", PlanningNormalizer.normalize("3e mardi 8h30 : Sec. frais, surgelés"), "Period inside product list");
 	assertEqual("4e mercredi 8h30 : Frais, Surgelé.", PlanningNormalizer.normalize("4 mercredi 8h30 frais+surgeles"), "4 mercredi -> 4e, + separator");
@@ -170,19 +170,19 @@ function test_PlanningNormalizer_CSVSamples()
 	for (const raw of rawSamples)
 	{
 		const normalized = PlanningNormalizer.normalize(raw);
-		
+
 		// Attempt to parse
 		const encoded = parseHumanReadable(normalized);
-		
+
 		// We expect at least something to be encoded if the input had valid time/day info.
 		// Some raw samples above are intentionally broken (missing time), so encoded might be empty or partial.
-		
+
 		// Round trip check for the parts that survived
 		const decoded = decodePlanning(encoded);
-		
+
 		// Re-encode to verify stability of the encoded form
 		const reEncoded = parseHumanReadable(decoded);
-		
+
 		assertEqual(encoded, reEncoded, `Round-trip stability for: ${normalized}`);
 	}
 }

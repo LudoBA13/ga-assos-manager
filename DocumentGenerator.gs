@@ -57,7 +57,7 @@ class DocumentGenerator
 		this._placeholderRegex = new RegExp(this._escapedPlaceholderStart + '(.*?)' + this._escapedPlaceholderEnd, 'g');
 
 		this._placeholders = this._getPlaceholders();
-		
+
 		/** @type {GoogleAppsScript.Document.Document} */
 		this._outputDocument = null;
 

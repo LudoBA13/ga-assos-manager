@@ -28,10 +28,10 @@ class PlanningNormalizer
 {
 	/**
 	 * Normalizes a user-supplied schedule string to be compatible with parseHumanReadable.
-	 * 
+	 *
 	 * Target format for each entry: "Week Day Time : Product, Product."
 	 * Example: "1er lundi 8h30 : Frais, Sec."
-	 * 
+	 *
 	 * @param {string} input The raw user input.
 	 * @returns {string} The normalized string.
 	 */
@@ -66,7 +66,7 @@ class PlanningNormalizer
 		// 4. Normalize Times (8h30, 10h, 14h)
 		// Fix missing space between day and time (e.g., "mardi8h30")
 		text = text.replace(/([a-z])(0?8|1[04])/gi, '$1 $2');
-		
+
 		// 8h30: match 08 or 8 followed by optional h/H/: and optional 2 digits
 		text = text.replace(/\b0?8(?:[:hH]\d{0,2}|[0-5]\d)?\b/g, '8h30');
 		// 10h
@@ -79,7 +79,7 @@ class PlanningNormalizer
 		text = text.replace(/\bsurgel[ée]s?\b/gi, 'Surgelé');
 
 		// 6. Fix structure and separators
-		
+
 		// Ensure colon after time
 		text = text.replace(/(8h30|10h|14h)\s*[:.]?\s*/g, '$1 : ');
 

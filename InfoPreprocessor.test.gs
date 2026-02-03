@@ -86,7 +86,7 @@ function test_InfoPreprocessor_UD()
 
 	// With trailing non-word chars (consumed)
 	assertEqual("$ud:3$", InfoPreprocessor.process("UD: 3."), "UD with trailing dot");
-	
+
 	// With trailing whitespace (consumed)
 	assertEqual("$ud:4$", InfoPreprocessor.process("UD: 4   "), "UD with trailing spaces");
 
@@ -103,7 +103,7 @@ function test_InfoPreprocessor_UD()
 	const input8 = "UD: 1, UD: 2";
 	const expected8 = "$ud:1$$ud:2$";
 	assertEqual(expected8, InfoPreprocessor.process(input8), "Multiple occurrences");
-	
+
 	// Single digit limitation (Updated to support multiple)
 	assertEqual("$ud:12$", InfoPreprocessor.process("UD: 12"), "Multi digit support");
 
@@ -121,7 +121,7 @@ function test_InfoPreprocessor_Planning()
 {
 	// Note: We depend on parseHumanReadable from PlanningEncoder.gs
 	// "Tous les lundis 8h30: Frais." -> "0LuMdFr"
-	
+
 	// Basic single entry
 	const input1 = "Planning: Tous les lundis 8h30: Frais.";
 	const expected1 = "$planning:0LuMdFr$";
@@ -146,7 +146,7 @@ function test_InfoPreprocessor_Planning()
 	// Whitespace handling in the keyword part
 	// "Planning : " matches. The captured part is "   Tous les vendredis 8h30: Frais."
 	// parseHumanReadable trims input, so it should handle leading spaces.
-	const input5 = "Planning :   Tous les vendredis 8h30: Frais.  "; 
+	const input5 = "Planning :   Tous les vendredis 8h30: Frais.  ";
 	const expected5 = "$planning:0VeMdFr$  "; // Trailing spaces after the match are preserved
 	assertEqual(expected5, InfoPreprocessor.process(input5), "Planning with whitespace");
 
@@ -160,7 +160,7 @@ function test_InfoPreprocessor_Planning()
 	// "Invalid Text." does NOT match the regex (no "h" time, no colon).
 	// So it should NOT be replaced.
 	assertEqual(input6, InfoPreprocessor.process(input6), "Planning regex mismatch");
-	
+
 	// Regex match but parser fail?
 	// "Tous les lundis 99h99: Inconnu." -> Matches regex.
 	// parseHumanReadable("Tous les lundis 99h99: Inconnu.")

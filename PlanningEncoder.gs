@@ -32,28 +32,28 @@
 /**
  * Planning Encoding Format
  * Each planning entry is encoded as a 7-character string:
- * 
+ *
  * 1. Week (1 char):
  *    - '1', '2', '3', '4': Specific week of the month.
  *    - '0': "Tous les" (Every week).
- * 
+ *
  * 2. Day (2 chars):
  *    - 'Lu': Lundi (Monday)
  *    - 'Ma': Mardi (Tuesday)
  *    - 'Me': Mercredi (Wednesday)
  *    - 'Je': Jeudi (Thursday)
  *    - 'Ve': Vendredi (Friday)
- * 
+ *
  * 3. Time Slot (2 chars):
  *    - 'Md': Matin début (08:30)
  *    - 'Mf': Matin fin (10:00)
  *    - 'Ap': Après-midi (14:00)
- * 
+ *
  * 4. Product Type (2 chars):
  *    - 'Fr': Frais
  *    - 'Se': Sec
  *    - 'Su': Surgelé
- * 
+ *
  * Example: "1LuMdFr" -> 1st Monday, 08:30, Frais
  *          "0JeMdSe" -> Every Thursday, 08:30, Sec
  */
@@ -476,7 +476,7 @@ const parseHumanReadable = (text) =>
 		// Parse Header: "Week Day Time"
 		// Example: "1er lundi 8h30" or "Tous les lundis 8h30"
 		const headerParts = headerStr.split(' ');
-		
+
 		let weekCode = null;
 		let dayCode = null;
 		let timeCode = null;
@@ -609,7 +609,7 @@ const formatPlanningForDisplay = (text) =>
  * Counts the occurrences of each product type in the schedule.
  * Values 1, 2, 3, 4 for the week count as 1.
  * Value 0 for the week counts as 4.
- * 
+ *
  * @param {string} schedule The encoded planning schedule.
  * @returns {Object} An object with counts for 'Frais', 'Sec', and 'Surgelé'.
  */
