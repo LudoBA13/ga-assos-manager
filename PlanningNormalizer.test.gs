@@ -74,6 +74,9 @@ function assertEqual(expected, actual, message)
 
 function test_PlanningNormalizer_Unit()
 {
+	// 0. Superscripts
+	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1ᵉʳ lundi 8h30: Frais"), "Superscripts ᵉʳ to er");
+
 	// 1. Basic Formatting
 	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8h30: Frais"), "Basic single entry");
 

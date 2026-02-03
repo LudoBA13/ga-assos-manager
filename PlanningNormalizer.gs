@@ -44,6 +44,9 @@ class PlanningNormalizer
 
 		let text = input.toString();
 
+		// 0. Convert superscripts to standard characters
+		text = text.replaceAll('ᵉ', 'e').replaceAll('ʳ', 'r');
+
 		// 1. Unify whitespace and handle newlines
 		// Use double backslash for literal backslash in regex source string
 		text = text.replace(/[\r\n]+/g, ' . '); // Treat newlines as potential separators
