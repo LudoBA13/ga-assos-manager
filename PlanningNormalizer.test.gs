@@ -105,6 +105,9 @@ function test_PlanningNormalizer_Unit()
 	// 5. Edge cases
 	assertEqual("3e mardi 8h30 : Sec, Frais, Surgelé.", PlanningNormalizer.normalize("3e mardi 8h30 : Sec. frais, surgelés"), "Period inside product list");
 	assertEqual("4e mercredi 8h30 : Frais, Surgelé.", PlanningNormalizer.normalize("4 mercredi 8h30 frais+surgeles"), "4 mercredi -> 4e, + separator");
+
+	// 6. Multi-line and missing info
+	assertEqual("3e mercredi 10h : Frais, Sec, Surgelé. 3e mercredi 10h : Frais, Sec, Surgelé.", PlanningNormalizer.normalize("3 eme mercredi frais sec surgele\n3e mercredi 10h: Frais, Sec, Surgelé."), "Multi-line with missing time in first entry");
 }
 
 function test_PlanningNormalizer_Idempotency()

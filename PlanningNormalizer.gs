@@ -105,6 +105,25 @@ class PlanningNormalizer
 		text = text.replace(productRegex, '$1, $2');
 		text = text.replace(productRegex, '$1, $2');
 
+		// Handle missing times: reuse existing time or default to 8h30
+		const timesFound = text.match(/\b(8h30|10h|14h)\b/);
+		const inferredTime = timesFound ? timesFound[0] : '8h30';
+
+		const entries = text.split('. ').filter(e => e.trim().length > 0);
+		const updatedEntries = entries.map(entry =>
+		{
+			if (!/\b(8h30|10h|14h)\b/.test(entry))
+			{
+				// Insert inferredTime after the day name
+				return entry.replace(/\b((?:lun|mar|mercre|jeu|vendre)di)s?\b/i, '$& ' + inferredTime);
+			}
+			return entry;
+		});
+		text = updatedEntries.join('. ');
+
+		// Ensure colon after newly inserted times
+		text = text.replace(/(8h30|10h|14h)\s*[:.]?\s*/g, '$1 : ');
+
 		// 7. Final Cleanup
 		// Ensure ends with period
 		if (!text.endsWith('.'))
