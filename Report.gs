@@ -35,6 +35,16 @@ function generateVisitReport(timestamp)
 }
 
 /**
+ * Triggered when a form is submitted.
+ * @param {Object} e The form submission event.
+ */
+function onFormSubmit(e)
+{
+	const timestamp = e.values[0];
+	generateVisitReport(timestamp);
+}
+
+/**
  * Manages the generation of visit reports based on CRVisites data.
  */
 class ReportManager
