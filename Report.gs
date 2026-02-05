@@ -69,6 +69,23 @@ function onFormSubmit(e)
 }
 
 /**
+ * Updates the visit report template document based on the questions in the source form.
+ *
+ * This function:
+ * 1. Opens the active Google Form.
+ * 2. Opens the Google Doc specified by 'visitReportTemplateDocUrl'.
+ * 3. Attempts to remove all tabs (onglets) except "Couverture".
+ * 4. Appends each section and question from the form to the document.
+ *    - Sections are formatted as Heading 3.
+ *    - Questions are formatted as Normal text.
+ *    - Answers are represented by placeholders (e.g., <<Question>>) in Blue.
+ */
+function updateTemplateFromForm()
+{
+	return ReportManager.updateTemplateFromForm();
+}
+
+/**
  * Manages the generation of visit reports based on CRVisites data.
  */
 class ReportManager
@@ -198,5 +215,110 @@ class ReportManager
 		const documentName = `CR Visite ${dateStr}`;
 
 		return generator.generateDocument(vars, documentName, destinationFolderId);
+	}
+
+	/**
+	 * Updates the visit report template document based on the questions in the source form.
+	 */
+	static updateTemplateFromForm()
+	{
+		const docUrl = getConfig('debugVisitReportTemplateDocUrl');
+
+		const form = FormApp.getActiveForm();
+		const doc = DocumentApp.openByUrl(docUrl);
+
+		let targetContainer = doc.getBody();
+
+		// Attempt to find and clear the "Questionnaire" tab if the feature is supported.
+		try
+		{
+			if (typeof doc.getTabs === 'function')
+			{
+				const tabs = doc.getTabs();
+				const questionnaireTab = tabs.find(tab =>
+				{
+					let title = '';
+					if (typeof tab.getTitle === 'function') title = tab.getTitle();
+					else if (typeof tab.getName === 'function') title = tab.getName();
+					return title === 'Questionnaire';
+				});
+
+				if (questionnaireTab)
+				{
+					// In Apps Script, Tab objects usually have a asDocumentTab().getBody() or similar.
+					if (typeof questionnaireTab.asDocumentTab === 'function')
+					{
+						targetContainer = questionnaireTab.asDocumentTab().getBody();
+						targetContainer.clear();
+					}
+					else
+					{
+						console.warn("Found 'Questionnaire' tab but cannot access its body. Falling back to main body.");
+					}
+				}
+				else
+				{
+					console.warn("'Questionnaire' tab not found. Falling back to main body.");
+				}
+			}
+			else
+			{
+				console.warn("Tabs API not detected. Appending to main document body.");
+			}
+		}
+		catch (e)
+		{
+			console.warn("Error while trying to manage Doc Tabs:", e);
+		}
+
+		const items = form.getItems();
+
+		items.forEach(item =>
+		{
+			const type = item.getType();
+
+			// Exclude non-question/section items
+			if (type === FormApp.ItemType.IMAGE || type === FormApp.ItemType.VIDEO)
+			{
+				return;
+			}
+
+			if (type === FormApp.ItemType.SECTION_HEADER)
+			{
+				const section = item.asSectionHeaderItem();
+				const title = section.getTitle();
+				if (title)
+				{
+					targetContainer.appendParagraph(title).setHeading(DocumentApp.ParagraphHeading.HEADING3);
+				}
+			}
+			else if (type === FormApp.ItemType.PAGE_BREAK)
+			{
+				const pageBreak = item.asPageBreakItem();
+				const title = pageBreak.getTitle();
+				if (title)
+				{
+					targetContainer.appendParagraph(title).setHeading(DocumentApp.ParagraphHeading.HEADING3);
+				}
+			}
+			else
+			{
+				// Assume it's a question
+				const title = item.getTitle();
+				if (title)
+				{
+					// Question Text
+					targetContainer.appendParagraph(title).setHeading(DocumentApp.ParagraphHeading.NORMAL);
+
+					// Answer Placeholder
+					const placeholder = `<<${title}>>`;
+					const answerPara = targetContainer.appendParagraph(placeholder);
+					answerPara.setHeading(DocumentApp.ParagraphHeading.NORMAL);
+					answerPara.setForegroundColor('#0000FF');
+				}
+			}
+		});
+
+		doc.saveAndClose();
 	}
 }
