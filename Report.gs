@@ -26,12 +26,22 @@
 
 /**
  * Generates a visit report for a specific record.
- * @param {string|number|Date} timestamp The unique identifier (timestamp) for the record.
+ * @param {Map<string, any>} values The values for the report.
  * @return {GoogleAppsScript.Document.Document} The generated document.
  */
-function generateVisitReport(timestamp)
+function generateVisitReport(values)
 {
-	return ReportManager.generateVisitReport(timestamp);
+	return ReportManager.generateVisitReport(values);
+}
+
+/**
+ * Retrieves report values for the given timestamp.
+ * @param {string|number|Date} timestamp The unique identifier (timestamp) for the record.
+ * @return {Map<string, any>} The values as a Map.
+ */
+function getReportValuesFromTimestamp(timestamp)
+{
+	return ReportManager.getReportValuesFromTimestamp(timestamp);
 }
 
 /**
@@ -40,8 +50,22 @@ function generateVisitReport(timestamp)
  */
 function onFormSubmit(e)
 {
-	const timestamp = e.values[0];
-	generateVisitReport(timestamp);
+	const ss = SpreadsheetApp.getActiveSpreadsheet();
+	const sheet = ss.getSheetByName('CRVisites');
+	if (!sheet)
+	{
+		throw new Error(_("La feuille '%s' est introuvable.", 'CRVisites'));
+	}
+
+	const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+	const vars = new Map;
+	headers.forEach((header, index) =>
+	{
+		vars.set(header, e.values[index]);
+	});
+
+	generateVisitReport(vars);
 }
 
 /**
@@ -50,14 +74,12 @@ function onFormSubmit(e)
 class ReportManager
 {
 	/**
-	 * Generates a visit report for the given timestamp.
+	 * Retrieves report values for the given timestamp.
 	 * @param {string|number|Date} timestamp The unique identifier (timestamp) for the record.
-	 * @return {GoogleAppsScript.Document.Document} The generated document.
+	 * @return {Map<string, any>} The values as a Map.
 	 */
-	static generateVisitReport(timestamp)
+	static getReportValuesFromTimestamp(timestamp)
 	{
-		const templateDocUrl = getConfig('visitReportTemplateDocUrl');
-
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
 		const sheet = ss.getSheetByName('CRVisites');
 		if (!sheet)
@@ -116,6 +138,18 @@ class ReportManager
 			vars.set(header, value);
 		});
 
+		return vars;
+	}
+
+	/**
+	 * Generates a visit report for the given values.
+	 * @param {Map<string, any>} vars The values for the report.
+	 * @return {GoogleAppsScript.Document.Document} The generated document.
+	 */
+	static generateVisitReport(vars)
+	{
+		const templateDocUrl = getConfig('visitReportTemplateDocUrl');
+
 		const vif = vars.get('N° VIF de la structure visitée');
 		if (!vif)
 		{
@@ -139,15 +173,26 @@ class ReportManager
 		const generator = new DocumentGenerator(templateDocUrl);
 
 		// Use a descriptive name for the document: CR Visite yyyy-MM-dd
-		const dateVisiteIdx = headers.indexOf('Date de la visite');
-		let dateStr = '';
-		if (dateVisiteIdx !== -1 && row[dateVisiteIdx] instanceof Date)
+		let dateStr = vars.get('Date de la visite') || '';
+		if (dateStr instanceof Date)
 		{
-			dateStr = Utilities.formatDate(row[dateVisiteIdx], timeZone, 'yyyy-MM-dd');
+			dateStr = Utilities.formatDate(dateStr, Session.getScriptTimeZone(), 'yyyy-MM-dd');
 		}
-		else if (dateVisiteIdx !== -1)
+		else if (typeof dateStr === 'string' && dateStr.includes('/'))
 		{
-			dateStr = String(row[dateVisiteIdx]);
+			// Simple attempt to format dd/MM/yyyy to yyyy-MM-dd for the filename
+			const parts = dateStr.split(' ')[0].split('/');
+			if (parts.length === 3)
+			{
+				if (parts[2].length === 4) // dd/MM/yyyy
+				{
+					dateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+				}
+				else if (parts[0].length === 4) // yyyy/MM/dd
+				{
+					dateStr = `${parts[0]}-${parts[1]}-${parts[2]}`;
+				}
+			}
 		}
 
 		const documentName = `CR Visite ${dateStr}`;
