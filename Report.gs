@@ -223,8 +223,15 @@ class ReportManager
 	static updateTemplateFromForm()
 	{
 		const docUrl = getConfig('debugVisitReportTemplateDocUrl');
+		const ss = SpreadsheetApp.getActiveSpreadsheet();
+		const formUrl = ss.getFormUrl();
 
-		const form = FormApp.getActiveForm();
+		if (!formUrl)
+		{
+			throw new Error(_("Aucun formulaire n'est associé à cette feuille de calcul."));
+		}
+
+		const form = FormApp.openByUrl(formUrl);
 		const doc = DocumentApp.openByUrl(docUrl);
 
 		let targetContainer = doc.getBody();
