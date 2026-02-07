@@ -67,8 +67,8 @@ class Importer
 		headers.push('$planning', 'UD', 'Planning', 'Passages Frais', 'Passages Sec', 'Passages Surgelé');
 
 		// 2. Process rows to extract extra data
-		const udRegex = /\$ud:(\d+)\$/;
-		const planningRegex = /\$planning:(\w+)\$/;
+		const udRegex = /\[UD\]\s*(\d+)/;
+		const planningRegex = /\[Planning\]\s*(.*(?:Frais|Sec|Surgelé)\.)/;
 
 		for (let i = 1; i < data.length; i++)
 		{
@@ -85,7 +85,7 @@ class Importer
 				const planningMatch = info.match(planningRegex);
 
 				if (udMatch) ud = udMatch[1];
-				if (planningMatch) planning = planningMatch[1];
+				if (planningMatch) planning = parseHumanReadable(planningMatch[1]);
 			}
 
 			const formattedPlanning = formatPlanningForDisplay(decodePlanning(planning));
