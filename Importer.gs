@@ -31,7 +31,7 @@ class Importer
 		const html = HtmlService.createTemplateFromFile('UI.Importer')
 			.evaluate()
 			.setWidth(400);
-		SpreadsheetApp.getUi().showModalDialog(html, _('Importer les structures'));
+		getSafeUi().showModalDialog(html, _('Importer les structures'));
 	}
 
 	static updateACStructuresFromFile(fileData)

@@ -30,15 +30,7 @@
 function exportInterServicesData()
 {
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
-	let ui;
-	try
-	{
-		ui = SpreadsheetApp.getUi();
-	}
-	catch (e)
-	{
-		ui = { alert: function(){} };
-	}
+	const ui = getSafeUi();
 
 	// Retrieve the export folder URL from configuration
 	let folderUrl;

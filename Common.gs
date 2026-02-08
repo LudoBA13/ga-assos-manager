@@ -120,6 +120,49 @@ function extractDriveIdFromUrl(url)
 	const match = url.match(/[-\w]{25,}/);
 	return match ? match[0] : url;
 }
+
+/**
+ * Safely retrieves the Spreadsheet UI.
+ * When executed via a trigger (non-interactive mode), SpreadsheetApp.getUi() throws an error.
+ * This function catches that error and returns a mock UI object to prevent the script from crashing.
+ *
+ * @return {GoogleAppsScript.Base.Ui} The Spreadsheet UI or a mock object.
+ */
+function getSafeUi()
+{
+	try
+	{
+		return SpreadsheetApp.getUi();
+	}
+	catch (e)
+	{
+		return {
+			alert: function() { return null; },
+			showModalDialog: function() { return null; },
+			showModelessDialog: function() { return null; },
+			showSidebar: function() { return null; },
+			createMenu: function() {
+				const menu = {
+					addItem: function() { return menu; },
+					addSeparator: function() { return menu; },
+					addSubMenu: function() { return menu; },
+					addToUi: function() { return menu; }
+				};
+				return menu;
+			},
+			createAddonMenu: function() {
+				const menu = {
+					addItem: function() { return menu; },
+					addSeparator: function() { return menu; },
+					addSubMenu: function() { return menu; },
+					addToUi: function() { return menu; }
+				};
+				return menu;
+			}
+		};
+	}
+}
+
 function getAssoByVif(vif)
 {
 	const sheetName = 'ACStructures';

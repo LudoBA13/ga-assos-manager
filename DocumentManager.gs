@@ -43,7 +43,7 @@ class DocumentManager
 			.evaluate()
 			.setWidth(400)
 			.setHeight(250);
-		SpreadsheetApp.getUi().showModalDialog(html, _('Génération des fiches'));
+		getSafeUi().showModalDialog(html, _('Génération des fiches'));
 	}
 
 	/**

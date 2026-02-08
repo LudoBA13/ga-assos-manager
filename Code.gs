@@ -29,7 +29,7 @@
  */
 function onOpen()
 {
-	const ui = SpreadsheetApp.getUi();
+	const ui = getSafeUi();
 
 	ui.createMenu('AssoConnect')
 		.addItem(_('Importer les structures'), 'showImporter')

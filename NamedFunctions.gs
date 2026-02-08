@@ -114,16 +114,16 @@ function deployNamedFunctions()
 		if (requests.length > 0)
 		{
 			Sheets.Spreadsheets.batchUpdate({ requests: requests }, ssId);
-			SpreadsheetApp.getUi().alert(_('%s opération(s) sur les fonctions effectuée(s) avec succès !', requests.length));
+			getSafeUi().alert(_('%s opération(s) sur les fonctions effectuée(s) avec succès !', requests.length));
 		}
 		else
 		{
-			SpreadsheetApp.getUi().alert(_('Aucune modification nécessaire.'));
+			getSafeUi().alert(_('Aucune modification nécessaire.'));
 		}
 	}
 	catch (e)
 	{
 		console.error('Error deploying Named Functions: ' + e.message);
-		SpreadsheetApp.getUi().alert(_('Erreur lors du déploiement : %s', e.message));
+		getSafeUi().alert(_('Erreur lors du déploiement : %s', e.message));
 	}
 }
