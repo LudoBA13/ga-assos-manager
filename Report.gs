@@ -119,7 +119,7 @@ class ReportManager
 		}
 
 		const timeZone = Session.getScriptTimeZone();
-		const dateFormat = _('dd/MM/yyyy HH:mm:ss');
+		const dateFormat = _('dd/MM/yyyy');
 
 		// Helper to normalize values for comparison (handles Date objects and strings)
 		const normalize = (val) => {
@@ -222,9 +222,11 @@ class ReportManager
 	 */
 	static updateTemplateFromForm()
 	{
-		const docUrl = getConfig('debugVisitReportTemplateDocUrl');
+		const docUrl = getConfig('visitReportTemplateDocUrl');
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
 		const formUrl = ss.getFormUrl();
+
+		console.log(`Updating template from form. Doc: ${docUrl}, Form: ${formUrl}`);
 
 		if (!formUrl)
 		{
@@ -233,99 +235,130 @@ class ReportManager
 
 		const form = FormApp.openByUrl(formUrl);
 		const doc = DocumentApp.openByUrl(docUrl);
+		this._clearContentAfterFirstHR(doc);
 
-		let targetContainer = doc.getBody();
-
-		// Attempt to find and clear the "Questionnaire" tab if the feature is supported.
-		try
-		{
-			if (typeof doc.getTabs === 'function')
-			{
-				const tabs = doc.getTabs();
-				const questionnaireTab = tabs.find(tab =>
-				{
-					let title = '';
-					if (typeof tab.getTitle === 'function') title = tab.getTitle();
-					else if (typeof tab.getName === 'function') title = tab.getName();
-					return title === 'Questionnaire';
-				});
-
-				if (questionnaireTab)
-				{
-					// In Apps Script, Tab objects usually have a asDocumentTab().getBody() or similar.
-					if (typeof questionnaireTab.asDocumentTab === 'function')
-					{
-						targetContainer = questionnaireTab.asDocumentTab().getBody();
-						targetContainer.clear();
-					}
-					else
-					{
-						console.warn("Found 'Questionnaire' tab but cannot access its body. Falling back to main body.");
-					}
-				}
-				else
-				{
-					console.warn("'Questionnaire' tab not found. Falling back to main body.");
-				}
-			}
-			else
-			{
-				console.warn("Tabs API not detected. Appending to main document body.");
-			}
-		}
-		catch (e)
-		{
-			console.warn("Error while trying to manage Doc Tabs:", e);
-		}
-
+		const body = doc.getBody();
 		const items = form.getItems();
 
 		items.forEach(item =>
 		{
+			const title = item.getTitle();
 			const type = item.getType();
 
-			// Exclude non-question/section items
-			if (type === FormApp.ItemType.IMAGE || type === FormApp.ItemType.VIDEO)
+			if (type === FormApp.ItemType.PAGE_BREAK)
 			{
-				return;
-			}
+				if (title)
+				{
+					this._appendOrReuse(body, title).setHeading(DocumentApp.ParagraphHeading.HEADING2);
+				}
 
-			if (type === FormApp.ItemType.SECTION_HEADER)
-			{
-				const section = item.asSectionHeaderItem();
-				const title = section.getTitle();
-				if (title)
+				const helpText = item.asPageBreakItem().getHelpText();
+				if (helpText)
 				{
-					targetContainer.appendParagraph(title).setHeading(DocumentApp.ParagraphHeading.HEADING3);
+					this._appendOrReuse(body, helpText).setHeading(DocumentApp.ParagraphHeading.SUBTITLE);
 				}
 			}
-			else if (type === FormApp.ItemType.PAGE_BREAK)
+			else if (type === FormApp.ItemType.SECTION_HEADER)
 			{
-				const pageBreak = item.asPageBreakItem();
-				const title = pageBreak.getTitle();
 				if (title)
 				{
-					targetContainer.appendParagraph(title).setHeading(DocumentApp.ParagraphHeading.HEADING3);
+					this._appendOrReuse(body, title).setHeading(DocumentApp.ParagraphHeading.HEADING3);
 				}
-			}
-			else
-			{
-				// Assume it's a question
-				const title = item.getTitle();
-				if (title)
-				{
-					// Question Text
-					targetContainer.appendParagraph(title).setHeading(DocumentApp.ParagraphHeading.NORMAL);
 
-					// Answer Placeholder
-					const placeholder = `<<${title}>>`;
-					const answerPara = targetContainer.appendParagraph(placeholder);
-					answerPara.setHeading(DocumentApp.ParagraphHeading.NORMAL);
-					answerPara.setForegroundColor('#0000FF');
+				const helpText = item.asSectionHeaderItem().getHelpText();
+				if (helpText)
+				{
+					this._appendOrReuse(body, helpText).setHeading(DocumentApp.ParagraphHeading.SUBTITLE);
 				}
+			}
+			else if (type !== FormApp.ItemType.IMAGE && type !== FormApp.ItemType.VIDEO)
+			{
+				if (!title)
+				{
+					return;
+				}
+
+				// Append question title and placeholder on the same line
+				const separator = /[\p{L}\p{N}]$/u.test(title) ? ' : ' : ' ';
+				const paragraph = this._appendOrReuse(body, title + separator);
+				paragraph.setHeading(DocumentApp.ParagraphHeading.NORMAL);
+
+				const placeholder = paragraph.appendText(`<<${title}>>`);
+				placeholder.setFontFamily('Asap');
+				placeholder.setForegroundColor('#1c4587');
 			}
 		});
+	}
 
-		doc.saveAndClose();
+	/**
+	 * Appends a paragraph to the body, or reuses the last one if it is empty.
+	 * @param {GoogleAppsScript.Document.Body} body
+	 * @param {string} text
+	 * @return {GoogleAppsScript.Document.Paragraph}
+	 * @private
+	 */
+	static _appendOrReuse(body, text)
+	{
+		const numChildren = body.getNumChildren();
+		if (numChildren > 0)
+		{
+			const lastChild = body.getChild(numChildren - 1);
+			if (lastChild.getType() === DocumentApp.ElementType.PARAGRAPH)
+			{
+				const para = lastChild.asParagraph();
+				if (para.getText() === '')
+				{
+					para.setText(text);
+					return para;
+				}
+			}
+		}
+		return body.appendParagraph(text);
+	}
+
+	/**
+	 * Clears all content after the first horizontal rule in the given document.
+	 * @param {GoogleAppsScript.Document.Document} doc
+	 * @private
+	 */
+	static _clearContentAfterFirstHR(doc)
+	{
+		const body = doc.getBody();
+		const searchResult = body.findElement(DocumentApp.ElementType.HORIZONTAL_RULE);
+
+		if (searchResult)
+		{
+			let element = searchResult.getElement();
+
+			// Navigate up to find the direct child of the body
+			while (element.getParent() && element.getParent().getType() !== DocumentApp.ElementType.BODY_SECTION)
+			{
+				element = element.getParent();
+			}
+
+			if (element.getParent() && element.getParent().getType() === DocumentApp.ElementType.BODY_SECTION)
+			{
+				const hrIndex = body.getChildIndex(element);
+				const numChildren = body.getNumChildren();
+
+				// Remove all content after the first horizontal rule
+				for (let i = numChildren - 1; i > hrIndex; i--)
+				{
+					try
+					{
+						body.removeChild(body.getChild(i));
+					}
+					catch (e)
+					{
+						const child = body.getChild(i);
+						if (child.getType() === DocumentApp.ElementType.PARAGRAPH)
+						{
+							child.asParagraph().clear();
+							child.asParagraph().setHeading(DocumentApp.ParagraphHeading.NORMAL);
+						}
+					}
+				}
+			}
+		}
 	}
 }
