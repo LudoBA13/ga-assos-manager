@@ -60,6 +60,8 @@ class DocumentGenerator
 
 		/** @type {GoogleAppsScript.Document.Document} */
 		this._outputDocument = null;
+		/** @type {string} */
+		this._outputDocumentId = null;
 
 		try
 		{
@@ -151,23 +153,34 @@ class DocumentGenerator
 	}
 
 	/**
+	 * Returns the last generated document.
+	 * @return {GoogleAppsScript.Document.Document} The last generated document.
+	 */
+	getOutputDocument()
+	{
+		if (!this._outputDocument && this._outputDocumentId)
+		{
+			this._outputDocument = DocumentApp.openById(this._outputDocumentId);
+		}
+		return this._outputDocument;
+	}
+
+	/**
 	 * Generates a new document from the template, replacing placeholders with the provided variables.
 	 * @param {Iterable<[string, string]>} vars An iterable of key-value pairs for placeholder replacement.
 	 * @param {string} documentName The name for the new document.
 	 * @param {string} destinationFolderId The ID of the destination folder.
-	 * @return {GoogleAppsScript.Document.Document} The newly generated document.
 	 */
 	generateDocument(vars, documentName, destinationFolderId)
 	{
+		this._outputDocument = null;
+		this._outputDocumentId = null;
 		if (!documentName || !destinationFolderId)
 		{
 			throw new Error('documentName and destinationFolderId are required.');
 		}
 
 		vars = this._filterVars(vars);
-
-		const destinationFolder = DriveApp.getFolderById(destinationFolderId);
-		const existingFiles = destinationFolder.getFilesByName(documentName);
 
 		// Prepare metadata for comparison
 		const varsObject = Object.fromEntries(vars);
@@ -176,6 +189,8 @@ class DocumentGenerator
 			vars: varsObject
 		});
 
+		const destinationFolder = DriveApp.getFolderById(destinationFolderId);
+		const existingFiles = destinationFolder.getFilesByName(documentName);
 		let fileToReturn = null;
 
 		while (existingFiles.hasNext())
@@ -206,27 +221,23 @@ class DocumentGenerator
 
 		if (fileToReturn)
 		{
-			return DocumentApp.openById(fileToReturn.getId());
+			this._outputDocumentId = fileToReturn.getId();
+			return;
 		}
 
-		const newFile = this._templateFile.makeCopy(documentName, destinationFolder);
+		const copyResource = {
+			title: documentName,
+			parents: [{ id: destinationFolderId }],
+			appProperties: { ga_metadata_hash: metadataHash }
+		};
+		const newFile = Drive.Files.copy(copyResource, this._templateFile.getId(), { supportsAllDrives: true });
+		this._outputDocumentId = newFile.id;
 
-		try
-		{
-			Drive.Files.update({ appProperties: { ga_metadata_hash: metadataHash } }, newFile.getId(), null, { supportsAllDrives: true });
-		}
-		catch (e)
-		{
-			console.warn('Failed to set file metadata in appProperties:', e);
-		}
-
-		this._outputDocument = DocumentApp.openById(newFile.getId());
+		this._outputDocument = DocumentApp.openById(this._outputDocumentId);
 		this._replacePlaceholders(vars);
 		this._outputDocument.getBody().replaceText(this._placeholderRegex.source, '');
 		this._saveAndCloseDocument();
-
-		// Return the new document, reopened to ensure it's fresh.
-		return DocumentApp.openById(newFile.getId());
+		this._outputDocument = null;
 	}
 
 	/**
