@@ -814,8 +814,38 @@ const parseHumanReadable = (text) =>
 
 /**
  * Formats a human-readable planning schedule for display.
- * Breaks lines at periods and uses ditto marks (〃) for repeated product lists.
+ * This function can be used as a custom function in Google Sheets.
  * @customfunction
+ * @param {string|Array<Array<string>>} input The human-readable schedule or a 2D array of schedules.
+ * @returns {string|Array<Array<string>>} The formatted schedule(s) for display.
+ */
+const FORMAT_DISPLAY_PLANNING = (input) =>
+{
+	if (!Array.isArray(input))
+	{
+		return formatPlanningForDisplay(input);
+	}
+
+	return input.map(row =>
+	{
+		if (Array.isArray(row))
+		{
+			return row.map(cell =>
+			{
+				return formatPlanningForDisplay(cell);
+			});
+		}
+		else
+		{
+			return [formatPlanningForDisplay(row)];
+		}
+	});
+};
+
+/**
+ * Formats a human-readable planning schedule for display.
+ * Breaks lines at periods and uses ditto marks (\u3003) for repeated product lists.
+ *
  * @param {string} text The human-readable schedule (e.g., from decodePlanning).
  * @returns {string} The formatted schedule for display.
  */
