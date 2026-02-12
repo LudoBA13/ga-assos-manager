@@ -840,17 +840,27 @@ const parseHumanReadable = (text) =>
 };
 
 /**
- * Formats a human-readable planning schedule for display.
+ * Formats an encoded planning schedule for display.
  * This function can be used as a custom function in Google Sheets.
  * @customfunction
- * @param {string|Array<Array<string>>} input The human-readable schedule or a 2D array of schedules.
+ * @param {string|Array<Array<string>>} input The encoded schedule or a 2D array of encoded schedules.
  * @returns {string|Array<Array<string>>} The formatted schedule(s) for display.
  */
 const FORMAT_DISPLAY_PLANNING = (input) =>
 {
+	const process = (val) =>
+	{
+		if (!val || typeof val !== 'string')
+		{
+			return val || '';
+		}
+
+		return formatPlanningForDisplay(decodePlanning(val));
+	};
+
 	if (!Array.isArray(input))
 	{
-		return formatPlanningForDisplay(input);
+		return process(input);
 	}
 
 	return input.map(row =>
@@ -859,12 +869,12 @@ const FORMAT_DISPLAY_PLANNING = (input) =>
 		{
 			return row.map(cell =>
 			{
-				return formatPlanningForDisplay(cell);
+				return process(cell);
 			});
 		}
 		else
 		{
-			return [formatPlanningForDisplay(row)];
+			return [process(row)];
 		}
 	});
 };

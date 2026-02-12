@@ -43,6 +43,7 @@ function runPlanningEncoderTests()
 		test_decodePlannings,
 		test_formatPlanningForDisplay,
 		test_formatPlannings,
+		test_FORMAT_DISPLAY_PLANNING,
 		test_countProductOccurrences,
 		test_schedulesCSV_Verification
 	];
@@ -442,3 +443,25 @@ function test_countProductOccurrences()
 	const expected5 = { 'Frais': 0, 'Sec': 0, 'Surgelé': 0 };
 	assertPlanningEqual(expected5, countProductOccurrences(schedule5), "Test 5: Empty schedule");
 }
+
+function test_FORMAT_DISPLAY_PLANNING()
+{
+	const input1 = "1LuMdFr2MaApSe";
+	const expected1 = "1\u1D49\u02B3 lundi 8h30 : Frais.\n2\u1D49 mardi 14h : Sec.";
+	assertPlanningEqual(expected1, FORMAT_DISPLAY_PLANNING(input1), "Test 1: Single encoded string");
+
+	const input2 = [
+		["1LuMdFr2LuMdFr3LuMdFr4LuMdFr"],
+		["1MaApSe"]
+	];
+	const expected2 = [
+		["Tous les lundis 8h30 : Frais."],
+		["1\u1D49\u02B3 mardi 14h : Sec."]
+	];
+	assertPlanningEqual(expected2, FORMAT_DISPLAY_PLANNING(input2), "Test 2: Column of encoded strings");
+
+	const input3 = "1LuMdFr1MaMdFr";
+	const expected3 = "1\u1D49\u02B3 lundi 8h30 : Frais.\n1\u1D49\u02B3 mardi 8h30 :   \u3003";
+	assertPlanningEqual(expected3, FORMAT_DISPLAY_PLANNING(input3), "Test 3: Ditto mark generation from encoded input");
+}
+
