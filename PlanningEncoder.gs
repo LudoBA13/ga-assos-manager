@@ -475,10 +475,10 @@ const canonicalizeSchedule = (schedule) =>
 
 /**
  * Encodes a list of planning objects into a schedule string.
- * This function can be used as a custom function in Google Sheets.
+ *
  * When used in Google Sheets, the input `entries` should be a 2D array where each inner array
  * represents a planning entry with properties in a defined order (e.g., [week, day, time, product]).
- * @customfunction
+ *
  * @param {Array<Array<string>>} entries An array of arrays, where each inner array represents a planning entry.
  *                                       Example: `[['1', 'Lu', 'Md', 'Fr'], ['2', 'Ma', 'Ap', 'Se']]`
  * @returns {string} The encoded schedule string.
