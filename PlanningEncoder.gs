@@ -796,7 +796,7 @@ const parseFlexiblePlanning = (text) =>
 		else
 		{
 			const pLower = (productsStr || headerStr).toLowerCase();
-			if (pLower.includes('frais'))
+			if (pLower.includes('frai'))
 			{
 				currentProductCodes.push('Fr');
 			}
@@ -804,7 +804,7 @@ const parseFlexiblePlanning = (text) =>
 			{
 				currentProductCodes.push('Se');
 			}
-			if (pLower.includes('surgel'))
+			if (pLower.includes('surg'))
 			{
 				currentProductCodes.push('Su');
 			}
