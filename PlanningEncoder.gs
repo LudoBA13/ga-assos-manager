@@ -604,6 +604,36 @@ const parseCanonicalPlanning = (text) =>
 
 /**
  * Parses a flexible or display-formatted planning string into the encoded format.
+ * This function can be used as a custom function in Google Sheets.
+ * @customfunction
+ * @param {string|Array<Array<string>>} input The flexible planning string or a 2D array of strings.
+ * @returns {string|Array<Array<string>>} The encoded schedule string or a 2D array of encoded strings.
+ */
+const PARSE_FLEXIBLE_PLANNING = (input) =>
+{
+	if (!Array.isArray(input))
+	{
+		return parseFlexiblePlanning(input);
+	}
+
+	return input.map(row =>
+	{
+		if (Array.isArray(row))
+		{
+			return row.map(cell =>
+			{
+				return parseFlexiblePlanning(cell);
+			});
+		}
+		else
+		{
+			return [parseFlexiblePlanning(row)];
+		}
+	});
+};
+
+/**
+ * Parses a flexible or display-formatted planning string into the encoded format.
  * Handles Unicode ordinals, ditto marks, case-insensitivity, and missing times.
  *
  * @param {string} text The flexible planning string.
