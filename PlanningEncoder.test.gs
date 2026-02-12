@@ -282,7 +282,7 @@ function test_parseHumanReadable()
 
 	assertPlanningEqual('', parseHumanReadable(''), "Test 6: Empty schedule");
 	assertPlanningEqual('', parseHumanReadable(null), "Test 7: Null schedule");
-	assertPlanningEqual('', parseHumanReadable('Invalid text'), "Test 8: Invalid text");
+	assertPlanningEqual('#!ERROR: Cannot parse!#', parseHumanReadable('Invalid text'), "Test 8: Invalid text");
 
 	const text9 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec. 3e mercredi 10h : Surgelé. 4e jeudi 8h30 : Frais.";
 	assertPlanningEqual("1LuMdFr2MaApSe3MeMfSu4JeMdFr", parseHumanReadable(text9), "Test 9: Standard ordinal strings (backward compatibility for 1er, 2e, 3e, 4e)");
@@ -396,6 +396,9 @@ function test_parseFlexiblePlanning()
 
 	const text4 = "tout les lundis 8h: Frais";
 	assertPlanningEqual("0LuMdFr", parseFlexiblePlanning(text4), "Test 4: Case-insensitive and flexible keywords");
+
+	const text5 = "Gibberish text that means nothing";
+	assertPlanningEqual("#!ERROR: Cannot parse!#", parseFlexiblePlanning(text5), "Test 5: Error on invalid input");
 }
 
 function test_formatPlannings()

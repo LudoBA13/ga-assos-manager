@@ -824,7 +824,13 @@ const parseFlexiblePlanning = (text) =>
 		}
 	}
 
-	return encodePlanning(entries);
+	const result = encodePlanning(entries);
+	if (text.trim() && result === '')
+	{
+		return '#!ERROR: Cannot parse!#';
+	}
+
+	return result;
 };
 
 /**
