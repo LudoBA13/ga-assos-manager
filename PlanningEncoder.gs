@@ -58,13 +58,52 @@
  *          "0JeMdSe" -> Every Thursday, 08:30, Sec
  */
 
+/**
+ * Planning Formats
+ *
+ * 1. Encoded Format (Compact):
+ *    - 7-character string per entry (e.g., "1LuMdFr").
+ *    - See details below in parseSchedule.
+ *
+ * 2. Canonical Human-Readable Format (Storage):
+ *    - Structure: "[Week] [Day] [Time] : [Products]."
+ *    - Week: "1er", "2e", "3e", "4e", or "Tous les" (ASCII only).
+ *    - Day: "lundi" to "vendredi"; plural ("lundis") if week is "Tous les".
+ *    - Time: "8h30", "10h", or "14h".
+ *    - Products: "Frais", "Sec", "Surgelé" in lexicographic order, comma-separated.
+ *    - Separators: Space before and after colon (" : ").
+ *    - Terminator: Each entry ends with a period ".".
+ *    - Layout: All entries on a single line, separated by a space.
+ *    - Example: "1er lundi 8h30 : Frais. 2e mardi 10h : Sec."
+ *
+ * 3. Display Format:
+ *    - Week: Uses Unicode superscripts ("1ᵉʳ", "2ᵉ", "3ᵉ", "4ᵉ").
+ *    - Layout: Each entry on a new line.
+ *    - Ditto Marks: If consecutive entries have the same product list, the second list
+ *      is replaced by a ditto mark ("〃") centered using spaces (half the product list length).
+ *    - Example:
+ *      1ᵉʳ lundi 8h30 : Frais.
+ *      2ᵉ mardi 10h :   〃
+ *
+ * 4. Flexible Input Format (for parsing):
+ *    - Case: Case-insensitive.
+ *    - Week (Specific): [1-4] followed by any amount of [eèrmᵉʳ] (e.g., "1er", "2ᵉ", "3è", "4em").
+ *      Superscript ᵉ (\u1D49) and ʳ (\u02B3) are transcribed to "e" and "r".
+ *    - Week (Every): Matches /to[iu][st] les/ (e.g., "Tous les", "Tout les", "Touts les").
+ *    - Day: Matches any of the five weekdays, singular or plural (e.g., "lundi" or "lundis").
+ *    - Time: Hour part (8, 10, 14) determines the slot; any minutes are accepted but ignored (e.g., "8h44" is treated as "8h30").
+ *      If omitted, defaults to the time mentioned in other planning entries, or "8h30" if none are present.
+ *    - Products: Matches "Frais", "Sec", "Surgelé" (case-insensitive).
+ *    - Separators: Optional space around colon.
+ */
+
 const PLANNING_CONSTANTS = {
 	WEEKS: {
 		'0': 'Tous les',
-		'1': '1ᵉʳ',
-		'2': '2ᵉ',
-		'3': '3ᵉ',
-		'4': '4ᵉ'
+		'1': '1er',
+		'2': '2e',
+		'3': '3e',
+		'4': '4e'
 	},
 	DAYS: {
 		'Lu': 'lundi',
@@ -437,89 +476,179 @@ const encodePlanning = (entries) =>
 };
 
 /**
- * Parses a human-readable schedule string back into the encoded format.
- * Example: "1er lundi 8h30: Frais." -> "1LuMdFr"
+ * Strictly parses a canonical human-readable planning string into the encoded format.
+ * Expects the "Canonical Human-Readable Format (Storage)" as defined in the documentation.
+ *
+ * @param {string} text The canonical planning string.
+ * @returns {string} The encoded schedule string.
  */
-const parseHumanReadable = (text) =>
+const parseCanonicalPlanning = (text) =>
 {
-	if (!text)
-	{
-		return '';
-	}
+	if (!text) return '';
 
-	const { WEEKS, DAYS, TIMES, PRODUCTS } = PLANNING_CONSTANTS;
-
-	// Reverse mappings
-	const weeksRev = Object.fromEntries(Object.entries(WEEKS).map(([k, v]) => [v, k]));
-	// Add support for standard ordinals
-	weeksRev['1er'] = '1';
-	weeksRev['2e'] = '2';
-	weeksRev['3e'] = '3';
-	weeksRev['4e'] = '4';
-
+	const { DAYS, TIMES, PRODUCTS } = PLANNING_CONSTANTS;
 	const daysRev = Object.fromEntries(Object.entries(DAYS).map(([k, v]) => [v, k]));
 	const timesRev = Object.fromEntries(Object.entries(TIMES).map(([k, v]) => [v, k]));
 	const productsRev = Object.fromEntries(Object.entries(PRODUCTS).map(([k, v]) => [v, k]));
 
-	// Split by period to get sentences, filtering empty ones
-	const sentences = text.split('.').map(s => s.trim()).filter(s => s.length > 0);
+	const segments = text.split('. ').map(s => s.trim()).filter(s => s.length > 0);
 	const entries = [];
 
-	for (const sentence of sentences)
+	for (let segment of segments)
 	{
-		// Format: "Week Day Time: Product, Product"
-		// Split into Header and Product List
-		const [headerStr, productsStr] = sentence.split(':').map(s => s.trim());
+		if (segment.endsWith('.')) segment = segment.slice(0, -1);
 
-		if (!headerStr || !productsStr) continue;
+		const parts = segment.split(' : ');
+		if (parts.length !== 2) return '';
 
-		// Parse Header: "Week Day Time"
-		// Example: "1er lundi 8h30" or "Tous les lundis 8h30"
-		const headerParts = headerStr.split(' ');
+		const [header, products] = parts;
+		const headerParts = header.split(' ');
+		if (headerParts.length < 3) return '';
+
+		const timeLabel = headerParts.pop();
+		const timeCode = timesRev[timeLabel];
+
+		let dayLabel = headerParts.pop();
+		const weekLabel = headerParts.join(' ');
 
 		let weekCode = null;
-		let dayCode = null;
-		let timeCode = null;
-
-		// Identify Time (last part of header)
-		const timeLabel = headerParts.pop(); // "8h30"
-		timeCode = timesRev[timeLabel];
-
-		// Identify Day (second to last part, handle plural "s")
-		let dayLabel = headerParts.pop(); // "lundi" or "lundis"
-		if (dayLabel.endsWith('s'))
+		if (weekLabel === 'Tous les')
 		{
+			weekCode = '0';
+			if (!dayLabel.endsWith('s')) return '';
 			dayLabel = dayLabel.slice(0, -1);
 		}
-		dayCode = daysRev[dayLabel];
+		else
+		{
+			const weekMap = { '1er': '1', '2e': '2', '3e': '3', '4e': '4' };
+			weekCode = weekMap[weekLabel];
+		}
 
-		// Identify Week (remaining parts joined)
-		const weekLabel = headerParts.join(' '); // "1er" or "Tous les"
-		weekCode = weeksRev[weekLabel];
+		const dayCode = daysRev[dayLabel];
+		if (!weekCode || !dayCode || !timeCode) return '';
+
+		const productLabels = products.split(', ');
+		for (const pLabel of productLabels)
+		{
+			const productCode = productsRev[pLabel];
+			if (!productCode) return '';
+			entries.push({ week: weekCode, day: dayCode, time: timeCode, product: productCode });
+		}
+	}
+
+	return encodePlanning(entries);
+};
+
+/**
+ * Parses a flexible or display-formatted planning string into the encoded format.
+ * Handles Unicode ordinals, ditto marks, case-insensitivity, and missing times.
+ *
+ * @param {string} text The flexible planning string.
+ * @returns {string} The encoded schedule string.
+ */
+const parseFlexiblePlanning = (text) =>
+{
+	if (!text) return '';
+
+	// 1. Pre-process: Unicode to ASCII
+	text = text.replaceAll('\u1D49', 'e').replaceAll('\u02B3', 'r');
+
+	// 2. Identify a global default time
+	let defaultTimeCode = 'Md'; // Default to 8h30
+	const allTimesMatch = text.match(/(\d+)h/i);
+	if (allTimesMatch)
+	{
+		const hour = parseInt(allTimesMatch[1], 10);
+		if (hour === 8) defaultTimeCode = 'Md';
+		else if (hour === 10) defaultTimeCode = 'Mf';
+		else if (hour === 14) defaultTimeCode = 'Ap';
+	}
+
+	// 3. Split into segments (sentences or lines)
+	const segments = text.split(/[\n\r\.]+/).map(s => s.trim()).filter(s => s.length > 0);
+
+	const entries = [];
+	let lastProductCodes = [];
+	let lastTimeCode = defaultTimeCode;
+
+	for (const segment of segments)
+	{
+		const hasDitto = segment.includes('〃') || segment.includes('\u3003');
+		const colonIdx = segment.indexOf(':');
+		let headerStr = colonIdx !== -1 ? segment.substring(0, colonIdx).trim() : segment;
+		let productsStr = colonIdx !== -1 ? segment.substring(colonIdx + 1).trim() : '';
+
+		// Parse Week
+		let weekCode = null;
+		const everyMatch = headerStr.match(/to[iu][st]\s+les/i);
+		if (everyMatch)
+		{
+			weekCode = '0';
+		}
+		else
+		{
+			const specMatch = headerStr.match(/([1-4])\s*[eèrm]+/i);
+			if (specMatch) weekCode = specMatch[1];
+		}
+
+		// Parse Day
+		let dayCode = null;
+		const dayMatch = headerStr.match(/(lundi|mardi|mercredi|jeudi|vendredi)s?/i);
+		if (dayMatch)
+		{
+			const dayMap = { 'lundi': 'Lu', 'mardi': 'Ma', 'mercredi': 'Me', 'jeudi': 'Je', 'vendredi': 'Ve' };
+			dayCode = dayMap[dayMatch[1].toLowerCase()];
+		}
+
+		// Parse Time
+		const tMatch = headerStr.match(/(\d+)h/i);
+		if (tMatch)
+		{
+			const hour = parseInt(tMatch[1], 10);
+			let timeCode = null;
+			if (hour === 8) timeCode = 'Md';
+			else if (hour === 10) timeCode = 'Mf';
+			else if (hour === 14) timeCode = 'Ap';
+
+			if (timeCode) lastTimeCode = timeCode;
+		}
 
 		// Parse Products
-		const productLabels = productsStr.split(',').map(s => s.trim());
-
-		if (weekCode && dayCode && timeCode)
+		let currentProductCodes = [];
+		if (hasDitto && lastProductCodes.length > 0)
 		{
-			for (const pLabel of productLabels)
+			currentProductCodes = [...lastProductCodes];
+		}
+		else if (productsStr)
+		{
+			const pRegexes = { 'Fr': /\bfrais\b/i, 'Se': /\bsec[s]?\b/i, 'Su': /\bsurgel[ée]s?\b/i };
+			for (const [code, regex] of Object.entries(pRegexes))
 			{
-				const productCode = productsRev[pLabel];
-				if (productCode)
-				{
-					entries.push({
-						week: weekCode,
-						day: dayCode,
-						time: timeCode,
-						product: productCode
-					});
-				}
+				if (regex.test(productsStr)) currentProductCodes.push(code);
+			}
+			if (currentProductCodes.length > 0) lastProductCodes = [...currentProductCodes];
+		}
+
+		if (weekCode && dayCode && currentProductCodes.length > 0)
+		{
+			for (const pCode of currentProductCodes)
+			{
+				entries.push({ week: weekCode, day: dayCode, time: lastTimeCode, product: pCode });
 			}
 		}
 	}
 
 	return encodePlanning(entries);
 };
+
+/**
+ * Parses a human-readable schedule string back into the encoded format.
+ * This is a flexible parser that handles various formats.
+ *
+ * @param {string} text The human-readable schedule.
+ * @returns {string} The encoded schedule string.
+ */
+const parseHumanReadable = (text) => parseFlexiblePlanning(text);
 
 /**
  * Formats a human-readable planning schedule for display.
@@ -534,6 +663,10 @@ const formatPlanningForDisplay = (text) =>
 	{
 		return '';
 	}
+
+	// 0. Convert to display ordinals (Unicode superscripts)
+	text = text.replace(/\b1er\b/g, '1ᵉʳ')
+		.replace(/\b([2-4])e\b/g, '$1ᵉ');
 
 	// 1. Split into lines
 	const rawLines = text.replace(/\. /g, '.\n').split('\n').filter(l => l.trim().length > 0);

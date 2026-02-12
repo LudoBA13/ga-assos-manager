@@ -38,6 +38,8 @@ function runPlanningEncoderTests()
 		test_canonicalizeSchedule,
 		test_encodePlanning,
 		test_parseHumanReadable,
+		test_parseCanonicalPlanning,
+		test_parseFlexiblePlanning,
 		test_decodePlannings,
 		test_formatPlanningForDisplay,
 		test_formatPlannings,
@@ -125,15 +127,15 @@ function assertEqual(expected, actual, message)
 function test_decodePlanning()
 {
 	const schedule1 = "1LuMdFr";
-	const expected1 = "1ᵉʳ lundi 8h30 : Frais.";
+	const expected1 = "1er lundi 8h30 : Frais.";
 	assertEqual(expected1, decodePlanning(schedule1), "Test 1: Single entry");
 
 	const schedule2 = "1LuMdFr2MaApSe";
-	const expected2 = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Sec.";
+	const expected2 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec.";
 	assertEqual(expected2, decodePlanning(schedule2), "Test 2: Multiple entries");
 
 	const schedule3 = "1LuMdFr1LuMdSe";
-	const expected3 = "1ᵉʳ lundi 8h30 : Frais, Sec.";
+	const expected3 = "1er lundi 8h30 : Frais, Sec.";
 	assertEqual(expected3, decodePlanning(schedule3), "Test 3: Multiple products same slot");
 
 	const schedule4 = "1LuMdFr2LuMdFr3LuMdFr4LuMdFr";
@@ -297,8 +299,8 @@ function test_decodePlannings()
 		["2MaApSe"]
 	];
 	const expected1 = [
-		["1ᵉʳ lundi 8h30 : Frais."],
-		["2ᵉ mardi 14h : Sec."]
+		["1er lundi 8h30 : Frais."],
+		["2e mardi 14h : Sec."]
 	];
 	assertEqual(expected1, decodePlannings(range1), "Test 1: Multiple rows, single column");
 
@@ -306,7 +308,7 @@ function test_decodePlannings()
 		["1LuMdFr", "2MaApSe"]
 	];
 	const expected2 = [
-		["1ᵉʳ lundi 8h30 : Frais.", "2ᵉ mardi 14h : Sec."]
+		["1er lundi 8h30 : Frais.", "2e mardi 14h : Sec."]
 	];
 	assertEqual(expected2, decodePlannings(range2), "Test 2: Single row, multiple columns");
 
@@ -315,8 +317,8 @@ function test_decodePlannings()
 		["3MeMfSu", "4JeMdFr"]
 	];
 	const expected3 = [
-		["1ᵉʳ lundi 8h30 : Frais.", "2ᵉ mardi 14h : Sec."],
-		["3ᵉ mercredi 10h : Surgelé.", "4ᵉ jeudi 8h30 : Frais."]
+		["1er lundi 8h30 : Frais.", "2e mardi 14h : Sec."],
+		["3e mercredi 10h : Surgelé.", "4e jeudi 8h30 : Frais."]
 	];
 	assertEqual(expected3, decodePlannings(range3), "Test 3: Multiple rows, multiple columns");
 
@@ -337,34 +339,67 @@ function test_decodePlannings()
 
 function test_formatPlanningForDisplay()
 {
-	const text1 = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Sec.";
+	const text1 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec.";
 	const expected1 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h : Sec.";
-	assertEqual(expected1, formatPlanningForDisplay(text1), "Test 1: Simple line break");
+	assertEqual(expected1, formatPlanningForDisplay(text1), "Test 1: Simple line break and Unicode conversion");
 
-	const text2 = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Frais.";
-	const expected2 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003"; // "Frais." is 6 chars, floor(6/2) = 3 spaces
+	const text2 = "1er lundi 8h30 : Frais. 2e mardi 14h : Frais.";
+	const expected2 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003"; // "Frais." is 6 chars, 3 spaces
 	assertEqual(expected2, formatPlanningForDisplay(text2), "Test 2: Ditto mark for same product list");
 
-	const text3 = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Frais. 3ᵉ mercredi 10h : Sec.";
+	const text3 = "1er lundi 8h30 : Frais. 2e mardi 14h : Frais. 3e mercredi 10h : Sec.";
 	const expected3 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003\n3ᵉ mercredi 10h : Sec.";
 	assertEqual(expected3, formatPlanningForDisplay(text3), "Test 3: Mixed ditto and new list");
 
-	const text4 = "1ᵉʳ lundi 8h30 : Product A. 2ᵉ mardi 14h : Product A.";
+	const text4 = "1er lundi 8h30 : Product A. 2e mardi 14h : Product A.";
 	// "Product A." is 10 chars, ceil(10/2) = 5 spaces
 	const expected4 = "1ᵉʳ lundi 8h30 : Product A.\n2ᵉ mardi 14h :     \u3003";
 	assertEqual(expected4, formatPlanningForDisplay(text4), "Test 4: Ditto mark with longer string");
 
-	const textGrouping = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Sec. 3ᵉ mercredi 10h : Frais.";
+	const textGrouping = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec. 3e mercredi 10h : Frais.";
 	const expectedGrouping = "1ᵉʳ lundi 8h30 : Frais.\n3ᵉ mercredi 10h :   \u3003\n2ᵉ mardi 14h : Sec.";
 	assertEqual(expectedGrouping, formatPlanningForDisplay(textGrouping), "Test 5: Grouping same product lists together");
 
-	const textOdd = "1ᵉʳ lundi 8h30 : Frais, Sec. 2ᵉ mardi 14h : Frais, Sec.";
+	const textOdd = "1er lundi 8h30 : Frais, Sec. 2e mardi 14h : Frais, Sec.";
 	// "Frais, Sec." is 11 chars. ceil(11/2) = 6 spaces.
 	const expectedOdd = "1ᵉʳ lundi 8h30 : Frais, Sec.\n2ᵉ mardi 14h :      \u3003";
 	assertEqual(expectedOdd, formatPlanningForDisplay(textOdd), "Test 6: Rounding up spaces for odd-length strings");
 
 	assertEqual('', formatPlanningForDisplay(''), "Test 7: Empty input");
 	assertEqual('', formatPlanningForDisplay(null), "Test 8: Null input");
+}
+
+function test_parseCanonicalPlanning()
+{
+	const text1 = "1er lundi 8h30 : Frais.";
+	const expected1 = "1LuMdFr";
+	assertEqual(expected1, parseCanonicalPlanning(text1), "Test 1: Single entry");
+
+	const text2 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec.";
+	const expected2 = "1LuMdFr2MaApSe";
+	assertEqual(expected2, parseCanonicalPlanning(text2), "Test 2: Multiple entries");
+
+	const text3 = "Tous les lundis 8h30 : Frais.";
+	const expected3 = "0LuMdFr";
+	assertEqual(expected3, parseCanonicalPlanning(text3), "Test 3: Every week");
+
+	assertEqual('', parseCanonicalPlanning('Invalid format'), "Test 4: Invalid format");
+	assertEqual('', parseCanonicalPlanning('1er lundi 8h30: Frais.'), "Test 5: Missing space before colon (strict)");
+}
+
+function test_parseFlexiblePlanning()
+{
+	const text1 = "1ᵉʳ lundi 8h30 : Frais.";
+	assertEqual("1LuMdFr", parseFlexiblePlanning(text1), "Test 1: Unicode support");
+
+	const text2 = "1er lundi : Frais. 2e mardi 14h : Sec.";
+	assertEqual("1LuApFr2MaApSe", parseFlexiblePlanning(text2), "Test 2: Missing time default (uses 14h from later)");
+	
+	const text3 = "1er lundi 8h30 : Frais.\n2e mardi : 〃";
+	assertEqual("1LuMdFr2MaMdFr", parseFlexiblePlanning(text3), "Test 3: Newline and ditto mark");
+
+	const text4 = "tout les lundis 8h: Frais";
+	assertEqual("0LuMdFr", parseFlexiblePlanning(text4), "Test 4: Case-insensitive and flexible keywords");
 }
 
 function test_formatPlannings()
