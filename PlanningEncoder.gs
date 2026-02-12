@@ -693,10 +693,10 @@ const parseFlexiblePlanning = (text) =>
 
 		// Parse Day
 		let dayCode = null;
-		const dayMatch = headerStr.match(/(lundi|mardi|mercredi|jeudi|vendredi)s?/i);
+		const dayMatch = headerStr.match(/(lun|mar|mercre|jeu|vendre)dis?/i);
 		if (dayMatch)
 		{
-			const dayMap = { 'lundi': 'Lu', 'mardi': 'Ma', 'mercredi': 'Me', 'jeudi': 'Je', 'vendredi': 'Ve' };
+			const dayMap = { 'lun': 'Lu', 'mar': 'Ma', 'mercre': 'Me', 'jeu': 'Je', 'vendre': 'Ve' };
 			dayCode = dayMap[dayMatch[1].toLowerCase()];
 		}
 
