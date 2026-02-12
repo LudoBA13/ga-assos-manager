@@ -565,7 +565,15 @@ const parseFlexiblePlanning = (text) =>
 	}
 
 	// 3. Split into segments (sentences or lines)
-	const segments = text.split(/[\n\r\.]+/).map(s => s.trim()).filter(s => s.length > 0);
+	let segments = text.split(/[\n\r]+|\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
+	if (segments.length > 0)
+	{
+		const lastIdx = segments.length - 1;
+		if (segments[lastIdx].endsWith('.'))
+		{
+			segments[lastIdx] = segments[lastIdx].slice(0, -1).trim();
+		}
+	}
 
 	const entries = [];
 	let lastProductCodes = [];
@@ -621,11 +629,11 @@ const parseFlexiblePlanning = (text) =>
 		}
 		else if (productsStr)
 		{
-			const pRegexes = { 'Fr': /\bfrais\b/i, 'Se': /\bsec[s]?\b/i, 'Su': /\bsurgel[ée]s?\b/i };
-			for (const [code, regex] of Object.entries(pRegexes))
-			{
-				if (regex.test(productsStr)) currentProductCodes.push(code);
-			}
+			const pLower = productsStr.toLowerCase();
+			if (pLower.includes('frais')) currentProductCodes.push('Fr');
+			if (pLower.includes('sec')) currentProductCodes.push('Se');
+			if (pLower.includes('surgel')) currentProductCodes.push('Su');
+			
 			if (currentProductCodes.length > 0) lastProductCodes = [...currentProductCodes];
 		}
 

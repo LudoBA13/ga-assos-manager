@@ -1,0 +1,22 @@
+{
+  "name": "ga-assos-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node run-tests-local.js",
+    "push": "clasp push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-LudoBAorg:LudoBA13/ga-assos-manager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@google/clasp": "^3.2.0",
+    "gas-local": "^1.3.1"
+  }
+}
