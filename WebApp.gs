@@ -24,7 +24,10 @@ class WebApp
 		}
 
 		const data = sheet.getDataRange().getValues();
-		if (data.length < 2) return {};
+		if (data.length < 2)
+		{
+			return {};
+		}
 
 		const headers = data[0];
 		const idIdx = headers.indexOf('ID du Contact');
@@ -45,7 +48,10 @@ class WebApp
 			const row = data[i];
 			const id = row[idIdx];
 
-			if (!id) continue;
+			if (!id)
+			{
+				continue;
+			}
 
 			const dateVal = dateIdx !== -1 ? row[dateIdx] : '';
 			let dateStr = '';

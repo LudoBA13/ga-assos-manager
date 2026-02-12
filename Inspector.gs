@@ -90,27 +90,42 @@ function inspectAssociatedForm()
 			if (type === FormApp.ItemType.MULTIPLE_CHOICE)
 			{
 				const choices = item.asMultipleChoiceItem().getChoices();
-				if (choices.length > 0) details = ' [Choices: ' + choices.map(c => c.getValue()).join(', ') + ']';
+				if (choices.length > 0)
+				{
+					details = ' [Choices: ' + choices.map(c => c.getValue()).join(', ') + ']';
+				}
 			}
 			else if (type === FormApp.ItemType.CHECKBOX)
 			{
 				const choices = item.asCheckboxItem().getChoices();
-				if (choices.length > 0) details = ' [Choices: ' + choices.map(c => c.getValue()).join(', ') + ']';
+				if (choices.length > 0)
+				{
+					details = ' [Choices: ' + choices.map(c => c.getValue()).join(', ') + ']';
+				}
 			}
 			else if (type === FormApp.ItemType.LIST)
 			{
 				const choices = item.asListItem().getChoices();
-				if (choices.length > 0) details = ' [Choices: ' + choices.map(c => c.getValue()).join(', ') + ']';
+				if (choices.length > 0)
+				{
+					details = ' [Choices: ' + choices.map(c => c.getValue()).join(', ') + ']';
+				}
 			}
 			else if (type === FormApp.ItemType.SECTION_HEADER)
 			{
 				const help = item.asSectionHeaderItem().getHelpText();
-				if (help) details = ' [Help: ' + help + ']';
+				if (help)
+				{
+					details = ' [Help: ' + help + ']';
+				}
 			}
 			else if (type === FormApp.ItemType.PAGE_BREAK)
 			{
 				const help = item.asPageBreakItem().getHelpText();
-				if (help) details = ' [Help: ' + help + ']';
+				if (help)
+				{
+					details = ' [Help: ' + help + ']';
+				}
 			}
 		}
 		catch (e)

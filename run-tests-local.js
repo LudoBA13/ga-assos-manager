@@ -10,7 +10,8 @@ const vm = require('vm');
 
 const mocks = {
 	Logger: {
-		log: function (msg) { console.log('  [GAS Logger]', msg); }
+		log: function (msg)
+		{ console.log('  [GAS Logger]', msg); }
 	},
 	console: console,
 	// Add other GAS services here if needed
@@ -30,7 +31,8 @@ gsFiles.forEach(file => {
 	const code = fs.readFileSync(path.join(folderPath, file), 'utf8');
 	try {
 		vm.runInContext(code, sandbox, { filename: file });
-	} catch (e) {
+	} catch (e)
+	{
 		console.error(`Error loading ${file}:`, e);
 	}
 });
@@ -40,10 +42,12 @@ try {
 	// Execute the test runner from the sandbox
 	const results = sandbox.runPlanningEncoderTests();
 	
-	if (results && results.failed > 0) {
+	if (results && results.failed > 0)
+	{
 		process.exit(1);
 	}
-} catch (err) {
+} catch (err)
+{
 	console.error('Fatal error during test execution:');
 	console.error(err);
 	process.exit(1);

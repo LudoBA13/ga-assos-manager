@@ -84,8 +84,14 @@ class Importer
 				const udMatch = info.match(udRegex);
 				const planningMatch = info.match(planningRegex);
 
-				if (udMatch) ud = udMatch[1];
-				if (planningMatch) planning = parseHumanReadable(planningMatch[1]);
+				if (udMatch)
+				{
+					ud = udMatch[1];
+				}
+				if (planningMatch)
+				{
+					planning = parseHumanReadable(planningMatch[1]);
+				}
 			}
 
 			const formattedPlanning = formatPlanningForDisplay(decodePlanning(planning));

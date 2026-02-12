@@ -65,7 +65,8 @@ class DocumentGenerator
 
 		try
 		{
-			const fileInfo = Drive.Files.get(this._templateFile.getId(), { fields: 'headRevisionId', supportsAllDrives: true });
+			const fileInfo = Drive.Files.get(this._templateFile.getId(),
+			{ fields: 'headRevisionId', supportsAllDrives: true });
 			this._templateHeadRevisionId = fileInfo.headRevisionId;
 		}
 		catch (e)
@@ -202,7 +203,8 @@ class DocumentGenerator
 			{
 				try
 				{
-					const fileInfo = Drive.Files.get(file.getId(), { fields: 'appProperties', supportsAllDrives: true });
+					const fileInfo = Drive.Files.get(file.getId(),
+					{ fields: 'appProperties', supportsAllDrives: true });
 					if (fileInfo.appProperties && fileInfo.appProperties.ga_metadata_hash === metadataHash)
 					{
 						console.log(`Skipping generation for "${documentName}": cache match found.`);
@@ -230,7 +232,8 @@ class DocumentGenerator
 			parents: [{ id: destinationFolderId }],
 			appProperties: { ga_metadata_hash: metadataHash }
 		};
-		const newFile = Drive.Files.copy(copyResource, this._templateFile.getId(), { supportsAllDrives: true });
+		const newFile = Drive.Files.copy(copyResource, this._templateFile.getId(),
+		{ supportsAllDrives: true });
 		this._outputDocumentId = newFile.id;
 
 		this._outputDocument = DocumentApp.openById(this._outputDocumentId);

@@ -74,7 +74,10 @@ function getRowById(sheetName, id)
 	}
 
 	const lastRow = sheet.getLastRow();
-	if (lastRow < 2) return null;
+	if (lastRow < 2)
+	{
+		return null;
+	}
 
 	const lastCol = sheet.getLastColumn();
 	const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
@@ -90,7 +93,8 @@ function getRowById(sheetName, id)
 	const rowData = sheet.getRange(rowIdx + 2, 1, 1, lastCol).getValues()[0];
 
 	const result = {};
-	headers.forEach((header, index) => {
+	headers.forEach((header, index) =>
+	{
 		if (header)
 		{
 			result[header] = rowData[index];
@@ -137,25 +141,39 @@ function getSafeUi()
 	catch (e)
 	{
 		return {
-			alert: function() { return null; },
-			showModalDialog: function() { return null; },
-			showModelessDialog: function() { return null; },
-			showSidebar: function() { return null; },
-			createMenu: function() {
+			alert: function()
+			{ return null; },
+			showModalDialog: function()
+			{ return null; },
+			showModelessDialog: function()
+			{ return null; },
+			showSidebar: function()
+			{ return null; },
+			createMenu: function()
+			{
 				const menu = {
-					addItem: function() { return menu; },
-					addSeparator: function() { return menu; },
-					addSubMenu: function() { return menu; },
-					addToUi: function() { return menu; }
+					addItem: function()
+					{ return menu; },
+					addSeparator: function()
+					{ return menu; },
+					addSubMenu: function()
+					{ return menu; },
+					addToUi: function()
+					{ return menu; }
 				};
 				return menu;
 			},
-			createAddonMenu: function() {
+			createAddonMenu: function()
+			{
 				const menu = {
-					addItem: function() { return menu; },
-					addSeparator: function() { return menu; },
-					addSubMenu: function() { return menu; },
-					addToUi: function() { return menu; }
+					addItem: function()
+					{ return menu; },
+					addSeparator: function()
+					{ return menu; },
+					addSubMenu: function()
+					{ return menu; },
+					addToUi: function()
+					{ return menu; }
 				};
 				return menu;
 			}
@@ -173,7 +191,10 @@ function getAssoByVif(vif)
 	}
 
 	const lastRow = sheet.getLastRow();
-	if (lastRow < 2) return null;
+	if (lastRow < 2)
+	{
+		return null;
+	}
 
 	const lastCol = sheet.getLastColumn();
 	const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
@@ -195,7 +216,8 @@ function getAssoByVif(vif)
 	const rowData = sheet.getRange(rowIdx + 2, 1, 1, lastCol).getValues()[0];
 
 	const result = {};
-	headers.forEach((header, index) => {
+	headers.forEach((header, index) =>
+	{
 		if (header)
 		{
 			result[header] = rowData[index];

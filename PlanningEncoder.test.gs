@@ -43,7 +43,8 @@ function runPlanningEncoderTests()
 		test_decodePlannings,
 		test_formatPlanningForDisplay,
 		test_formatPlannings,
-		test_countProductOccurrences
+		test_countProductOccurrences,
+		test_schedulesCSV_Verification
 	];
 
 	const results = {
@@ -258,15 +259,15 @@ function test_encodePlanning()
 
 function test_parseHumanReadable()
 {
-	const text1 = "1ᵉʳ lundi 8h30 : Frais.";
+	const text1 = "1\u1D49\u02B3 lundi 8h30 : Frais.";
 	const expected1 = "1LuMdFr";
 	assertPlanningEqual(expected1, parseHumanReadable(text1), "Test 1: Single entry");
 
-	const text2 = "1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 14h : Sec.";
+	const text2 = "1\u1D49\u02B3 lundi 8h30 : Frais. 2\u1D49 mardi 14h : Sec.";
 	const expected2 = "1LuMdFr2MaApSe";
 	assertPlanningEqual(expected2, parseHumanReadable(text2), "Test 2: Multiple entries");
 
-	const text3 = "1ᵉʳ lundi 8h30 : Frais, Sec.";
+	const text3 = "1\u1D49\u02B3 lundi 8h30 : Frais, Sec.";
 	const expected3 = "1LuMdFr1LuMdSe";
 	assertPlanningEqual(expected3, parseHumanReadable(text3), "Test 3: Multiple products same slot");
 
@@ -334,29 +335,29 @@ function test_decodePlannings()
 function test_formatPlanningForDisplay()
 {
 	const text1 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec.";
-	const expected1 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h : Sec.";
+	const expected1 = "1\u1D49\u02B3 lundi 8h30 : Frais.\n2\u1D49 mardi 14h : Sec.";
 	assertPlanningEqual(expected1, formatPlanningForDisplay(text1), "Test 1: Simple line break and Unicode conversion");
 
 	const text2 = "1er lundi 8h30 : Frais. 2e mardi 14h : Frais.";
-	const expected2 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003"; // "Frais." is 6 chars, 3 spaces
+	const expected2 = "1\u1D49\u02B3 lundi 8h30 : Frais.\n2\u1D49 mardi 14h :   \u3003"; // "Frais." is 6 chars, 3 spaces
 	assertPlanningEqual(expected2, formatPlanningForDisplay(text2), "Test 2: Ditto mark for same product list");
 
 	const text3 = "1er lundi 8h30 : Frais. 2e mardi 14h : Frais. 3e mercredi 10h : Sec.";
-	const expected3 = "1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003\n3ᵉ mercredi 10h : Sec.";
+	const expected3 = "1\u1D49\u02B3 lundi 8h30 : Frais.\n2\u1D49 mardi 14h :   \u3003\n3\u1D49 mercredi 10h : Sec.";
 	assertPlanningEqual(expected3, formatPlanningForDisplay(text3), "Test 3: Mixed ditto and new list");
 
 	const text4 = "1er lundi 8h30 : Product A. 2e mardi 14h : Product A.";
 	// "Product A." is 10 chars, ceil(10/2) = 5 spaces
-	const expected4 = "1ᵉʳ lundi 8h30 : Product A.\n2ᵉ mardi 14h :     \u3003";
+	const expected4 = "1\u1D49\u02B3 lundi 8h30 : Product A.\n2\u1D49 mardi 14h :     \u3003";
 	assertPlanningEqual(expected4, formatPlanningForDisplay(text4), "Test 4: Ditto mark with longer string");
 
 	const textGrouping = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec. 3e mercredi 10h : Frais.";
-	const expectedGrouping = "1ᵉʳ lundi 8h30 : Frais.\n3ᵉ mercredi 10h :   \u3003\n2ᵉ mardi 14h : Sec.";
+	const expectedGrouping = "1\u1D49\u02B3 lundi 8h30 : Frais.\n3\u1D49 mercredi 10h :   \u3003\n2\u1D49 mardi 14h : Sec.";
 	assertPlanningEqual(expectedGrouping, formatPlanningForDisplay(textGrouping), "Test 5: Grouping same product lists together");
 
 	const textOdd = "1er lundi 8h30 : Frais, Sec. 2e mardi 14h : Frais, Sec.";
 	// "Frais, Sec." is 11 chars. ceil(11/2) = 6 spaces.
-	const expectedOdd = "1ᵉʳ lundi 8h30 : Frais, Sec.\n2ᵉ mardi 14h :      \u3003";
+	const expectedOdd = "1\u1D49\u02B3 lundi 8h30 : Frais, Sec.\n2\u1D49 mardi 14h :      \u3003";
 	assertPlanningEqual(expectedOdd, formatPlanningForDisplay(textOdd), "Test 6: Rounding up spaces for odd-length strings");
 
 	assertPlanningEqual('', formatPlanningForDisplay(''), "Test 7: Empty input");
@@ -383,13 +384,13 @@ function test_parseCanonicalPlanning()
 
 function test_parseFlexiblePlanning()
 {
-	const text1 = "1ᵉʳ lundi 8h30 : Frais.";
+	const text1 = "1\u1D49\u02B3 lundi 8h30 : Frais.";
 	assertPlanningEqual("1LuMdFr", parseFlexiblePlanning(text1), "Test 1: Unicode support");
 
 	const text2 = "1er lundi : Frais. 2e mardi 14h : Sec.";
 	assertPlanningEqual("1LuApFr2MaApSe", parseFlexiblePlanning(text2), "Test 2: Missing time default (uses 14h from later)");
 	
-	const text3 = "1er lundi 8h30 : Frais.\n2e mardi : 〃";
+	const text3 = "1er lundi 8h30 : Frais.\n2e mardi : \u3003";
 	assertPlanningEqual("1LuMdFr2MaMdFr", parseFlexiblePlanning(text3), "Test 3: Newline and ditto mark");
 
 	const text4 = "tout les lundis 8h: Frais";
@@ -403,8 +404,8 @@ function test_formatPlannings()
 		["3MeMfSu"]
 	];
 	const expected1 = [
-		["1ᵉʳ lundi 8h30 : Frais.\n2ᵉ mardi 14h :   \u3003"],
-		["3ᵉ mercredi 10h : Surgelé."]
+		["1\u1D49\u02B3 lundi 8h30 : Frais.\n2\u1D49 mardi 14h :   \u3003"],
+		["3\u1D49 mercredi 10h : Surgelé."]
 	];
 	assertPlanningEqual(expected1, formatPlannings(range1), "Test 1: Multiple rows with internal formatting");
 
@@ -412,7 +413,7 @@ function test_formatPlannings()
 		["1LuMdFr", "2MaApFr"]
 	];
 	const expected2 = [
-		["1ᵉʳ lundi 8h30 : Frais.", "2ᵉ mardi 14h : Frais."]
+		["1\u1D49\u02B3 lundi 8h30 : Frais.", "2\u1D49 mardi 14h : Frais."]
 	];
 	// Note: formatPlanningForDisplay only does ditto marks WITHIN a single cell's decoded text (sentences),
 	// not across different cells of the range.

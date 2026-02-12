@@ -142,7 +142,10 @@ const PLANNING_CONSTANTS = {
  */
 const parseSchedule = function* (schedule)
 {
-	if (!schedule) return;
+	if (!schedule)
+	{
+		return;
+	}
 
 	for (let i = 0; i < schedule.length; i += 7)
 	{
@@ -180,7 +183,10 @@ const compressPlanning = (schedule) =>
 
 	for (const [suffix, weeks] of groupedBySuffix.entries())
 	{
-		const hasAllWeeks = requiredWeeks.size === weeks.size && [...requiredWeeks].every(w => weeks.has(w));
+		const hasAllWeeks = requiredWeeks.size === weeks.size && [...requiredWeeks].every(w =>
+		{
+			return weeks.has(w);
+		});
 
 		if (hasAllWeeks)
 		{
@@ -267,7 +273,10 @@ const decompressPlanning = (schedule) =>
 		return labelA.localeCompare(labelB, 'fr');
 	});
 
-	return entries.map(e => e.weekCode + e.dayCode + e.timeCode + e.productCode).join('');
+	return entries.map(e =>
+	{
+		return e.weekCode + e.dayCode + e.timeCode + e.productCode;
+	}).join('');
 };
 
 /**
@@ -307,7 +316,10 @@ const groupAndSortEntries = (schedule) =>
 	return sortedKeys.map(key =>
 	{
 		const item = grouped.get(key);
-		item.productList.sort((a, b) => a.localeCompare(b, 'fr'));
+		item.productList.sort((a, b) =>
+		{
+			return a.localeCompare(b, 'fr');
+		});
 		return item;
 	});
 };
@@ -359,7 +371,10 @@ const decodePlannings = (range) =>
 	{
 		if (Array.isArray(row))
 		{
-			return row.map(cell => decodePlanning(cell));
+			return row.map(cell =>
+			{
+				return decodePlanning(cell);
+			});
 		}
 		else
 		{
@@ -378,7 +393,13 @@ const decodePlannings = (range) =>
  */
 const formatPlannings = (range) =>
 {
-	return decodePlannings(range).map(row => row.map(cell => formatPlanningForDisplay(cell)));
+	return decodePlannings(range).map(row =>
+	{
+		return row.map(cell =>
+		{
+			return formatPlanningForDisplay(cell);
+		});
+	});
 };
 
 /**
@@ -419,7 +440,10 @@ const canonicalizeSchedule = (schedule) =>
 		return labelA.localeCompare(labelB, 'fr');
 	});
 
-	return entries.map(e => e.weekCode + e.dayCode + e.timeCode + e.productCode).join('');
+	return entries.map(e =>
+	{
+		return e.weekCode + e.dayCode + e.timeCode + e.productCode;
+	}).join('');
 };
 
 /**
@@ -443,12 +467,15 @@ const encodePlanning = (entries) =>
 	// Check if the input is a 2D array from Google Sheets
 	if (entries.length > 0 && Array.isArray(entries[0]))
 	{
-		formattedEntries = entries.map(row => ({
-			week: row[0],
-			day: row[1],
-			time: row[2],
-			product: row[3]
-		}));
+		formattedEntries = entries.map(row =>
+		{
+			return {
+				week: row[0],
+				day: row[1],
+				time: row[2],
+				product: row[3]
+			};
+		});
 	}
 	else
 	{
@@ -484,26 +511,53 @@ const encodePlanning = (entries) =>
  */
 const parseCanonicalPlanning = (text) =>
 {
-	if (!text) return '';
+	if (!text)
+	{
+		return '';
+	}
 
 	const { DAYS, TIMES, PRODUCTS } = PLANNING_CONSTANTS;
-	const daysRev = Object.fromEntries(Object.entries(DAYS).map(([k, v]) => [v, k]));
-	const timesRev = Object.fromEntries(Object.entries(TIMES).map(([k, v]) => [v, k]));
-	const productsRev = Object.fromEntries(Object.entries(PRODUCTS).map(([k, v]) => [v, k]));
+	const daysRev = Object.fromEntries(Object.entries(DAYS).map(([k, v]) =>
+	{
+		return [v, k];
+	}));
+	const timesRev = Object.fromEntries(Object.entries(TIMES).map(([k, v]) =>
+	{
+		return [v, k];
+	}));
+	const productsRev = Object.fromEntries(Object.entries(PRODUCTS).map(([k, v]) =>
+	{
+		return [v, k];
+	}));
 
-	const segments = text.split('. ').map(s => s.trim()).filter(s => s.length > 0);
+	const segments = text.split('. ').map(s =>
+	{
+		return s.trim();
+	}).filter(s =>
+	{
+		return s.length > 0;
+	});
 	const entries = [];
 
 	for (let segment of segments)
 	{
-		if (segment.endsWith('.')) segment = segment.slice(0, -1);
+		if (segment.endsWith('.'))
+		{
+			segment = segment.slice(0, -1);
+		}
 
 		const parts = segment.split(' : ');
-		if (parts.length !== 2) return '';
+		if (parts.length !== 2)
+		{
+			return '';
+		}
 
 		const [header, products] = parts;
 		const headerParts = header.split(' ');
-		if (headerParts.length < 3) return '';
+		if (headerParts.length < 3)
+		{
+			return '';
+		}
 
 		const timeLabel = headerParts.pop();
 		const timeCode = timesRev[timeLabel];
@@ -515,7 +569,10 @@ const parseCanonicalPlanning = (text) =>
 		if (weekLabel === 'Tous les')
 		{
 			weekCode = '0';
-			if (!dayLabel.endsWith('s')) return '';
+			if (!dayLabel.endsWith('s'))
+			{
+				return '';
+			}
 			dayLabel = dayLabel.slice(0, -1);
 		}
 		else
@@ -525,13 +582,19 @@ const parseCanonicalPlanning = (text) =>
 		}
 
 		const dayCode = daysRev[dayLabel];
-		if (!weekCode || !dayCode || !timeCode) return '';
+		if (!weekCode || !dayCode || !timeCode)
+		{
+			return '';
+		}
 
 		const productLabels = products.split(', ');
 		for (const pLabel of productLabels)
 		{
 			const productCode = productsRev[pLabel];
-			if (!productCode) return '';
+			if (!productCode)
+			{
+				return '';
+			}
 			entries.push({ week: weekCode, day: dayCode, time: timeCode, product: productCode });
 		}
 	}
@@ -548,7 +611,10 @@ const parseCanonicalPlanning = (text) =>
  */
 const parseFlexiblePlanning = (text) =>
 {
-	if (!text) return '';
+	if (!text)
+	{
+		return '';
+	}
 
 	// 1. Pre-process: Unicode to ASCII
 	text = text.replaceAll('\u1D49', 'e').replaceAll('\u02B3', 'r');
@@ -559,13 +625,29 @@ const parseFlexiblePlanning = (text) =>
 	if (allTimesMatch)
 	{
 		const hour = parseInt(allTimesMatch[1], 10);
-		if (hour === 8) defaultTimeCode = 'Md';
-		else if (hour === 10) defaultTimeCode = 'Mf';
-		else if (hour === 14) defaultTimeCode = 'Ap';
+		if (hour === 8)
+		{
+			defaultTimeCode = 'Md';
+		}
+		else if (hour === 10)
+		{
+			defaultTimeCode = 'Mf';
+		}
+		else if (hour === 14)
+		{
+			defaultTimeCode = 'Ap';
+		}
 	}
 
 	// 3. Split into segments (sentences or lines)
-	let segments = text.split(/[\n\r]+|\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
+	let segments = text.split(/[\n\r]+|\.\s+/).map(s =>
+	{
+		return s.trim();
+	}).filter(s =>
+	{
+		return s.length > 0;
+	});
+
 	if (segments.length > 0)
 	{
 		const lastIdx = segments.length - 1;
@@ -578,10 +660,12 @@ const parseFlexiblePlanning = (text) =>
 	const entries = [];
 	let lastProductCodes = [];
 	let lastTimeCode = defaultTimeCode;
+	let lastWeekCode = null;
+	let lastDayCode = null;
 
 	for (const segment of segments)
 	{
-		const hasDitto = segment.includes('〃') || segment.includes('\u3003');
+		const hasDitto = segment.includes('\u3003') || segment.includes('\u3003');
 		const colonIdx = segment.indexOf(':');
 		let headerStr = colonIdx !== -1 ? segment.substring(0, colonIdx).trim() : segment;
 		let productsStr = colonIdx !== -1 ? segment.substring(colonIdx + 1).trim() : '';
@@ -596,7 +680,15 @@ const parseFlexiblePlanning = (text) =>
 		else
 		{
 			const specMatch = headerStr.match(/([1-4])\s*[eèrm]+/i);
-			if (specMatch) weekCode = specMatch[1];
+			if (specMatch)
+			{
+				weekCode = specMatch[1];
+			}
+		}
+
+		if (weekCode)
+		{
+			lastWeekCode = weekCode;
 		}
 
 		// Parse Day
@@ -608,17 +700,34 @@ const parseFlexiblePlanning = (text) =>
 			dayCode = dayMap[dayMatch[1].toLowerCase()];
 		}
 
+		if (dayCode)
+		{
+			lastDayCode = dayCode;
+		}
+
 		// Parse Time
 		const tMatch = headerStr.match(/(\d+)h/i);
 		if (tMatch)
 		{
 			const hour = parseInt(tMatch[1], 10);
 			let timeCode = null;
-			if (hour === 8) timeCode = 'Md';
-			else if (hour === 10) timeCode = 'Mf';
-			else if (hour === 14) timeCode = 'Ap';
+			if (hour === 8)
+			{
+				timeCode = 'Md';
+			}
+			else if (hour === 10)
+			{
+				timeCode = 'Mf';
+			}
+			else if (hour === 14)
+			{
+				timeCode = 'Ap';
+			}
 
-			if (timeCode) lastTimeCode = timeCode;
+			if (timeCode)
+			{
+				lastTimeCode = timeCode;
+			}
 		}
 
 		// Parse Products
@@ -627,21 +736,33 @@ const parseFlexiblePlanning = (text) =>
 		{
 			currentProductCodes = [...lastProductCodes];
 		}
-		else if (productsStr)
+		else
 		{
-			const pLower = productsStr.toLowerCase();
-			if (pLower.includes('frais')) currentProductCodes.push('Fr');
-			if (pLower.includes('sec')) currentProductCodes.push('Se');
-			if (pLower.includes('surgel')) currentProductCodes.push('Su');
-			
-			if (currentProductCodes.length > 0) lastProductCodes = [...currentProductCodes];
+			const pLower = (productsStr || headerStr).toLowerCase();
+			if (pLower.includes('frais'))
+			{
+				currentProductCodes.push('Fr');
+			}
+			if (pLower.includes('sec'))
+			{
+				currentProductCodes.push('Se');
+			}
+			if (pLower.includes('surgel'))
+			{
+				currentProductCodes.push('Su');
+			}
+
+			if (currentProductCodes.length > 0)
+			{
+				lastProductCodes = [...currentProductCodes];
+			}
 		}
 
-		if (weekCode && dayCode && currentProductCodes.length > 0)
+		if (lastWeekCode && lastDayCode && currentProductCodes.length > 0)
 		{
 			for (const pCode of currentProductCodes)
 			{
-				entries.push({ week: weekCode, day: dayCode, time: lastTimeCode, product: pCode });
+				entries.push({ week: lastWeekCode, day: lastDayCode, time: lastTimeCode, product: pCode });
 			}
 		}
 	}
@@ -656,7 +777,10 @@ const parseFlexiblePlanning = (text) =>
  * @param {string} text The human-readable schedule.
  * @returns {string} The encoded schedule string.
  */
-const parseHumanReadable = (text) => parseFlexiblePlanning(text);
+const parseHumanReadable = (text) =>
+{
+	return parseFlexiblePlanning(text);
+};
 
 /**
  * Formats a human-readable planning schedule for display.
@@ -673,11 +797,14 @@ const formatPlanningForDisplay = (text) =>
 	}
 
 	// 0. Convert to display ordinals (Unicode superscripts)
-	text = text.replace(/\b1er\b/g, '1ᵉʳ')
-		.replace(/\b([2-4])e\b/g, '$1ᵉ');
+	text = text.replace(/\b1er\b/g, '1\u1D49\u02B3')
+		.replace(/\b([2-4])e\b/g, '$1\u1D49');
 
 	// 1. Split into lines
-	const rawLines = text.replace(/\. /g, '.\n').split('\n').filter(l => l.trim().length > 0);
+	const rawLines = text.replace(/\. /g, '.\n').split('\n').filter(l =>
+	{
+		return l.trim().length > 0;
+	});
 
 	// 2. Parse lines
 	const parsedLines = rawLines.map(line =>

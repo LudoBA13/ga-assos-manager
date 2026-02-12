@@ -182,23 +182,23 @@ function test_InfoPreprocessor_Planning()
 function test_InfoPreprocessor_Normalization()
 {
 	// Test Unicode superscript ordinals normalization
-	const input1 = "Planning: 1ᵉʳ lundi 8h30: Frais."; // ᵉʳ (U+1D49 U+02B3)
+	const input1 = "Planning: 1\u1D49\u02B3 lundi 8h30: Frais."; // ᵉʳ (U+1D49 U+02B3)
 	const expected1 = "$planning:1LuMdFr$";
 	assertEqual(expected1, InfoPreprocessor.process(input1), "Unicode 1er normalization");
 
-	const input2 = "Planning: 2ᵉ mardi 14h: Sec."; // ᵉ (U+1D49)
+	const input2 = "Planning: 2\u1D49 mardi 14h: Sec."; // ᵉ (U+1D49)
 	const expected2 = "$planning:2MaApSe$";
 	assertEqual(expected2, InfoPreprocessor.process(input2), "Unicode 2e normalization");
 
-	const input4 = "Planning: 3ᵉ mercredi 10h: Sec."; // ᵉ (U+1D49)
+	const input4 = "Planning: 3\u1D49 mercredi 10h: Sec."; // ᵉ (U+1D49)
 	const expected4 = "$planning:3MeMfSe$";
 	assertEqual(expected4, InfoPreprocessor.process(input4), "Unicode 3e normalization");
 
-	const input5 = "Planning: 4ᵉ jeudi 8h30: Frais."; // ᵉ (U+1D49)
+	const input5 = "Planning: 4\u1D49 jeudi 8h30: Frais."; // ᵉ (U+1D49)
 	const expected5 = "$planning:4JeMdFr$";
 	assertEqual(expected5, InfoPreprocessor.process(input5), "Unicode 4e normalization");
 
-	const input6 = "60 UD. Planning : 1ᵉʳ mercredi 8h30 : Frais, Sec, Surgelé.";
+	const input6 = "60 UD. Planning : 1\u1D49\u02B3 mercredi 8h30 : Frais, Sec, Surgelé.";
 	const expected6 = "$ud:60$$planning:1MeMdFr1MeMdSe1MeMdSu$";
 	assertEqual(expected6, InfoPreprocessor.process(input6), "Mixed UD and Unicode 1er");
 }

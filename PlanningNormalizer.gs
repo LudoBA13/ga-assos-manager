@@ -45,7 +45,7 @@ class PlanningNormalizer
 		let text = input.toString();
 
 		// 0. Convert superscripts to standard characters
-		text = text.replaceAll('ᵉ', 'e').replaceAll('ʳ', 'r');
+		text = text.replaceAll('\u1D49', 'e').replaceAll('\u02B3', 'r');
 
 		// 1. Unify whitespace and handle newlines
 		// Use double backslash for literal backslash in regex source string
@@ -112,7 +112,10 @@ class PlanningNormalizer
 		const timesFound = text.match(/\b(8h30|10h|14h)\b/);
 		const inferredTime = timesFound ? timesFound[0] : '8h30';
 
-		const entries = text.split('. ').filter(e => e.trim().length > 0);
+		const entries = text.split('. ').filter(e =>
+		{
+			return e.trim().length > 0;
+		});
 		const updatedEntries = entries.map(entry =>
 		{
 			if (!/\b(8h30|10h|14h)\b/.test(entry))
@@ -180,7 +183,10 @@ class PlanningNormalizer
 		{
 			if (Array.isArray(row))
 			{
-				return row.map(cell => PlanningNormalizer.normalize(cell));
+				return row.map(cell =>
+				{
+					return PlanningNormalizer.normalize(cell);
+				});
 			}
 			else
 			{
@@ -194,4 +200,7 @@ class PlanningNormalizer
  * Normalizes a range of planning schedules.
  * @customfunction
  */
-const NORMALIZE_PLANNING = (range) => PlanningNormalizer.normalizeRange(range);
+const NORMALIZE_PLANNING = (range) =>
+{
+	return PlanningNormalizer.normalizeRange(range);
+};

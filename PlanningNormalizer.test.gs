@@ -75,42 +75,42 @@ function assertEqual(expected, actual, message)
 function test_PlanningNormalizer_Unit()
 {
 	// 0. Superscripts
-	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1ᵉʳ lundi 8h30: Frais"), "Superscripts ᵉʳ to er");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais.", PlanningNormalizer.normalize("1\u1D49\u02B3 lundi 8h30: Frais"), "Superscripts \u1D49\u02B3 to er");
 
 	// 1. Basic Formatting
-	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8h30: Frais"), "Basic single entry");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8h30: Frais"), "Basic single entry");
 
 	// 2. Week Normalization
-	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1 lundi 8h30 Frais"), "Implicit 1er");
-	assertEqual("2ᵉ mardi 10h : Sec.", PlanningNormalizer.normalize("2 eme mardi 10:00 Sec"), "2 eme -> 2e, 10:00 -> 10h");
-	assertEqual("3ᵉ mercredi 14h : Surgelé.", PlanningNormalizer.normalize("3ème mercredi 14h Surgeles"), "3ème -> 3e, Surgeles -> Surgelé");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais.", PlanningNormalizer.normalize("1 lundi 8h30 Frais"), "Implicit 1er");
+	assertEqual("2\u1D49 mardi 10h : Sec.", PlanningNormalizer.normalize("2 eme mardi 10:00 Sec"), "2 eme -> 2e, 10:00 -> 10h");
+	assertEqual("3\u1D49 mercredi 14h : Surgelé.", PlanningNormalizer.normalize("3ème mercredi 14h Surgeles"), "3ème -> 3e, Surgeles -> Surgelé");
 	assertEqual("Tous les jeudis 8h30 : Frais.", PlanningNormalizer.normalize("tout les jeudi 8h30 frais"), "tout les -> Tous les, plural day");
 
 	// 3. Time Normalization
-	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 08:30 Frais"), "08:30 -> 8h30");
-	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8:30 Frais"), "8:30 -> 8h30");
-	assertEqual("1ᵉʳ lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10h00 Frais"), "10h00 -> 10h");
-	assertEqual("1ᵉʳ lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10h30 Frais"), "10h30 -> 10h");
-	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8h45 Frais"), "8h45 -> 8h30");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 08:30 Frais"), "08:30 -> 8h30");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8:30 Frais"), "8:30 -> 8h30");
+	assertEqual("1\u1D49\u02B3 lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10h00 Frais"), "10h00 -> 10h");
+	assertEqual("1\u1D49\u02B3 lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10h30 Frais"), "10h30 -> 10h");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8h45 Frais"), "8h45 -> 8h30");
 
-	assertEqual("1ᵉʳ lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 1030 Frais"), "1030 -> 10h");
-	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 830 Frais"), "830 -> 8h30");
+	assertEqual("1\u1D49\u02B3 lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 1030 Frais"), "1030 -> 10h");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 830 Frais"), "830 -> 8h30");
 
-	assertEqual("1ᵉʳ lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10 Frais"), "10 -> 10h");
-	assertEqual("1ᵉʳ lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8 Frais"), "8 -> 8h30");
+	assertEqual("1\u1D49\u02B3 lundi 10h : Frais.", PlanningNormalizer.normalize("1er lundi 10 Frais"), "10 -> 10h");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8 Frais"), "8 -> 8h30");
 
 	// 4. Separators & Structure
-	assertEqual("1ᵉʳ lundi 8h30 : Frais, Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais Sec"), "Missing commas between products");
-	assertEqual("1ᵉʳ lundi 8h30 : Frais, Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais+Sec"), "Plus separator");
-	assertEqual("1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 10h : Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais\n2e mardi 10h Sec"), "Newline separation");
-	assertEqual("1ᵉʳ lundi 8h30 : Frais. 2ᵉ mardi 10h : Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais. 2e mardi 10h Sec"), "Period separation");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais, Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais Sec"), "Missing commas between products");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais, Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais+Sec"), "Plus separator");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais. 2\u1D49 mardi 10h : Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais\n2e mardi 10h Sec"), "Newline separation");
+	assertEqual("1\u1D49\u02B3 lundi 8h30 : Frais. 2\u1D49 mardi 10h : Sec.", PlanningNormalizer.normalize("1er lundi 8h30 Frais. 2e mardi 10h Sec"), "Period separation");
 
 	// 5. Edge cases
-	assertEqual("3ᵉ mardi 8h30 : Frais, Sec, Surgelé.", PlanningNormalizer.normalize("3e mardi 8h30 : Sec. frais, surgelés"), "Period inside product list");
-	assertEqual("4ᵉ mercredi 8h30 : Frais, Surgelé.", PlanningNormalizer.normalize("4 mercredi 8h30 frais+surgeles"), "4 mercredi -> 4e, + separator");
+	assertEqual("3\u1D49 mardi 8h30 : Frais, Sec, Surgelé.", PlanningNormalizer.normalize("3e mardi 8h30 : Sec. frais, surgelés"), "Period inside product list");
+	assertEqual("4\u1D49 mercredi 8h30 : Frais, Surgelé.", PlanningNormalizer.normalize("4 mercredi 8h30 frais+surgeles"), "4 mercredi -> 4e, + separator");
 
 	// 6. Multi-line and missing info
-	assertEqual("3ᵉ mercredi 10h : Frais, Sec, Surgelé. 3ᵉ mercredi 10h : Frais, Sec, Surgelé.", PlanningNormalizer.normalize("3 eme mercredi frais sec surgele\n3e mercredi 10h: Frais, Sec, Surgelé."), "Multi-line with missing time in first entry");
+	assertEqual("3\u1D49 mercredi 10h : Frais, Sec, Surgelé. 3\u1D49 mercredi 10h : Frais, Sec, Surgelé.", PlanningNormalizer.normalize("3 eme mercredi frais sec surgele\n3e mercredi 10h: Frais, Sec, Surgelé."), "Multi-line with missing time in first entry");
 }
 
 function test_PlanningNormalizer_Idempotency()
@@ -200,7 +200,7 @@ function test_PlanningNormalizer_Range()
 		["Tous les vendredis 14h: Surgelé", ""]
 	];
 	const expected = [
-		["1ᵉʳ lundi 8h30 : Frais.", "2ᵉ mardi 10h : Sec."],
+		["1\u1D49\u02B3 lundi 8h30 : Frais.", "2\u1D49 mardi 10h : Sec."],
 		["Tous les vendredis 14h : Surgelé.", ""]
 	];
 	const actual = PlanningNormalizer.normalizeRange(range);

@@ -122,7 +122,8 @@ class ReportManager
 		const dateFormat = _('dd/MM/yyyy');
 
 		// Helper to normalize values for comparison (handles Date objects and strings)
-		const normalize = (val) => {
+		const normalize = (val) =>
+		{
 			if (val instanceof Date)
 			{
 				return Utilities.formatDate(val, timeZone, dateFormat);
