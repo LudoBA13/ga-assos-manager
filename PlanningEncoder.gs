@@ -328,6 +328,35 @@ const groupAndSortEntries = (schedule) =>
  * Decodes a planning schedule from its encoded string representation into a human-readable format.
  * This function can be used as a custom function in Google Sheets.
  * @customfunction
+ * @param {string|Array<Array<string>>} input The encoded schedule string or a 2D array of strings.
+ * @returns {string|Array<Array<string>>} The human-readable planning schedule or a 2D array of schedules.
+ */
+const FORMAT_STORAGE_PLANNING = (input) =>
+{
+	if (!Array.isArray(input))
+	{
+		return decodePlanning(input);
+	}
+
+	return input.map(row =>
+	{
+		if (Array.isArray(row))
+		{
+			return row.map(cell =>
+			{
+				return decodePlanning(cell);
+			});
+		}
+		else
+		{
+			return [decodePlanning(row)];
+		}
+	});
+};
+
+/**
+ * Decodes a planning schedule from its encoded string representation into a human-readable format.
+ *
  * @param {string} schedule The encoded schedule string (e.g., "1LuMdFr").
  * @returns {string} The human-readable planning schedule (e.g., "1er lundi 8h30: Frais.").
  */
@@ -355,8 +384,7 @@ const decodePlanning = (schedule) =>
 
 /**
  * Decodes a 2D array (range) of planning schedules, applying decodePlanning to each value.
- * This function can be used as a custom function in Google Sheets.
- * @customfunction
+ *
  * @param {Array<Array<string>>} range The 2D array (range) of encoded schedule strings.
  * @returns {Array<Array<string>>} A 2D array with the decoded planning schedules.
  */
@@ -386,8 +414,7 @@ const decodePlannings = (range) =>
 
 /**
  * Decodes and formats a 2D array (range) of planning schedules for display.
- * This function can be used as a custom function in Google Sheets.
- * @customfunction
+ *
  * @param {Array<Array<string>>} range The 2D array (range) of encoded schedule strings.
  * @returns {Array<Array<string>>} A 2D array with the formatted planning schedules.
  */
