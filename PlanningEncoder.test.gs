@@ -282,7 +282,16 @@ function test_parseHumanReadable()
 
 	assertPlanningEqual('', parseHumanReadable(''), "Test 6: Empty schedule");
 	assertPlanningEqual('', parseHumanReadable(null), "Test 7: Null schedule");
-	assertPlanningEqual('#!ERROR: Cannot parse!#', parseHumanReadable('Invalid text'), "Test 8: Invalid text");
+
+	try
+	{
+		parseHumanReadable('Invalid text');
+		throw new Error("Test 8: Invalid text - Expected error to be thrown");
+	}
+	catch (e)
+	{
+		// Expected
+	}
 
 	const text9 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec. 3e mercredi 10h : Surgelé. 4e jeudi 8h30 : Frais.";
 	assertPlanningEqual("1LuMdFr2MaApSe3MeMfSu4JeMdFr", parseHumanReadable(text9), "Test 9: Standard ordinal strings (backward compatibility for 1er, 2e, 3e, 4e)");
@@ -379,8 +388,25 @@ function test_parseCanonicalPlanning()
 	const expected3 = "0LuMdFr";
 	assertPlanningEqual(expected3, parseCanonicalPlanning(text3), "Test 3: Every week");
 
-	assertPlanningEqual('', parseCanonicalPlanning('Invalid format'), "Test 4: Invalid format");
-	assertPlanningEqual('', parseCanonicalPlanning('1er lundi 8h30: Frais.'), "Test 5: Missing space before colon (strict)");
+	try
+	{
+		parseCanonicalPlanning('Invalid format');
+		throw new Error("Test 4: Invalid format - Expected error to be thrown");
+	}
+	catch (e)
+	{
+		// Expected
+	}
+
+	try
+	{
+		parseCanonicalPlanning('1er lundi 8h30: Frais.');
+		throw new Error("Test 5: Missing space before colon - Expected error to be thrown");
+	}
+	catch (e)
+	{
+		// Expected
+	}
 }
 
 function test_parseFlexiblePlanning()
@@ -398,7 +424,15 @@ function test_parseFlexiblePlanning()
 	assertPlanningEqual("0LuMdFr", parseFlexiblePlanning(text4), "Test 4: Case-insensitive and flexible keywords");
 
 	const text5 = "Gibberish text that means nothing";
-	assertPlanningEqual("#!ERROR: Cannot parse!#", parseFlexiblePlanning(text5), "Test 5: Error on invalid input");
+	try
+	{
+		parseFlexiblePlanning(text5);
+		throw new Error("Test 5: Error on invalid input - Expected error to be thrown");
+	}
+	catch (e)
+	{
+		// Expected
+	}
 }
 
 function test_formatPlannings()

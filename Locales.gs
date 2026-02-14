@@ -48,6 +48,12 @@ const CATALOG = {
 		"Terminé.": "Terminé.",
 		"Génération terminée avec succès.": "Génération terminée avec succès.",
 		"Erreur critique : ": "Erreur critique : ",
+		"Impossible d'analyser le planning : %s": "Impossible d'analyser le planning : %s",
+		"Format canonique invalide (manque ':'): %s": "Format canonique invalide (manque ':'): %s",
+		"Format d'en-tête canonique invalide : %s": "Format d'en-tête canonique invalide : %s",
+		"Le jour doit être au pluriel pour 'Tous les' : %s": "Le jour doit être au pluriel pour 'Tous les' : %s",
+		"Code temporel ou hebdomadaire invalide dans le segment : %s": "Code temporel ou hebdomadaire invalide dans le segment : %s",
+		"Produit inconnu : %s": "Produit inconnu : %s",
 		"Fermer": "Fermer"
 	}
 };

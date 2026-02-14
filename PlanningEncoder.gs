@@ -576,14 +576,14 @@ const parseCanonicalPlanning = (text) =>
 		const parts = segment.split(' : ');
 		if (parts.length !== 2)
 		{
-			return '';
+			throw new Error(_("Format canonique invalide (manque ':'): %s", segment));
 		}
 
 		const [header, products] = parts;
 		const headerParts = header.split(' ');
 		if (headerParts.length < 3)
 		{
-			return '';
+			throw new Error(_("Format d'en-tête canonique invalide : %s", header));
 		}
 
 		const timeLabel = headerParts.pop();
@@ -598,7 +598,7 @@ const parseCanonicalPlanning = (text) =>
 			weekCode = '0';
 			if (!dayLabel.endsWith('s'))
 			{
-				return '';
+				throw new Error(_("Le jour doit être au pluriel pour 'Tous les' : %s", dayLabel));
 			}
 			dayLabel = dayLabel.slice(0, -1);
 		}
@@ -611,7 +611,7 @@ const parseCanonicalPlanning = (text) =>
 		const dayCode = daysRev[dayLabel];
 		if (!weekCode || !dayCode || !timeCode)
 		{
-			return '';
+			throw new Error(_("Code temporel ou hebdomadaire invalide dans le segment : %s", segment));
 		}
 
 		const productLabels = products.split(', ');
@@ -620,7 +620,7 @@ const parseCanonicalPlanning = (text) =>
 			const productCode = productsRev[pLabel];
 			if (!productCode)
 			{
-				return '';
+				throw new Error(_("Produit inconnu : %s", pLabel));
 			}
 			entries.push({ week: weekCode, day: dayCode, time: timeCode, product: productCode });
 		}
@@ -827,7 +827,7 @@ const parseFlexiblePlanning = (text) =>
 	const result = encodePlanning(entries);
 	if (text.trim() && result === '')
 	{
-		return '#!ERROR: Cannot parse!#';
+		throw new Error(_("Impossible d'analyser le planning : %s", text));
 	}
 
 	return result;
