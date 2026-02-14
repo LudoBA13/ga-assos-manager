@@ -180,6 +180,7 @@ class DocumentGenerator
 	 * @param {Iterable<[string, string]>} vars An iterable of key-value pairs for placeholder replacement.
 	 * @param {string} documentName The name for the new document.
 	 * @param {string} destinationFolderId The ID of the destination folder.
+	 * @return {string} The ID of the generated document.
 	 */
 	generateDocument(vars, documentName, destinationFolderId)
 	{
@@ -233,7 +234,7 @@ class DocumentGenerator
 		if (fileToReturn)
 		{
 			this._outputDocumentId = fileToReturn.getId();
-			return;
+			return this._outputDocumentId;
 		}
 
 		const copyResource = {
@@ -250,6 +251,8 @@ class DocumentGenerator
 		this._outputDocument.getBody().replaceText(this._placeholderRegex.source, '');
 		this._saveAndCloseDocument();
 		this._outputDocument = null;
+
+		return this._outputDocumentId;
 	}
 
 	/**

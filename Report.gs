@@ -27,7 +27,7 @@
 /**
  * Generates a visit report for a specific record.
  * @param {Map<string, any>} values The values for the report.
- * @return {GoogleAppsScript.Document.Document} The generated document.
+ * @return {string} The ID of the generated document.
  */
 function generateVisitReport(values)
 {
@@ -162,7 +162,7 @@ class ReportManager
 	/**
 	 * Generates a visit report for the given values.
 	 * @param {Map<string, any>} vars The values for the report.
-	 * @return {GoogleAppsScript.Document.Document} The generated document.
+	 * @return {string} The ID of the generated document.
 	 */
 	static generateVisitReport(vars)
 	{
