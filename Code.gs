@@ -41,6 +41,7 @@ function onOpen()
 	ui.createMenu('Admin')
 		.addItem(_('Exporter les données interservices'), 'exportInterServicesData')
 		.addItem(_("Générer les Fiches d'Informations Partenaires"), 'generateFIPDocuments')
+		.addItem(_('Ajuster la feuille au contenu'), 'cropCurrentSheet')
 		.addToUi();
 }
 
@@ -73,6 +74,61 @@ function runTests()
 	const totalTotal = encoderResults.total + preprocessorResults.total;
 
 	Logger.log(`Total Tests: ${totalPassed} / ${totalTotal} passed.`);
+}
+
+/**
+ * Resizes a sheet to match its content by removing empty rows and columns from the end.
+ *
+ * @param {string|number} sheetNameOrId The name or the ID of the sheet to resize.
+ */
+function resizeSheetToContent(sheetNameOrId)
+{
+	const ss = SpreadsheetApp.getActiveSpreadsheet();
+	let sheet = ss.getSheetByName(sheetNameOrId);
+
+	if (!sheet)
+	{
+		sheet = ss.getSheets().find(s =>
+		{
+			return s.getSheetId() == sheetNameOrId;
+		});
+	}
+
+	if (!sheet)
+	{
+		throw new Error(_("La feuille '%s' est introuvable.", sheetNameOrId));
+	}
+
+	const maxRows = sheet.getMaxRows();
+	const maxCols = sheet.getMaxColumns();
+
+	// Quick path: if the last cell at the bottom right is not empty, return early.
+	if (sheet.getRange(maxRows, maxCols).getValue() !== '')
+	{
+		return;
+	}
+
+	const lastRow = Math.max(1, sheet.getLastRow());
+	const lastCol = Math.max(1, sheet.getLastColumn());
+
+	if (maxRows > lastRow)
+	{
+		sheet.deleteRows(lastRow + 1, maxRows - lastRow);
+	}
+
+	if (maxCols > lastCol)
+	{
+		sheet.deleteColumns(lastCol + 1, maxCols - lastCol);
+	}
+}
+
+/**
+ * Wrapper function for the UI menu to crop the current sheet.
+ */
+function cropCurrentSheet()
+{
+	const sheet = SpreadsheetApp.getActiveSheet();
+	resizeSheetToContent(sheet.getSheetId());
 }
 
 

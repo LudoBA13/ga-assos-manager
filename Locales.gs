@@ -54,6 +54,7 @@ const CATALOG = {
 		"Le jour doit être au pluriel pour 'Tous les' : %s": "Le jour doit être au pluriel pour 'Tous les' : %s",
 		"Code temporel ou hebdomadaire invalide dans le segment : %s": "Code temporel ou hebdomadaire invalide dans le segment : %s",
 		"Produit inconnu : %s": "Produit inconnu : %s",
+		"Ajuster la feuille au contenu": "Ajuster la feuille au contenu",
 		"Fermer": "Fermer"
 	}
 };
