@@ -31,6 +31,7 @@ function exportInterServicesData()
 {
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
 	const ui = getSafeUi();
+	const props = PropertiesService.getScriptProperties();
 
 	// Retrieve the export folder URL from configuration
 	let folderUrl;
@@ -74,6 +75,7 @@ function exportInterServicesData()
 
 	const sheets = ss.getSheets();
 	let exportedCnt = 0;
+	let skippedCnt = 0;
 
 	for (const sheet of sheets)
 	{
@@ -86,6 +88,18 @@ function exportInterServicesData()
 			// Check if the sheet is empty
 			if (sheet.getLastRow() === 0)
 			{
+				continue;
+			}
+
+			// Optimization: Check if content has changed since last export
+			const currentHash = computeSheetContentHash(sheet);
+			const propKey = `LAST_EXPORT_HASH_${sheetName}`;
+			const lastHash = props.getProperty(propKey);
+
+			if (currentHash && currentHash === lastHash)
+			{
+				console.log(`Skipping export for "${sheetName}": no changes detected.`);
+				skippedCnt++;
 				continue;
 			}
 
@@ -130,9 +144,39 @@ function exportInterServicesData()
 			// Rename the copied sheet to the target name
 			copiedSheet.setName(targetName);
 
+			// Save the hash to skip next time if no changes
+			props.setProperty(propKey, currentHash);
 			exportedCnt++;
 		}
 	}
 
-	ui.alert(_('Export terminé. %s fichier(s) généré(s).', exportedCnt));
+	let msg = _('Export terminé. %s fichier(s) généré(s).', exportedCnt);
+	if (skippedCnt > 0)
+	{
+		msg += '\n' + _('%s fichier(s) ignoré(s) (déjà à jour).', skippedCnt);
+	}
+	ui.alert(msg);
+}
+
+/**
+ * Computes an MD5 hash of a sheet's data values.
+ * Optimized for speed using join-based serialization.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet The sheet to hash.
+ * @return {string} The computed hash.
+ */
+function computeSheetContentHash(sheet)
+{
+	const lastRow = sheet.getLastRow();
+	if (lastRow === 0)
+	{
+		return '';
+	}
+
+	const values = sheet.getDataRange().getValues();
+
+	// Faster serialization than JSON.stringify for large 2D arrays
+	const content = values.map(row => row.join('\t')).join('\n');
+
+	const rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, content, Utilities.Charset.UTF_8);
+	return rawHash.map(b => ('0' + (b & 0xFF).toString(16)).slice(-2)).join('');
 }
