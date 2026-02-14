@@ -45,6 +45,30 @@ function onOpen()
 		.addToUi();
 }
 
+function resetDailyPlanningDate()
+{
+	const cellAddress = 'E1';
+	const sheetName   = 'Export-Planning journalier';
+
+	const ss = SpreadsheetApp.getActiveSpreadsheet();
+	const sheet = ss.getSheetByName(sheetName);
+
+	if (!sheet)
+	{
+		console.error(`La feuille '${sheetName}' est introuvable.`);
+		return;
+	}
+
+	try
+	{
+		sheet.getRange(cellAddress).setValue(new Date);
+	}
+	catch (e)
+	{
+		console.error(`Impossible de définir la valeur de la cellule ${cellAddress} dans '${sheetName}' : ` + e.message);
+	}
+}
+
 function showImporter()
 {
 	Importer.show();
