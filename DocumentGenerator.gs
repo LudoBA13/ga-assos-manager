@@ -154,6 +154,15 @@ class DocumentGenerator
 	}
 
 	/**
+	 * Returns the ID of the last generated document.
+	 * @return {string|null} The ID of the document or null.
+	 */
+	getOutputDocumentId()
+	{
+		return this._outputDocumentId;
+	}
+
+	/**
 	 * Returns the last generated document.
 	 * @return {GoogleAppsScript.Document.Document} The last generated document.
 	 */
@@ -228,8 +237,8 @@ class DocumentGenerator
 		}
 
 		const copyResource = {
-			title: documentName,
-			parents: [{ id: destinationFolderId }],
+			name: documentName,
+			parents: [destinationFolderId],
 			appProperties: { ga_metadata_hash: metadataHash }
 		};
 		const newFile = Drive.Files.copy(copyResource, this._templateFile.getId(),
