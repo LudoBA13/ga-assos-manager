@@ -31,7 +31,6 @@ function exportInterServicesData()
 {
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
 	const ui = getSafeUi();
-	const props = PropertiesService.getScriptProperties();
 
 	// Retrieve the export folder URL from configuration
 	let folderUrl;
@@ -91,6 +90,8 @@ function exportInterServicesData()
 		const trgDocName   = nameParts[0];
 		const trgSheetName = nameParts.length > 1 ? nameParts.slice(1).join('-') : trgDocName;
 
+		console.log(`Exporting "${trgSheetName}" in "${trgDocName}"`);
+
 		// Check if the sheet is empty
 		if (sheet.getLastRow() === 0)
 		{
@@ -99,28 +100,40 @@ function exportInterServicesData()
 
 		// Optimization: Check if content has changed since last export
 		const currentHash = computeSheetContentHash(sheet);
-		const propKey = `LAST_EXPORT_HASH_${sheetName}`;
-		const lastHash = props.getProperty(propKey);
-
-		if (currentHash && currentHash === lastHash)
-		{
-			console.log(`Skipping export for "${sheetName}": no changes detected.`);
-			skippedCnt++;
-			continue;
-		}
+		const propKey     = 'ga_hash_' + trgSheetName.replace(/[^a-zA-Z0-9_-]/g, '_');
 
 		let trgSS;
+		let trgFileId;
 		const files = folder.getFilesByName(trgDocName);
 
 		if (files.hasNext())
 		{
 			const file = files.next();
+			trgFileId = file.getId();
+
+			// Optimization: Check if content has changed via appProperties (faster than opening the doc)
+			try
+			{
+				const driveFile = Drive.Files.get(trgFileId, { fields: 'appProperties', supportsAllDrives: true });
+				if (driveFile.appProperties && driveFile.appProperties[propKey] === currentHash)
+				{
+					console.log(`Skipping export for "${sheetName}" in "${trgDocName}": cache match found.`);
+					skippedCnt++;
+					continue;
+				}
+			}
+			catch (e)
+			{
+				console.warn(`Failed to read appProperties for "${trgDocName}":`, e);
+			}
+
 			trgSS = SpreadsheetApp.open(file);
 		}
 		else
 		{
 			trgSS = SpreadsheetApp.create(trgDocName);
-			const newFile = DriveApp.getFileById(trgSS.getId());
+			trgFileId = trgSS.getId();
+			const newFile = DriveApp.getFileById(trgFileId);
 			newFile.moveTo(folder);
 		}
 
@@ -159,7 +172,17 @@ function exportInterServicesData()
 		copiedSheet.setName(trgSheetName);
 
 		// Save the hash to skip next time if no changes
-		props.setProperty(propKey, currentHash);
+		try
+		{
+			const driveFile = Drive.Files.get(trgFileId, { fields: 'appProperties', supportsAllDrives: true });
+			const appProperties = driveFile.appProperties || {};
+			appProperties[propKey] = currentHash;
+			Drive.Files.update({ appProperties: appProperties }, trgFileId, null, { supportsAllDrives: true });
+		}
+		catch (e)
+		{
+			console.error(`Failed to update appProperties for "${trgDocName}":`, e);
+		}
 		exportedCnt++;
 	}
 
