@@ -47,7 +47,7 @@ function exportInterServicesData()
 
 	// Extract Folder ID from URL if necessary
 	let folderId = folderUrl;
-	if (folderUrl.toString().indexOf('http') !== -1)
+	if (folderUrl.toString().includes('http'))
 	{
 		const match = folderUrl.match(/[-\w]{25,}/);
 		if (match)
@@ -130,10 +130,28 @@ function exportInterServicesData()
 		// Ensure the copied sheet is visible (it might be hidden in the src)
 		copiedSheet.showSheet();
 
-		// Replace formulae with values (using values from src sheet to avoid broken references)
+		// Replace formulae with values (using values from src sheet to avoid broken references),
+		// but preserve formulas if they have the @preserveFormula note.
 		const srcRange = sheet.getDataRange();
+		const values = srcRange.getValues();
+		const formulas = srcRange.getFormulas();
+		const notes = srcRange.getNotes();
+
+		for (let r = 0; r < values.length; r++)
+		{
+			for (let c = 0; c < values[r].length; c++)
+			{
+				if (!notes[r][c].includes('@preserveFormula') || formulas[r][c] === '')
+				{
+					continue;
+				}
+
+				values[r][c] = formulas[r][c];
+			}
+		}
+
 		const trgRange = copiedSheet.getRange(1, 1, srcRange.getNumRows(), srcRange.getNumColumns());
-		trgRange.setValues(srcRange.getValues());
+		trgRange.setValues(values);
 
 		// Delete the old sheet with the same name if it exists
 		const oldSheet = trgSS.getSheetByName(trgSheetName);
