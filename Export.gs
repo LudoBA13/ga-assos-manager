@@ -83,7 +83,10 @@ function exportInterServicesData()
 
 		if (sheetName.startsWith('Export-'))
 		{
-			const targetName = sheetName.substring('Export-'.length);
+			const fullTargetName = sheetName.substring('Export-'.length);
+			const nameParts = fullTargetName.split('-');
+			const targetDocName = nameParts[0];
+			const targetSheetName = nameParts.length > 1 ? nameParts.slice(1).join('-') : targetDocName;
 
 			// Check if the sheet is empty
 			if (sheet.getLastRow() === 0)
@@ -104,7 +107,7 @@ function exportInterServicesData()
 			}
 
 			let targetSS;
-			const files = folder.getFilesByName(targetName);
+			const files = folder.getFilesByName(targetDocName);
 
 			if (files.hasNext())
 			{
@@ -113,7 +116,7 @@ function exportInterServicesData()
 			}
 			else
 			{
-				targetSS = SpreadsheetApp.create(targetName);
+				targetSS = SpreadsheetApp.create(targetDocName);
 				const newFile = DriveApp.getFileById(targetSS.getId());
 				newFile.moveTo(folder);
 			}
@@ -129,20 +132,15 @@ function exportInterServicesData()
 			const targetRange = copiedSheet.getRange(1, 1, sourceRange.getNumRows(), sourceRange.getNumColumns());
 			targetRange.setValues(sourceRange.getValues());
 
-			// Delete all other sheets in the target spreadsheet
-			SpreadsheetApp.flush();
-			const targetSheets = targetSS.getSheets();
-			for (const s of targetSheets)
+			// Delete the old sheet with the same name if it exists
+			const oldSheet = targetSS.getSheetByName(targetSheetName);
+			if (oldSheet)
 			{
-				if (s.getSheetId() !== copiedSheet.getSheetId())
-				{
-					targetSS.deleteSheet(s);
-				}
+				targetSS.deleteSheet(oldSheet);
 			}
-			SpreadsheetApp.flush();
 
 			// Rename the copied sheet to the target name
-			copiedSheet.setName(targetName);
+			copiedSheet.setName(targetSheetName);
 
 			// Save the hash to skip next time if no changes
 			props.setProperty(propKey, currentHash);
