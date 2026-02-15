@@ -90,17 +90,18 @@ function exportInterServicesData()
 		const trgDocName   = nameParts[0];
 		const trgSheetName = nameParts.length > 1 ? nameParts.slice(1).join('-') : trgDocName;
 
-		console.log(`Exporting "${trgSheetName}" in "${trgDocName}"`);
-
 		// Check if the sheet is empty
 		if (sheet.getLastRow() === 0)
 		{
+			console.log(`Skipping "${sheetName}" (0 rows)`);
 			continue;
 		}
 
 		// Optimization: Check if content has changed since last export
 		const currentHash = computeSheetContentHash(sheet);
 		const propKey     = 'ga_hash_' + trgSheetName.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+		console.log(`Exporting "${sheetName}" (hash: ${currentHash})`);
 
 		let trgSS;
 		let trgFileId;
@@ -115,6 +116,9 @@ function exportInterServicesData()
 			try
 			{
 				const driveFile = Drive.Files.get(trgFileId, { fields: 'appProperties', supportsAllDrives: true });
+
+				console.log('Found a matching document with hash ' + driveFile.appProperties?.[propKey]);
+
 				if (driveFile.appProperties && driveFile.appProperties[propKey] === currentHash)
 				{
 					console.log(`Skipping export for "${sheetName}" in "${trgDocName}": cache match found.`);
