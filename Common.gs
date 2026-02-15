@@ -226,3 +226,32 @@ function getAssoByVif(vif)
 
 	return result;
 }
+
+/**
+ * Returns an array of objects for non-empty notes in a range.
+ * @param {GoogleAppsScript.Spreadsheet.Range} range The range to inspect.
+ * @return {Array<{rowIdx: number, colIdx: number, note: string}>} Array of note objects.
+ */
+function getNotes(range)
+{
+	const notes = range.getNotes();
+	const results = [];
+
+	for (let r = 0; r < notes.length; r++)
+	{
+		for (let c = 0; c < notes[r].length; c++)
+		{
+			const note = notes[r][c];
+			if (note && note !== '')
+			{
+				results.push({
+					rowIdx: r,
+					colIdx: c,
+					note: note
+				});
+			}
+		}
+	}
+
+	return results;
+}

@@ -133,25 +133,20 @@ function exportInterServicesData()
 		// Replace formulae with values (using values from src sheet to avoid broken references),
 		// but preserve formulas if they have the @preserveFormula note.
 		const srcRange = sheet.getDataRange();
-		const values = srcRange.getValues();
+		const values   = srcRange.getValues();
 		const formulas = srcRange.getFormulas();
-		const notes = srcRange.getNotes();
 
-		for (let r = 0; r < values.length; r++)
+		for (const { rowIdx, colIdx, note } of getNotes(srcRange))
 		{
-			for (let c = 0; c < values[r].length; c++)
+			if (note.includes('@preserveFormula'))
 			{
-				if (!notes[r][c].includes('@preserveFormula') || formulas[r][c] === '')
-				{
-					continue;
-				}
-
-				values[r][c] = formulas[r][c];
+				values[rowIdx][colIdx] = formulas[rowIdx][colIdx];
 			}
 		}
 
 		const trgRange = copiedSheet.getRange(1, 1, srcRange.getNumRows(), srcRange.getNumColumns());
 		trgRange.setValues(values);
+		trgRange.clearNote();
 
 		// Delete the old sheet with the same name if it exists
 		const oldSheet = trgSS.getSheetByName(trgSheetName);
