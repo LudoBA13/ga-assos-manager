@@ -86,10 +86,10 @@ function exportInterServicesData()
 			continue;
 		}
 
-		const fullTargetName = sheetName.substring('Export-'.length);
-		const nameParts = fullTargetName.split('-');
-		const targetDocName = nameParts[0];
-		const targetSheetName = nameParts.length > 1 ? nameParts.slice(1).join('-') : targetDocName;
+		const trgName      = sheetName.substring('Export-'.length);
+		const nameParts    = trgName.split('-');
+		const trgDocName   = nameParts[0];
+		const trgSheetName = nameParts.length > 1 ? nameParts.slice(1).join('-') : trgDocName;
 
 		// Check if the sheet is empty
 		if (sheet.getLastRow() === 0)
@@ -109,41 +109,41 @@ function exportInterServicesData()
 			continue;
 		}
 
-		let targetSS;
-		const files = folder.getFilesByName(targetDocName);
+		let trgSS;
+		const files = folder.getFilesByName(trgDocName);
 
 		if (files.hasNext())
 		{
 			const file = files.next();
-			targetSS = SpreadsheetApp.open(file);
+			trgSS = SpreadsheetApp.open(file);
 		}
 		else
 		{
-			targetSS = SpreadsheetApp.create(targetDocName);
-			const newFile = DriveApp.getFileById(targetSS.getId());
+			trgSS = SpreadsheetApp.create(trgDocName);
+			const newFile = DriveApp.getFileById(trgSS.getId());
 			newFile.moveTo(folder);
 		}
 
-		// Copy the sheet to the target spreadsheet (preserves formatting)
-		const copiedSheet = sheet.copyTo(targetSS);
+		// Copy the sheet to the trg spreadsheet (preserves formatting)
+		const copiedSheet = sheet.copyTo(trgSS);
 
-		// Ensure the copied sheet is visible (it might be hidden in the source)
+		// Ensure the copied sheet is visible (it might be hidden in the src)
 		copiedSheet.showSheet();
 
-		// Replace formulae with values (using values from source sheet to avoid broken references)
-		const sourceRange = sheet.getDataRange();
-		const targetRange = copiedSheet.getRange(1, 1, sourceRange.getNumRows(), sourceRange.getNumColumns());
-		targetRange.setValues(sourceRange.getValues());
+		// Replace formulae with values (using values from src sheet to avoid broken references)
+		const srcRange = sheet.getDataRange();
+		const trgRange = copiedSheet.getRange(1, 1, srcRange.getNumRows(), srcRange.getNumColumns());
+		trgRange.setValues(srcRange.getValues());
 
 		// Delete the old sheet with the same name if it exists
-		const oldSheet = targetSS.getSheetByName(targetSheetName);
+		const oldSheet = trgSS.getSheetByName(trgSheetName);
 		if (oldSheet)
 		{
-			targetSS.deleteSheet(oldSheet);
+			trgSS.deleteSheet(oldSheet);
 		}
 
-		// Rename the copied sheet to the target name
-		copiedSheet.setName(targetSheetName);
+		// Rename the copied sheet to the trg name
+		copiedSheet.setName(trgSheetName);
 
 		// Save the hash to skip next time if no changes
 		props.setProperty(propKey, currentHash);
