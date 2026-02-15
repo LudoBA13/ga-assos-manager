@@ -81,71 +81,73 @@ function exportInterServicesData()
 	{
 		const sheetName = sheet.getName();
 
-		if (sheetName.startsWith('Export-'))
+		if (!sheetName.startsWith('Export-'))
 		{
-			const fullTargetName = sheetName.substring('Export-'.length);
-			const nameParts = fullTargetName.split('-');
-			const targetDocName = nameParts[0];
-			const targetSheetName = nameParts.length > 1 ? nameParts.slice(1).join('-') : targetDocName;
-
-			// Check if the sheet is empty
-			if (sheet.getLastRow() === 0)
-			{
-				continue;
-			}
-
-			// Optimization: Check if content has changed since last export
-			const currentHash = computeSheetContentHash(sheet);
-			const propKey = `LAST_EXPORT_HASH_${sheetName}`;
-			const lastHash = props.getProperty(propKey);
-
-			if (currentHash && currentHash === lastHash)
-			{
-				console.log(`Skipping export for "${sheetName}": no changes detected.`);
-				skippedCnt++;
-				continue;
-			}
-
-			let targetSS;
-			const files = folder.getFilesByName(targetDocName);
-
-			if (files.hasNext())
-			{
-				const file = files.next();
-				targetSS = SpreadsheetApp.open(file);
-			}
-			else
-			{
-				targetSS = SpreadsheetApp.create(targetDocName);
-				const newFile = DriveApp.getFileById(targetSS.getId());
-				newFile.moveTo(folder);
-			}
-
-			// Copy the sheet to the target spreadsheet (preserves formatting)
-			const copiedSheet = sheet.copyTo(targetSS);
-
-			// Ensure the copied sheet is visible (it might be hidden in the source)
-			copiedSheet.showSheet();
-
-			// Replace formulae with values (using values from source sheet to avoid broken references)
-			const sourceRange = sheet.getDataRange();
-			const targetRange = copiedSheet.getRange(1, 1, sourceRange.getNumRows(), sourceRange.getNumColumns());
-			targetRange.setValues(sourceRange.getValues());
-
-			// Delete the old sheet with the same name if it exists
-			const oldSheet = targetSS.getSheetByName(targetSheetName);
-			if (oldSheet)
-			{
-				targetSS.deleteSheet(oldSheet);
-			}
-
-			// Rename the copied sheet to the target name
-			copiedSheet.setName(targetSheetName);
-
-			// Save the hash to skip next time if no changes
-			props.setProperty(propKey, currentHash);
-			exportedCnt++;
+			continue;
 		}
+
+		const fullTargetName = sheetName.substring('Export-'.length);
+		const nameParts = fullTargetName.split('-');
+		const targetDocName = nameParts[0];
+		const targetSheetName = nameParts.length > 1 ? nameParts.slice(1).join('-') : targetDocName;
+
+		// Check if the sheet is empty
+		if (sheet.getLastRow() === 0)
+		{
+			continue;
+		}
+
+		// Optimization: Check if content has changed since last export
+		const currentHash = computeSheetContentHash(sheet);
+		const propKey = `LAST_EXPORT_HASH_${sheetName}`;
+		const lastHash = props.getProperty(propKey);
+
+		if (currentHash && currentHash === lastHash)
+		{
+			console.log(`Skipping export for "${sheetName}": no changes detected.`);
+			skippedCnt++;
+			continue;
+		}
+
+		let targetSS;
+		const files = folder.getFilesByName(targetDocName);
+
+		if (files.hasNext())
+		{
+			const file = files.next();
+			targetSS = SpreadsheetApp.open(file);
+		}
+		else
+		{
+			targetSS = SpreadsheetApp.create(targetDocName);
+			const newFile = DriveApp.getFileById(targetSS.getId());
+			newFile.moveTo(folder);
+		}
+
+		// Copy the sheet to the target spreadsheet (preserves formatting)
+		const copiedSheet = sheet.copyTo(targetSS);
+
+		// Ensure the copied sheet is visible (it might be hidden in the source)
+		copiedSheet.showSheet();
+
+		// Replace formulae with values (using values from source sheet to avoid broken references)
+		const sourceRange = sheet.getDataRange();
+		const targetRange = copiedSheet.getRange(1, 1, sourceRange.getNumRows(), sourceRange.getNumColumns());
+		targetRange.setValues(sourceRange.getValues());
+
+		// Delete the old sheet with the same name if it exists
+		const oldSheet = targetSS.getSheetByName(targetSheetName);
+		if (oldSheet)
+		{
+			targetSS.deleteSheet(oldSheet);
+		}
+
+		// Rename the copied sheet to the target name
+		copiedSheet.setName(targetSheetName);
+
+		// Save the hash to skip next time if no changes
+		props.setProperty(propKey, currentHash);
+		exportedCnt++;
 	}
 
 	let msg = _('Export terminé. %s fichier(s) généré(s).', exportedCnt);
