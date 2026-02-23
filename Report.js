@@ -59,11 +59,7 @@ function onFormSubmit(e)
 
 	const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
 
-	const vars = new Map;
-	headers.forEach((header, index) =>
-	{
-		vars.set(header, e.values[index]);
-	});
+	const vars = newMapFromArray(headers, e.values);
 
 	generateVisitReport(vars);
 }
@@ -83,6 +79,43 @@ function onFormSubmit(e)
 function updateTemplateFromForm()
 {
 	return ReportManager.updateTemplateFromForm();
+}
+
+/**
+ * Generates visit reports for a specified range of rows in the 'CRVisites' sheet.
+ * @param {number} startRow The 1-based starting row number (inclusive).
+ * @param {number} endRow The 1-based ending row number (inclusive).
+ */
+function generateVisitReportsByRange(startRow, endRow)
+{
+	const sheetName = 'CRVisites';
+	const ss = SpreadsheetApp.getActiveSpreadsheet();
+	const sheet = ss.getSheetByName(sheetName);
+	if (!sheet)
+	{
+		throw new Error(_("La feuille '%s' est introuvable.", sheetName));
+	}
+
+	const lastColumn = sheet.getLastColumn();
+	const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+
+	// Ensure startRow and endRow are within valid bounds
+	const actualLastRow = sheet.getLastRow();
+	if (startRow < 2 || startRow > actualLastRow)
+	{
+		throw new Error(_("La ligne de début '%s' est invalide. Doit être entre 2 et %s.", startRow, actualLastRow));
+	}
+	if (endRow < startRow || endRow > actualLastRow)
+	{
+		throw new Error(_("La ligne de fin '%s' est invalide. Doit être entre %s et %s.", endRow, startRow, actualLastRow));
+	}
+
+	for (let i = startRow; i <= endRow; i++)
+	{
+		const rowData = sheet.getRange(i, 1, 1, lastColumn).getValues()[0];
+		const vars = newMapFromArray(headers, rowData);
+		generateVisitReport(vars);
+	}
 }
 
 /**

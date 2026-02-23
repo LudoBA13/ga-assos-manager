@@ -255,3 +255,19 @@ function getNotes(range)
 
 	return results;
 }
+
+/**
+ * Creates a Map from two arrays (keys and values).
+ * @param {Array} keys The array of keys.
+ * @param {Array} values The array of values.
+ * @return {Map} The resulting Map.
+ */
+function newMapFromArray(keys, values)
+{
+	const map = new Map;
+	keys.forEach((key, index) =>
+	{
+		map.set(key, values[index]);
+	});
+	return map;
+}
