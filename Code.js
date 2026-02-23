@@ -48,7 +48,7 @@ function onOpen()
 
 function resetDailyPlanningDate()
 {
-	const cellAddress = 'E1';
+	const cellAddress = 'H1';
 	const sheetName   = 'Export-Planning journalier';
 
 	const ss = SpreadsheetApp.getActiveSpreadsheet();

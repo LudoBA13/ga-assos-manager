@@ -13,7 +13,7 @@
 function debugGenerateReportsInRange()
 {
 	const sheetName = 'CRVisites';
-	const rangeAddress = 'A2:A8';
+	const rangeAddress = 'A10:A11';
 
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
 	const sheet = ss.getSheetByName(sheetName);
