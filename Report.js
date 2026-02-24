@@ -114,7 +114,14 @@ function generateVisitReportsByRange(startRow, endRow)
 	{
 		const rowData = sheet.getRange(i, 1, 1, lastColumn).getValues()[0];
 		const vars = newMapFromArray(headers, rowData);
-		generateVisitReport(vars);
+		try
+		{
+			generateVisitReport(vars);
+		}
+		catch (e)
+		{
+			console.error(_("Erreur lors de la génération du rapport pour la ligne %s: %s", i, e.message));
+		}
 	}
 }
 
@@ -123,74 +130,6 @@ function generateVisitReportsByRange(startRow, endRow)
  */
 class ReportManager
 {
-	/**
-	 * Retrieves report values for the given timestamp.
-	 * @param {string|number|Date} timestamp The unique identifier (timestamp) for the record.
-	 * @return {Map<string, any>} The values as a Map.
-	 */
-	static getReportValuesFromTimestamp(timestamp)
-	{
-		const ss = SpreadsheetApp.getActiveSpreadsheet();
-		const sheet = ss.getSheetByName('CRVisites');
-		if (!sheet)
-		{
-			throw new Error(_("La feuille '%s' est introuvable.", 'CRVisites'));
-		}
-
-		const lastRow = sheet.getLastRow();
-		if (lastRow < 2)
-		{
-			throw new Error(_("Aucune donnée à traiter dans la feuille '%s'.", 'CRVisites'));
-		}
-
-		const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-		const timestampIdx = headers.indexOf('Horodateur');
-
-		if (timestampIdx === -1)
-		{
-			throw new Error(_("La colonne 'Horodateur' est manquante dans la feuille '%s'.", 'CRVisites'));
-		}
-
-		const timeZone = Session.getScriptTimeZone();
-		const dateFormat = _('dd/MM/yyyy');
-
-		// Helper to normalize values for comparison (handles Date objects and strings)
-		const normalize = (val) =>
-		{
-			if (val instanceof Date)
-			{
-				return Utilities.formatDate(val, timeZone, dateFormat);
-			}
-			return String(val);
-		};
-
-		// Find the row matching the timestamp.
-		const targetTimestamp = normalize(timestamp);
-		const timestampValues = sheet.getRange(2, timestampIdx + 1, lastRow - 1, 1).getValues();
-		const matchIndex = timestampValues.findIndex(r => normalize(r[0]) === targetTimestamp);
-
-		if (matchIndex === -1)
-		{
-			throw new Error(_("Aucun enregistrement trouvé pour le timestamp '%s'.", targetTimestamp));
-		}
-
-		// Fetch the specific row. matchIndex is 0-based from row 2, so add 2 to get the sheet row number.
-		const row = sheet.getRange(matchIndex + 2, 1, 1, sheet.getLastColumn()).getValues()[0];
-
-		const vars = new Map;
-
-		headers.forEach((header, index) =>
-		{
-			let value = row[index];
-			if (value instanceof Date)
-			{
-				value = Utilities.formatDate(value, timeZone, dateFormat);
-			}
-			vars.set(header, value);
-		});
-
-		return vars;
-	}
 
 	/**
 	 * Generates a visit report for the given values.
@@ -243,6 +182,15 @@ class ReportManager
 				{
 					dateStr = `${parts[0]}-${parts[1]}-${parts[2]}`;
 				}
+			}
+		}
+
+		// Format all Date objects in vars to dd/MM/yyyy strings
+		for (const [key, value] of vars)
+		{
+			if (value instanceof Date)
+			{
+				vars.set(key, Utilities.formatDate(value, Session.getScriptTimeZone(), _('dd/MM/yyyy')));
 			}
 		}
 
