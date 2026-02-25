@@ -6,6 +6,11 @@
  * Copyright (c) Ludovic ARNAUD
  */
 
+function debugGenerateReports()
+{
+  generateVisitReportsByRange(9, 9);
+}
+
 /**
  * Generates visit reports for the timestamps found in CRVisites!A2:A8.
  * This is intended for manual testing and debugging within the GAS Editor.

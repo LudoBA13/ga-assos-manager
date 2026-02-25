@@ -178,4 +178,3 @@ function cropCurrentSheet()
 	resizeSheetToContent(sheet.getSheetId());
 }
 
-
