@@ -48,8 +48,7 @@ function onOpen()
 
 function resetDailyPlanningDate()
 {
-	const cellAddress = 'H1';
-	const sheetName   = 'Export-Planning journalier';
+	const sheetName = 'Export-Planning journalier';
 
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
 	const sheet = ss.getSheetByName(sheetName);
@@ -60,14 +59,32 @@ function resetDailyPlanningDate()
 		return;
 	}
 
-	try
+	const dataRange = sheet.getDataRange();
+	const values = dataRange.getValues();
+
+	for (let row = 0; row < values.length; row++)
 	{
-		sheet.getRange(cellAddress).setValue(new Date);
+		for (let col = 0; col < values[row].length; col++)
+		{
+			if (!(values[row][col] instanceof Date))
+			{
+				continue;
+			}
+
+			try
+			{
+				sheet.getRange(row + 1, col + 1).setValue(new Date);
+			}
+			catch (e)
+			{
+				console.error(`Impossible de définir la valeur de la cellule à la ligne ${row + 1}, colonne ${col + 1} dans '${sheetName}' : ` + e.message);
+			}
+
+			return;
+		}
 	}
-	catch (e)
-	{
-		console.error(`Impossible de définir la valeur de la cellule ${cellAddress} dans '${sheetName}' : ` + e.message);
-	}
+
+	console.warn(`Aucune cellule contenant une date n'a été trouvée dans '${sheetName}'.`);
 }
 
 function showImporter()
