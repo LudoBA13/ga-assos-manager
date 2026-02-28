@@ -61,10 +61,22 @@ testFiles.forEach(file => {
 
 console.log('--- Starting Local GAS Tests ---');
 try {
-	// Execute the test runner from the sandbox
-	const results = sandbox.runPlanningEncoderTests();
+	let totalFailed = 0;
+	// Find all functions starting with run and ending with Tests in the sandbox
+	for (const key in sandbox)
+	{
+		if (typeof sandbox[key] === 'function' && key.startsWith('run') && key.endsWith('Tests'))
+		{
+			console.log(`\nExecuting: ${key}()`);
+			const results = sandbox[key]();
+			if (results && results.failed > 0)
+			{
+				totalFailed += results.failed;
+			}
+		}
+	}
 	
-	if (results && results.failed > 0)
+	if (totalFailed > 0)
 	{
 		process.exit(1);
 	}

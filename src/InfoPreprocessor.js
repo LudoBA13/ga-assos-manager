@@ -58,8 +58,15 @@ const InfoPreprocessor = {
 		// We use a callback to encode the captured schedule string.
 		processed = processed.replace(/Planning\s*:((?:\s*[0-4]*[a-z ]+[0-9]+h[0-9]*\s*:\s*[^.]+\.)+)/gi, (match, p1) =>
 		{
-			const encoded = parseHumanReadable(p1.trim());
-			return `$planning:${encoded}$`;
+			try
+			{
+				const encoded = parseHumanReadable(p1.trim());
+				return `$planning:${encoded}$`;
+			}
+			catch (e)
+			{
+				return `$planning:$`;
+			}
 		});
 
 		return processed;

@@ -1,0 +1,87 @@
+/**
+ * @file This file contains tests for the VifParser.js file.
+ */
+
+/**
+ * Runs all tests for the VifParser class.
+ * @returns {{passed: number, failed: number, total: number, details: Array<{name: string, status: string, error: string, stack: string}>}}
+ */
+function runVifParserTests()
+{
+	const testCases = [
+		test_parseBL_Standard
+	];
+
+	const results = {
+		passed: 0,
+		failed: 0,
+		total: testCases.length,
+		details: []
+	};
+
+	testCases.forEach(test =>
+	{
+		try
+		{
+			test();
+			results.passed++;
+			results.details.push({
+				name: test.name,
+				status: 'PASSED'
+			});
+		}
+		catch (e)
+		{
+			results.failed++;
+			results.details.push({
+				name: test.name,
+				status: 'FAILED',
+				error: e.message,
+				stack: e.stack
+			});
+		}
+	});
+
+	Logger.log(`VifParser Test Results: ${results.passed} / ${results.total} passed.`);
+	if (results.failed > 0)
+	{
+		Logger.log('--- FAILED TESTS ---');
+		results.details.filter(r => r.status === 'FAILED').forEach(r =>
+		{
+			Logger.log(`[${r.name}]: ${r.error}`);
+			Logger.log(`Stack: ${r.stack}`);
+		});
+	}
+	else
+	{
+		Logger.log('All VifParser tests passed successfully!');
+	}
+
+	return results;
+}
+
+function test_parseBL_Standard()
+{
+	const mockContent = `Client : 12345
+2023-01-01	BL001	CDE001	101	Article 1	LOT1	10.5	11.0	P1	COL1
+			102	Article 2	LOT2	5.0	5.5	P2	COL2
+Client : 67890
+2023-01-02	BL002	CDE002	201	Article 3	LOT3	20.0	21.0	P3	COL3
+`;
+
+	const expected = [
+		['Code VIF', 'Date', 'n° BL', 'n° Cde', 'Article', 'Libellé', 'Lot', 'Kg Net', 'Kg Brut', 'P', 'COL'],
+		['12345', '2023-01-01', 'BL001', 'CDE001', '101', 'Article 1', 'LOT1', '10.5', '11.0', 'P1', 'COL1'],
+		['12345', '2023-01-01', 'BL001', 'CDE001', '102', 'Article 2', 'LOT2', '5.0', '5.5', 'P2', 'COL2'],
+		['67890', '2023-01-02', 'BL002', 'CDE002', '201', 'Article 3', 'LOT3', '20.0', '21.0', 'P3', 'COL3']
+	];
+
+	const actual = VifParser.parseBL(mockContent);
+
+	if (JSON.stringify(actual) !== JSON.stringify(expected))
+	{
+		throw new Error(`test_parseBL_Standard failed.
+Expected: ${JSON.stringify(expected)}
+Actual:   ${JSON.stringify(actual)}`);
+	}
+}

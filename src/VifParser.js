@@ -7,6 +7,22 @@ class VifParser
 	 */
 	static parseBL(content)
 	{
+		const result = [];
+		for (const entry of VifParser._parseBLEntries(content))
+		{
+			result.push(entry);
+		}
+		return result;
+	}
+
+	/**
+	 * Private generator to yield entries from the raw VIF content.
+	 * @param {string} content - The raw string content of the file.
+	 * @yields {string[]} A single row of the 2D array.
+	 * @private
+	 */
+	static * _parseBLEntries(content)
+	{
 		const lines = content.split(/\r?\n/);
 		
 		let currentState = {
@@ -16,12 +32,10 @@ class VifParser
 			cde: ''
 		};
 
-		const result = [];
-
-		result.push([
+		yield [
 			'Code VIF', 'Date', 'n° BL', 'n° Cde', 'Article', 
 			'Libellé', 'Lot', 'Kg Net', 'Kg Brut', 'P', 'COL'
-		]);
+		];
 
 		for (let i = 0; i < lines.length; i++)
 		{
@@ -67,7 +81,7 @@ class VifParser
 
 			if (articleVal && /^\d+$/.test(articleVal))
 			{
-				result.push([
+				yield [
 					currentState.customerID,
 					currentState.date,
 					currentState.bl,
@@ -79,11 +93,9 @@ class VifParser
 					cols[7]?.trim() || '',
 					cols[8]?.trim() || '',
 					cols[9]?.trim() || ''
-				]);
+				];
 			}
 		}
-
-		return result;
 	}
 
 	/**
