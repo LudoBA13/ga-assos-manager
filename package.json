@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node run-tests-local.js",
+    "test": "node tests/run-tests-local.js",
     "push": "clasp push"
   },
   "repository": {
