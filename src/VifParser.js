@@ -133,6 +133,7 @@ class VifParser
 					'Produits Sec': 0,
 					'Produits Frais': 0,
 					'Produits Surgelé': 0,
+					'Produits F&L': 0,
 					'Produits FSE': 0,
 					'Produits CNES': 0,
 					'Produits Proxidon': 0
@@ -161,6 +162,11 @@ class VifParser
 					{
 						++stats['Produits Surgelé'];
 					}
+				}
+
+				if (article.startsWith('452'))
+				{
+					++stats['Produits F&L'];
 				}
 
 				if (article.endsWith('9'))
@@ -275,7 +281,7 @@ function processUpload(fileObj)
 
 		// Import BL statistics
 		const statsRows = [];
-		const headers = ['Code VIF', 'Date', 'n° BL', 'Type BL', 'Kg Net', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
+		const headers = ['Code VIF', 'Date', 'n° BL', 'Type BL', 'Kg Net', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits F&L', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
 		statsRows.push(headers);
 
 		for (const stat of VifParser.parseBLStats(content))
