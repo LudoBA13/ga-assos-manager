@@ -90,7 +90,7 @@ Actual:   ${JSON.stringify(actual)}`);
 function test_parseBLStats()
 {
 	const mockContent = `Client : 12345
-2023-01-01	BL001	CDE001	10009	Article 1	LOT1	10.5	11.0	P1	COL1
+2023-01-01	BL001	CDE001	10009	Article 1	LOT1	10,5	11.0	P1	COL1
 			10003	Article 2	proxidon001	5.0	5.5	P2	COL2
 Client : 67890
 2023-01-02	BL002	CDE002	20003	Article 3	LOT3	20.0	21.0	P3	COL3
@@ -103,6 +103,7 @@ Client : 67890
 			'Date': '2023-01-01',
 			'n° BL': 'BL001',
 			'Type BL': 'Proxidon',
+			'Kg Net': 15.5,
 			'Produits Sec': 2,
 			'Produits Frais': 0,
 			'Produits Surgelé': 0,
@@ -115,6 +116,7 @@ Client : 67890
 			'Date': '2023-01-02',
 			'n° BL': 'BL002',
 			'Type BL': 'Surgelé',
+			'Kg Net': 21.0,
 			'Produits Sec': 0,
 			'Produits Frais': 1,
 			'Produits Surgelé': 1,

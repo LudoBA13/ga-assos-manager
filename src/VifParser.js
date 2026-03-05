@@ -129,6 +129,7 @@ class VifParser
 					'Date': row[1],
 					'n° BL': bl,
 					'Type BL': '',
+					'Kg Net': 0,
 					'Produits Sec': 0,
 					'Produits Frais': 0,
 					'Produits Surgelé': 0,
@@ -140,6 +141,10 @@ class VifParser
 
 			if (article)
 			{
+				const kgNetStr = row[7] || '';
+				const kgNet = parseFloat(kgNetStr.replace(',', '.')) || 0;
+				stats['Kg Net'] += kgNet;
+
 				const len = article.length;
 				if (len >= 5)
 				{
@@ -270,7 +275,7 @@ function processUpload(fileObj)
 
 		// Import BL statistics
 		const statsRows = [];
-		const headers = ['Code VIF', 'Date', 'n° BL', 'Type BL', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
+		const headers = ['Code VIF', 'Date', 'n° BL', 'Type BL', 'Kg Net', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
 		statsRows.push(headers);
 
 		for (const stat of VifParser.parseBLStats(content))
