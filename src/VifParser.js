@@ -131,7 +131,8 @@ class VifParser
 					'Produits Frais': 0,
 					'Produits Surgelé': 0,
 					'Produits FSE': 0,
-					'Produits CNES': 0
+					'Produits CNES': 0,
+					'Produits Proxidon': 0
 				};
 			}
 
@@ -162,6 +163,12 @@ class VifParser
 				if (article.endsWith('3'))
 				{
 					++stats['Produits CNES'];
+				}
+
+				const lot = row[6];
+				if (lot && lot.toLowerCase().startsWith('proxidon'))
+				{
+					++stats['Produits Proxidon'];
 				}
 			}
 		}
@@ -233,7 +240,7 @@ function processUpload(fileObj)
 
 		// Import BL statistics
 		const statsRows = [];
-		const headers = ['Code VIF', 'Date', 'n° BL', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits FSE', 'Produits CNES'];
+		const headers = ['Code VIF', 'Date', 'n° BL', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
 		statsRows.push(headers);
 
 		for (const stat of VifParser.parseBLStats(content))
