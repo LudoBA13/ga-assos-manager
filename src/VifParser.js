@@ -34,7 +34,7 @@ class VifParser
 		};
 
 		yield [
-			'Code VIF', 'Date', 'n° BL', 'n° Cde', 'Article', 
+			'Code VIF', 'Date', 'n° BL', 'n° Cde', 'Article',
 			'Libellé', 'Lot', 'Kg Net', 'Kg Brut', 'P', 'COL'
 		];
 
@@ -44,13 +44,22 @@ class VifParser
 		while (start < contentLength)
 		{
 			let end = content.indexOf('\n', start);
-			if (end === -1) end = contentLength;
+			if (end === -1)
+			{
+				end = contentLength;
+			}
 			
 			let line = content.substring(start, end);
-			if (line.endsWith('\r')) line = line.substring(0, line.length - 1);
+			if (line.endsWith('\r'))
+			{
+				line = line.substring(0, line.length - 1);
+			}
 			start = end + 1;
 
-			if (line.length === 0 || line.trim().length === 0) continue;
+			if (line.length === 0 || line.trim().length === 0)
+			{
+				continue;
+			}
 
 			// Quick check: data lines MUST have tabs. metadata like 'Client :' usually don't.
 			const tabIdx = line.indexOf('\t');
@@ -59,7 +68,10 @@ class VifParser
 				if (line.indexOf('Client :') !== -1)
 				{
 					const clientMatch = line.match(clientRegex);
-					if (clientMatch) currentState.customerID = clientMatch[1];
+					if (clientMatch)
+					{
+						currentState.customerID = clientMatch[1];
+					}
 				}
 				continue;
 			}
@@ -75,7 +87,10 @@ class VifParser
 			const blVal = cols[1]?.trim();
 			const articleVal = cols[3]?.trim();
 
-			if (dateVal) currentState.date = dateVal;
+			if (dateVal)
+			{
+				currentState.date = dateVal;
+			}
 			if (blVal)
 			{
 				currentState.bl = blVal;
