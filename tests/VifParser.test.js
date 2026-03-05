@@ -94,7 +94,7 @@ function test_parseBLStats()
 			10003	Article 2	proxidon001	5.0	5.5	P2	COL2
 Client : 67890
 2023-01-02	BL002	CDE002	20003	Article 3	LOT3	20.0	21.0	P3	COL3
-			30009	Article 4	PROXIDON_XYZ	1.0	1.5	P4	COL4
+			30009	Article 4	LOT4	1.0	1.5	P4	COL4
 `;
 
 	const expected = [
@@ -102,6 +102,7 @@ Client : 67890
 			'Code VIF': '12345',
 			'Date': '2023-01-01',
 			'n° BL': 'BL001',
+			'Type BL': 'Proxidon',
 			'Produits Sec': 2,
 			'Produits Frais': 0,
 			'Produits Surgelé': 0,
@@ -113,12 +114,13 @@ Client : 67890
 			'Code VIF': '67890',
 			'Date': '2023-01-02',
 			'n° BL': 'BL002',
+			'Type BL': 'Surgelé',
 			'Produits Sec': 0,
 			'Produits Frais': 1,
 			'Produits Surgelé': 1,
 			'Produits FSE': 1,
 			'Produits CNES': 1,
-			'Produits Proxidon': 1
+			'Produits Proxidon': 0
 		}
 	];
 

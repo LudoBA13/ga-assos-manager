@@ -120,6 +120,7 @@ class VifParser
 			{
 				if (stats)
 				{
+					stats['Type BL'] = VifParser._determineBLType(stats);
 					yield stats;
 				}
 				currentBL = bl;
@@ -127,6 +128,7 @@ class VifParser
 					'Code VIF': row[0],
 					'Date': row[1],
 					'n° BL': bl,
+					'Type BL': '',
 					'Produits Sec': 0,
 					'Produits Frais': 0,
 					'Produits Surgelé': 0,
@@ -175,8 +177,36 @@ class VifParser
 
 		if (stats)
 		{
+			stats['Type BL'] = VifParser._determineBLType(stats);
 			yield stats;
 		}
+	}
+
+	/**
+	 * Determines the 'Type BL' based on statistics.
+	 * @param {Object} stats - The statistics for a single 'n° BL'.
+	 * @return {string} The determined type.
+	 * @private
+	 */
+	static _determineBLType(stats)
+	{
+		if (stats['Produits Proxidon'] > 0)
+		{
+			return 'Proxidon';
+		}
+		if (stats['Produits Surgelé'] > 0)
+		{
+			return 'Surgelé';
+		}
+		if (stats['Produits Frais'] > 0)
+		{
+			return 'Complément/Frais/F&L';
+		}
+		if (stats['Produits Sec'] > 0)
+		{
+			return 'Sec';
+		}
+		return '';
 	}
 
 	/**
@@ -240,7 +270,7 @@ function processUpload(fileObj)
 
 		// Import BL statistics
 		const statsRows = [];
-		const headers = ['Code VIF', 'Date', 'n° BL', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
+		const headers = ['Code VIF', 'Date', 'n° BL', 'Type BL', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
 		statsRows.push(headers);
 
 		for (const stat of VifParser.parseBLStats(content))
