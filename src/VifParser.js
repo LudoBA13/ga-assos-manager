@@ -23,8 +23,9 @@ class VifParser
 	 */
 	static * _parseBLEntries(content)
 	{
-		const lines = content.split(/\r?\n/);
-		
+		const clientRegex = /Client\s*:\s*(\d+)/;
+		const articleRegex = /^\d+$/;
+
 		let currentState = {
 			customerID: '',
 			date: '',
@@ -37,49 +38,51 @@ class VifParser
 			'Libellé', 'Lot', 'Kg Net', 'Kg Brut', 'P', 'COL'
 		];
 
-		for (let i = 0; i < lines.length; i++)
+		let start = 0;
+		const contentLength = content.length;
+
+		while (start < contentLength)
 		{
-			const line = lines[i];
-			if (!line.trim())
+			let end = content.indexOf('\n', start);
+			if (end === -1) end = contentLength;
+			
+			let line = content.substring(start, end);
+			if (line.endsWith('\r')) line = line.substring(0, line.length - 1);
+			start = end + 1;
+
+			if (line.length === 0 || line.trim().length === 0) continue;
+
+			// Quick check: data lines MUST have tabs. metadata like 'Client :' usually don't.
+			const tabIdx = line.indexOf('\t');
+			if (tabIdx === -1)
+			{
+				if (line.indexOf('Client :') !== -1)
+				{
+					const clientMatch = line.match(clientRegex);
+					if (clientMatch) currentState.customerID = clientMatch[1];
+				}
+				continue;
+			}
+
+			// Skip header/summary lines early
+			if (line.indexOf('Date livr.') !== -1 || line.indexOf('Rappel de la sélection') !== -1)
 			{
 				continue;
 			}
 
 			const cols = line.split('\t');
-			const firstCol = cols[0]?.trim() || '';
-
-			if (firstCol.includes('Client :'))
-			{
-				const clientMatch = line.match(/Client\s*:\s*(\d+)/);
-				if (clientMatch && clientMatch[1])
-				{
-					currentState.customerID = clientMatch[1];
-				}
-				continue;
-			}
-
-			if (firstCol.includes('Date livr.') || line.includes('Rappel de la sélection'))
-			{
-				continue;
-			}
-
-			const dateVal = firstCol;
+			const dateVal = cols[0]?.trim();
 			const blVal = cols[1]?.trim();
-			const cdeVal = cols[2]?.trim();
 			const articleVal = cols[3]?.trim();
 
-			if (dateVal)
-			{
-				currentState.date = dateVal;
-			}
-
+			if (dateVal) currentState.date = dateVal;
 			if (blVal)
 			{
 				currentState.bl = blVal;
-				currentState.cde = cdeVal || '';
+				currentState.cde = cols[2]?.trim() || '';
 			}
 
-			if (articleVal && /^\d+$/.test(articleVal))
+			if (articleVal && articleRegex.test(articleVal))
 			{
 				yield [
 					currentState.customerID,
