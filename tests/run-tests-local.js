@@ -13,6 +13,21 @@ const mocks = {
 		log: function (msg)
 		{ console.log('  [GAS Logger]', msg); }
 	},
+	Utilities: {
+		newBlob: function (data, mimeType)
+		{
+			return {
+				getDataAsString: function (encoding)
+				{
+					return data;
+				}
+			};
+		},
+		base64Decode: function (data)
+		{
+			return data; // Simple mock, doesn't actually decode
+		}
+	},
 	console: console,
 	// Add other GAS services here if needed
 };

@@ -99,6 +99,80 @@ class VifParser
 	}
 
 	/**
+	 * Parses the raw text content and yields statistics grouped by 'n° BL'.
+	 * @param {string} content - The raw string content of the file.
+	 * @yields {Object} Statistics for a single 'n° BL'.
+	 */
+	static * parseBLStats(content)
+	{
+		const entries = VifParser._parseBLEntries(content);
+		entries.next(); // Skip headers
+
+		let currentBL = null;
+		let stats = null;
+
+		for (const row of entries)
+		{
+			const bl = row[2];
+			const article = row[4];
+
+			if (bl !== currentBL)
+			{
+				if (stats)
+				{
+					yield stats;
+				}
+				currentBL = bl;
+				stats = {
+					'Code VIF': row[0],
+					'Date': row[1],
+					'n° BL': bl,
+					'Produits Sec': 0,
+					'Produits Frais': 0,
+					'Produits Surgelé': 0,
+					'Produits FSE': 0,
+					'Produits CNES': 0
+				};
+			}
+
+			if (article)
+			{
+				const len = article.length;
+				if (len >= 5)
+				{
+					const familyChar = article.charAt(len - 5);
+					if (familyChar === '1')
+					{
+						++stats['Produits Sec'];
+					}
+					else if (familyChar === '2')
+					{
+						++stats['Produits Frais'];
+					}
+					else if (familyChar === '3')
+					{
+						++stats['Produits Surgelé'];
+					}
+				}
+
+				if (article.endsWith('9'))
+				{
+					++stats['Produits FSE'];
+				}
+				if (article.endsWith('3'))
+				{
+					++stats['Produits CNES'];
+				}
+			}
+		}
+
+		if (stats)
+		{
+			yield stats;
+		}
+	}
+
+	/**
 	 * Handles sheet creation/selection and data injection.
 	 * @param {string} sheetName - The name of the target sheet.
 	 * @param {string[][]} data - The 2D array of data to write.
@@ -153,8 +227,20 @@ function processUpload(fileObj)
 		const blob = Utilities.newBlob(Utilities.base64Decode(fileObj.data), fileObj.mimeType);
 		const content = blob.getDataAsString('ISO-8859-1');
 		
+		// Import detailed BL data
 		const parsedData = VifParser.parseBL(content);
 		VifParser.writeToSheet('VIF_BL', parsedData);
+
+		// Import BL statistics
+		const statsRows = [];
+		const headers = ['Code VIF', 'Date', 'n° BL', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits FSE', 'Produits CNES'];
+		statsRows.push(headers);
+
+		for (const stat of VifParser.parseBLStats(content))
+		{
+			statsRows.push(headers.map(h => stat[h]));
+		}
+		VifParser.writeToSheet('VIF_BL_Stats', statsRows);
 		
 		return 'Importation réussie : ' + (parsedData.length - 1) + ' lignes traitées.';
 	}
