@@ -263,7 +263,15 @@ class VifParser
 			sheet.deleteRows(rows + 1, currentMaxRows - rows);
 		}
 
-		sheet.getRange(1, 1, rows, cols).setValues(data);
+		sheet.clearContents();
+		
+		const CHUNK_SIZE = 5000;
+		for (let i = 0; i < rows; i += CHUNK_SIZE)
+		{
+			const chunk = data.slice(i, i + CHUNK_SIZE);
+			sheet.getRange(i + 1, 1, chunk.length, cols).setValues(chunk);
+		}
+
 		sheet.activate();
 	}
 }
