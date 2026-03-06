@@ -129,7 +129,8 @@ Client : 67890
 	];
 
 	const results = [];
-	for (const res of VifParser.parseBLStats(mockContent))
+	const data = VifParser.parseBL(mockContent);
+	for (const res of VifParser.parseBLStats(data))
 	{
 		results.push(res);
 	}

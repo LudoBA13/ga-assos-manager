@@ -55,6 +55,7 @@ const CATALOG = {
 		"Code temporel ou hebdomadaire invalide dans le segment : %s": "Code temporel ou hebdomadaire invalide dans le segment : %s",
 		"Produit inconnu : %s": "Produit inconnu : %s",
 		"Ajuster la feuille au contenu": "Ajuster la feuille au contenu",
+		"Rafraîchir les statistiques BL": "Rafraîchir les statistiques BL",
 		"Fermer": "Fermer"
 	}
 };

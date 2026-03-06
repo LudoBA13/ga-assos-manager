@@ -117,20 +117,18 @@ class VifParser
 	}
 
 	/**
-	 * Parses the raw text content and yields statistics grouped by 'n° BL'.
-	 * @param {string} content - The raw string content of the file.
+	 * Computes statistics grouped by 'n° BL' from the parsed 2D data.
+	 * @param {string[][]} data - The 2D array of parsed BL data (with headers).
 	 * @yields {Object} Statistics for a single 'n° BL'.
 	 */
-	static * parseBLStats(content)
+	static * parseBLStats(data)
 	{
-		const entries = VifParser._parseBLEntries(content);
-		entries.next(); // Skip headers
-
 		let currentBL = null;
 		let stats = null;
 
-		for (const row of entries)
+		for (let i = 1; i < data.length; i++) // Skip headers
 		{
+			const row = data[i];
 			const bl = row[2];
 			const article = row[4];
 
@@ -160,14 +158,15 @@ class VifParser
 
 			if (article)
 			{
-				const kgNetStr = row[7] || '';
-				const kgNet = parseFloat(kgNetStr.replace(',', '.')) || 0;
+				const kgNetVal = row[7];
+				const kgNet = typeof kgNetVal === 'number' ? kgNetVal : parseFloat(String(kgNetVal || '0').replace(',', '.')) || 0;
 				stats['Kg Net'] += kgNet;
 
-				const len = article.length;
+				const articleStr = String(article);
+				const len = articleStr.length;
 				if (len >= 5)
 				{
-					const familyChar = article.charAt(len - 5);
+					const familyChar = articleStr.charAt(len - 5);
 					if (familyChar === '1')
 					{
 						++stats['Produits Sec'];
@@ -182,22 +181,22 @@ class VifParser
 					}
 				}
 
-				if (article.startsWith('452'))
+				if (articleStr.startsWith('452'))
 				{
 					++stats['Produits F&L'];
 				}
 
-				if (article.endsWith('9'))
+				if (articleStr.endsWith('9'))
 				{
 					++stats['Produits FSE'];
 				}
-				if (article.endsWith('3'))
+				if (articleStr.endsWith('3'))
 				{
 					++stats['Produits CNES'];
 				}
 
 				const lot = row[6];
-				if (lot && lot.toLowerCase().startsWith('proxidon'))
+				if (lot && String(lot).toLowerCase().startsWith('proxidon'))
 				{
 					++stats['Produits Proxidon'];
 				}
@@ -292,6 +291,48 @@ class VifParser
 }
 
 /**
+ * Refreshes the 'VIF_BL_Stats' sheet based on the data in 'VIF_BL'.
+ */
+function refreshBLStats()
+{
+	try
+	{
+		const ss = SpreadsheetApp.getActiveSpreadsheet();
+		const blSheet = ss.getSheetByName('VIF_BL');
+
+		if (!blSheet)
+		{
+			throw new Error("La feuille 'VIF_BL' est introuvable.");
+		}
+
+		const data = blSheet.getDataRange().getValues();
+		if (data.length <= 1)
+		{
+			throw new Error("La feuille 'VIF_BL' est vide.");
+		}
+
+		const statsRows = [];
+		const headers = ['Code VIF', 'Date', 'n° BL', 'Type BL', 'Kg Net', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits F&L', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
+		statsRows.push(headers);
+
+		for (const stat of VifParser.parseBLStats(data))
+		{
+			statsRows.push(headers.map(h => stat[h]));
+		}
+
+		VifParser.writeToSheet('VIF_BL_Stats', statsRows);
+
+		const ui = SpreadsheetApp.getUi();
+		ui.alert('Succès', 'Les statistiques BL ont été rafraîchies.', ui.ButtonSet.OK);
+	}
+	catch (e)
+	{
+		const ui = SpreadsheetApp.getUi();
+		ui.alert('Erreur', e.toString(), ui.ButtonSet.OK);
+	}
+}
+
+/**
 * Updated server-side trigger for the upload UI
 */
 function processUpload(fileObj)
@@ -310,7 +351,7 @@ function processUpload(fileObj)
 		const headers = ['Code VIF', 'Date', 'n° BL', 'Type BL', 'Kg Net', 'Produits Sec', 'Produits Frais', 'Produits Surgelé', 'Produits F&L', 'Produits FSE', 'Produits CNES', 'Produits Proxidon'];
 		statsRows.push(headers);
 
-		for (const stat of VifParser.parseBLStats(content))
+		for (const stat of VifParser.parseBLStats(parsedData))
 		{
 			statsRows.push(headers.map(h => stat[h]));
 		}

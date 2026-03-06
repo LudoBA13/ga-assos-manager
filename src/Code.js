@@ -42,6 +42,7 @@ function onOpen()
 		.addItem(_('Exporter les données interservices'), 'exportInterServicesData')
 		.addItem(_("Générer les Fiches d'Informations Partenaires"), 'generateFIPDocuments')
 		.addItem(_('Importer bons de livraisons VIF'), 'showVifImporter')
+		.addItem(_('Rafraîchir les statistiques BL'), 'refreshBLStats')
 		.addItem(_('Ajuster la feuille au contenu'), 'cropCurrentSheet')
 		.addToUi();
 }
