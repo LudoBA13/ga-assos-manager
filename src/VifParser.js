@@ -48,7 +48,7 @@ class VifParser
 			{
 				end = contentLength;
 			}
-			
+
 			let line = content.substring(start, end);
 			if (line.endsWith('\r'))
 			{
@@ -247,7 +247,7 @@ class VifParser
 	{
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
 		let sheet = ss.getSheetByName(sheetName);
-		
+
 		if (!sheet)
 		{
 			sheet = ss.insertSheet(sheetName);
@@ -279,7 +279,7 @@ class VifParser
 		}
 
 		sheet.clearContents();
-		
+
 		const CHUNK_SIZE = 5000;
 		for (let i = 0; i < rows; i += CHUNK_SIZE)
 		{
@@ -292,15 +292,15 @@ class VifParser
 }
 
 /**
- * Updated server-side trigger for the upload UI
- */
+* Updated server-side trigger for the upload UI
+*/
 function processUpload(fileObj)
 {
 	try
 	{
 		const blob = Utilities.newBlob(Utilities.base64Decode(fileObj.data), fileObj.mimeType);
 		const content = blob.getDataAsString('ISO-8859-1');
-		
+
 		// Import detailed BL data
 		const parsedData = VifParser.parseBL(content);
 		VifParser.writeToSheet('VIF_BL', parsedData);
@@ -315,7 +315,7 @@ function processUpload(fileObj)
 			statsRows.push(headers.map(h => stat[h]));
 		}
 		VifParser.writeToSheet('VIF_BL_Stats', statsRows);
-		
+
 		return 'Importation réussie : ' + (parsedData.length - 1) + ' lignes traitées.';
 	}
 	catch (e)
