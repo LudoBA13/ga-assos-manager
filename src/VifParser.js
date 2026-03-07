@@ -167,13 +167,13 @@ class VifParser
 				if (len >= 5)
 				{
 					const familyChar = articleStr.charAt(len - 5);
-					if (familyChar === '1')
-					{
-						++stats['Produits Sec'];
-					}
-					else if (familyChar === '2')
+					if (articleStr === '4210011' || familyChar === '2')
 					{
 						++stats['Produits Frais'];
+					}
+					else if (familyChar === '1')
+					{
+						++stats['Produits Sec'];
 					}
 					else if (familyChar === '3')
 					{
