@@ -126,6 +126,13 @@ class VifParser
 		let currentBL = null;
 		let stats = null;
 
+		const specialFamilyChar = {
+			// Plat cuisiné viande ambiant => Frais
+			'4210011' : '2',
+			// Oeufs ambiants => Frais
+			'4710001' : '2'
+		};
+
 		for (let i = 1; i < data.length; i++) // Skip headers
 		{
 			const row = data[i];
@@ -164,26 +171,24 @@ class VifParser
 
 				const articleStr = String(article);
 				const len = articleStr.length;
-				if (len >= 5)
+				const familyChar = specialFamilyChar[articleStr] || ((len < 5) ? '' : articleStr.charAt(len - 5));
+
+				if (familyChar === '1')
 				{
-					const familyChar = articleStr.charAt(len - 5);
-					if (articleStr === '4210011' || familyChar === '2')
+					++stats['Produits Sec'];
+				}
+				else if (familyChar === '2')
+				{
+					++stats['Produits Frais'];
+
+					if (articleStr.startsWith('452'))
 					{
-						++stats['Produits Frais'];
-					}
-					else if (familyChar === '1')
-					{
-						++stats['Produits Sec'];
-					}
-					else if (familyChar === '3')
-					{
-						++stats['Produits Surgelé'];
+						++stats['Produits F&L'];
 					}
 				}
-
-				if (articleStr.startsWith('452'))
+				else if (familyChar === '3')
 				{
-					++stats['Produits F&L'];
+					++stats['Produits Surgelé'];
 				}
 
 				if (articleStr.endsWith('9'))
@@ -228,7 +233,7 @@ class VifParser
 		}
 		if (stats['Produits Frais'] > 0)
 		{
-			return 'Complément/Frais/F&L';
+			return (stats['Produits Frais'] === stats['Produits F&L']) ? 'F&L' : 'Frais';
 		}
 		if (stats['Produits Sec'] > 0)
 		{

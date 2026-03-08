@@ -11,7 +11,8 @@ function runVifParserTests()
 	const testCases = [
 		test_parseBL_Standard,
 		test_parseBLStats,
-		test_parseBLStats_SpecialArticle
+		test_parseBLStats_SpecialArticle,
+		test_parseBLStats_FL
 	];
 
 	const results = {
@@ -122,7 +123,7 @@ Client : 67890
 			'Produits Sec': 0,
 			'Produits Frais': 0,
 			'Produits Surgelé': 1,
-			'Produits F&L': 1,
+			'Produits F&L': 0,
 			'Produits FSE': 1,
 			'Produits CNES': 1,
 			'Produits Proxidon': 0
@@ -155,7 +156,7 @@ function test_parseBLStats_SpecialArticle()
 			'Code VIF': '99999',
 			'Date': '2023-01-01',
 			'n° BL': 'BL003',
-			'Type BL': 'Complément/Frais/F&L',
+			'Type BL': 'Frais',
 			'Kg Net': 10.0,
 			'Produits Sec': 0,
 			'Produits Frais': 1,
@@ -177,6 +178,44 @@ function test_parseBLStats_SpecialArticle()
 	if (JSON.stringify(results) !== JSON.stringify(expected))
 	{
 		throw new Error(`test_parseBLStats_SpecialArticle failed.
+Expected: ${JSON.stringify(expected)}
+Actual:   ${JSON.stringify(results)}`);
+	}
+}
+
+function test_parseBLStats_FL()
+{
+	const mockContent = `Client : 99999
+2023-01-01	BL004	CDE004	4520000	Fruits Test	LOT1	10.0	10.0	P1	COL1
+`;
+
+	const expected = [
+		{
+			'Code VIF': '99999',
+			'Date': '2023-01-01',
+			'n° BL': 'BL004',
+			'Type BL': 'F&L',
+			'Kg Net': 10.0,
+			'Produits Sec': 0,
+			'Produits Frais': 1,
+			'Produits Surgelé': 0,
+			'Produits F&L': 1,
+			'Produits FSE': 0,
+			'Produits CNES': 0,
+			'Produits Proxidon': 0
+		}
+	];
+
+	const results = [];
+	const data = VifParser.parseBL(mockContent);
+	for (const res of VifParser.parseBLStats(data))
+	{
+		results.push(res);
+	}
+
+	if (JSON.stringify(results) !== JSON.stringify(expected))
+	{
+		throw new Error(`test_parseBLStats_FL failed.
 Expected: ${JSON.stringify(expected)}
 Actual:   ${JSON.stringify(results)}`);
 	}
