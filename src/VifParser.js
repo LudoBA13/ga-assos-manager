@@ -126,6 +126,11 @@ class VifParser
 		let currentBL = null;
 		let stats = null;
 
+		const ignoredArticles = [
+			// Articles de collecte gardés
+			'5010010'
+		];
+
 		const specialFamilyChar = {
 			// Plat cuisiné viande ambiant => Frais
 			'4210011' : '2',
@@ -138,6 +143,11 @@ class VifParser
 			const row = data[i];
 			const bl = row[2];
 			const article = row[4];
+
+			if (ignoredArticles.includes(String(article)))
+			{
+				continue;
+			}
 
 			if (bl !== currentBL)
 			{

@@ -12,7 +12,8 @@ function runVifParserTests()
 		test_parseBL_Standard,
 		test_parseBLStats,
 		test_parseBLStats_SpecialArticle,
-		test_parseBLStats_FL
+		test_parseBLStats_FL,
+		test_parseBLStats_IgnoreArticle
 	];
 
 	const results = {
@@ -216,6 +217,45 @@ function test_parseBLStats_FL()
 	if (JSON.stringify(results) !== JSON.stringify(expected))
 	{
 		throw new Error(`test_parseBLStats_FL failed.
+Expected: ${JSON.stringify(expected)}
+Actual:   ${JSON.stringify(results)}`);
+	}
+}
+
+function test_parseBLStats_IgnoreArticle()
+{
+	const mockContent = `Client : 99999
+2023-01-01	BL005	CDE005	5010010	Ignored Article	LOT1	10.0	10.0	P1	COL1
+			10009	Valid Article	LOT2	5.0	5.0	P2	COL2
+`;
+
+	const expected = [
+		{
+			'Code VIF': '99999',
+			'Date': '2023-01-01',
+			'n° BL': 'BL005',
+			'Type BL': 'Sec',
+			'Kg Net': 5.0,
+			'Produits Sec': 1,
+			'Produits Frais': 0,
+			'Produits Surgelé': 0,
+			'Produits F&L': 0,
+			'Produits FSE': 1,
+			'Produits CNES': 0,
+			'Produits Proxidon': 0
+		}
+	];
+
+	const results = [];
+	const data = VifParser.parseBL(mockContent);
+	for (const res of VifParser.parseBLStats(data))
+	{
+		results.push(res);
+	}
+
+	if (JSON.stringify(results) !== JSON.stringify(expected))
+	{
+		throw new Error(`test_parseBLStats_IgnoreArticle failed.
 Expected: ${JSON.stringify(expected)}
 Actual:   ${JSON.stringify(results)}`);
 	}
