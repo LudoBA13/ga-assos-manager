@@ -79,7 +79,7 @@ class PlanningNormalizer
 		text = text.replace(/\b(1[04])(?:[:hH]\d{0,2}|[0-5]\d)?\b/g, '$1h');
 
 		// 5. Normalize Products
-		text = text.replace(/\bfrais\b/gi, 'Frais');
+		text = text.replace(/\b(frais|f&l)\b/gi, 'Frais');
 		text = text.replace(/\bsec[s.]?\b/gi, 'Sec'); // Consumes following dot or 's'
 		text = text.replace(/\bsurgel[ée]s?\b/gi, 'Surgelé');
 

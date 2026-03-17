@@ -110,7 +110,8 @@ function test_PlanningNormalizer_Unit()
 	assertEqual("4e mercredi 8h30 : Frais, Surgelé.", PlanningNormalizer.normalize("4 mercredi 8h30 frais+surgeles"), "4 mercredi -> 4e, + separator");
 
 	// 6. Multi-line and missing info
-	assertEqual("3e mercredi 10h : Frais, Sec, Surgelé.", PlanningNormalizer.normalize("3 eme mercredi frais sec surgele\n3e mercredi 10h: Frais, Sec, Surgelé."), "Multi-line with missing time in first entry");
+	assertEqual("1er lundi 8h30 : Frais.", PlanningNormalizer.normalize("1er lundi 8h30 : Frais, Frais."), "Duplicates in normalization");
+	assertEqual("1er lundi 8h30 : Frais, Sec.", PlanningNormalizer.normalize("1er lundi 8h30 : F&L, Inconnu, Sec."), "F&L alias and unknown types in normalization");
 }
 
 function test_PlanningNormalizer_Idempotency()

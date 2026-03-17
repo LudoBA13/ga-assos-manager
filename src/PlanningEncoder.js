@@ -97,39 +97,46 @@
  *    - Separators: Optional space around colon.
  */
 
-const PLANNING_CONSTANTS = {
-	WEEKS: {
+const PLANNING_CONSTANTS =
+{
+	WEEKS:
+	{
 		'0': 'Tous les',
 		'1': '1er',
 		'2': '2e',
 		'3': '3e',
 		'4': '4e'
 	},
-	DAYS: {
+	DAYS:
+	{
 		'Lu': 'lundi',
 		'Ma': 'mardi',
 		'Me': 'mercredi',
 		'Je': 'jeudi',
 		'Ve': 'vendredi'
 	},
-	DAY_ORDER: {
+	DAY_ORDER:
+	{
 		'Lu': 0,
 		'Ma': 1,
 		'Me': 2,
 		'Je': 3,
 		'Ve': 4
 	},
-	TIMES: {
+	TIMES:
+	{
 		'Md': '8h30',
 		'Mf': '10h',
 		'Ap': '14h'
 	},
-	TIME_ORDER: {
+	TIME_ORDER:
+	{
 		'Md': 0,
 		'Mf': 1,
 		'Ap': 2
 	},
-	PRODUCTS: {
+	PRODUCTS:
+	{
 		'Fr': 'Frais',
 		'Se': 'Sec',
 		'Su': 'Surgelé'
@@ -229,7 +236,8 @@ const decompressPlanning = (schedule) =>
 		{
 			for (const week of allWeeks)
 			{
-				entries.push({
+				entries.push(
+				{
 					weekCode: week,
 					dayCode,
 					timeCode,
@@ -239,7 +247,8 @@ const decompressPlanning = (schedule) =>
 		}
 		else
 		{
-			entries.push({
+			entries.push(
+			{
 				weekCode,
 				dayCode,
 				timeCode,
@@ -295,7 +304,8 @@ const groupAndSortEntries = (schedule) =>
 
 		if (!grouped.has(sortKey))
 		{
-			grouped.set(sortKey, {
+			grouped.set(sortKey,
+			{
 				week: WEEKS[weekCode],
 				day: DAYS[dayCode],
 				time: TIMES[timeCode],
@@ -305,7 +315,7 @@ const groupAndSortEntries = (schedule) =>
 		}
 
 		const productLabel = PRODUCTS[productCode];
-		if (productLabel)
+		if (productLabel && !grouped.get(sortKey).productList.includes(productLabel))
 		{
 			grouped.get(sortKey).productList.push(productLabel);
 		}
@@ -440,7 +450,17 @@ const canonicalizeSchedule = (schedule) =>
 	}
 
 	const compressed = compressPlanning(schedule);
-	const entries = Array.from(parseSchedule(compressed));
+	const entriesSet = new Set;
+	const entries = [];
+	for (const entry of parseSchedule(compressed))
+	{
+		const str = entry.weekCode + entry.dayCode + entry.timeCode + entry.productCode;
+		if (!entriesSet.has(str))
+		{
+			entriesSet.add(str);
+			entries.push(entry);
+		}
+	}
 
 	const { DAY_ORDER, TIME_ORDER, PRODUCTS } = PLANNING_CONSTANTS;
 
@@ -796,7 +816,7 @@ const parseFlexiblePlanning = (text) =>
 		else
 		{
 			const pLower = (productsStr || headerStr).toLowerCase();
-			if (pLower.includes('frai'))
+			if (pLower.includes('frai') || pLower.includes('f&l'))
 			{
 				currentProductCodes.push('Fr');
 			}
@@ -986,7 +1006,8 @@ const formatPlanningForDisplay = (text) =>
  */
 const countProductOccurrences = (schedule) =>
 {
-	const counts = {
+	const counts =
+	{
 		'Frais': 0,
 		'Sec': 0,
 		'Surgelé': 0
@@ -1005,7 +1026,8 @@ const countProductOccurrences = (schedule) =>
 		const week = match[1];
 		const productCode = match[2];
 		const count = (week === '0') ? 4 : 1;
-		const productMap = {
+		const productMap =
+		{
 			'Fr': 'Frais',
 			'Se': 'Sec',
 			'Su': 'Surgelé'

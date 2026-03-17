@@ -142,6 +142,10 @@ function test_decodePlanning()
 	const expected5 = "Tous les jeudis 8h30 : Sec.";
 	assertPlanningEqual(expected5, decodePlanning(schedule5), "Test 5: Every week pre-compressed");
 
+	const schedule8 = "1LuMdFr1LuMdFr";
+	const expected8 = "1er lundi 8h30 : Frais.";
+	assertPlanningEqual(expected8, decodePlanning(schedule8), "Test 8: Duplicate products in encoded string");
+
 	assertPlanningEqual('', decodePlanning(''), "Test 6: Empty schedule");
 	assertPlanningEqual('', decodePlanning(null), "Test 7: Null schedule");
 }
@@ -422,6 +426,18 @@ function test_parseFlexiblePlanning()
 
 	const text4 = "tout les lundis 8h: Frais";
 	assertPlanningEqual("0LuMdFr", parseFlexiblePlanning(text4), "Test 4: Case-insensitive and flexible keywords");
+
+	const textFL = "1er lundi 8h30 : F&L.";
+	assertPlanningEqual("1LuMdFr", parseFlexiblePlanning(textFL), "Test: F&L alias");
+
+	const textDup = "1er lundi 8h30 : Frais, Frais.";
+	assertPlanningEqual("1LuMdFr", parseFlexiblePlanning(textDup), "Test: Duplicate products in same segment");
+
+	const textDup2 = "1er lundi 8h30 : Frais. 1er lundi 8h30 : Frais.";
+	assertPlanningEqual("1LuMdFr", parseFlexiblePlanning(textDup2), "Test: Duplicate products across segments");
+
+	const text6 = "1er lundi 8h30 : Frais, Inconnu, Sec.";
+	assertPlanningEqual("1LuMdFr1LuMdSe", parseFlexiblePlanning(text6), "Test: Ignore unknown types");
 
 	const text5 = "Gibberish text that means nothing";
 	try
