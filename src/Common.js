@@ -257,6 +257,57 @@ function getNotes(range)
 }
 
 /**
+ * Retrieves associations from the 'ACStructures' sheet.
+ * @param {Array<string>} [colNames] Optional array of column names to retrieve. If omitted, all columns are returned.
+ * @return {Object} A dictionary where keys are values from the first column and values are objects containing row data.
+ */
+function getAssos(colNames)
+{
+	const sheetName = 'ACStructures';
+	const ss = SpreadsheetApp.getActiveSpreadsheet();
+	const sheet = ss.getSheetByName(sheetName);
+	if (!sheet)
+	{
+		throw new Error(_("La feuille '%s' est introuvable.", sheetName));
+	}
+
+	const data = sheet.getDataRange().getValues();
+	if (data.length < 2)
+	{
+		return {};
+	}
+
+	const headers = data[0];
+	const targetCols = colNames || headers.filter(h => h);
+	const colIndices = targetCols.map(name => headers.indexOf(name));
+
+	const result = {};
+
+	for (let i = 1; i < data.length; i++)
+	{
+		const row = data[i];
+		const key = row[0];
+		if (!key)
+		{
+			continue;
+		}
+
+		const entry = {};
+		targetCols.forEach((name, index) =>
+		{
+			const colIdx = colIndices[index];
+			if (colIdx !== -1)
+			{
+				entry[name] = row[colIdx];
+			}
+		});
+		result[key] = entry;
+	}
+
+	return result;
+}
+
+/**
  * Builds a map from 'Code VIF' to 'ID du Contact' from the 'ACStructures' sheet.
  * @return {Object} An object where keys are Code VIF and values are ID du Contact.
  */
