@@ -126,10 +126,103 @@ function generateVisitReportsByRange(startRow, endRow)
 }
 
 /**
+ * Updates the last visit date from the reports in the 'CRVisites' sheet.
+ */
+function updateLastVisitFromReports()
+{
+	return ReportManager.updateLastVisitFromReports();
+}
+
+/**
  * Manages the generation of visit reports based on CRVisites data.
  */
 class ReportManager
 {
+
+	/**
+	 * Updates the last visit date from the reports in the 'CRVisites' sheet.
+	 * It computes the maximum visit date for each VIF and saves the result in a new sheet.
+	 */
+	static updateLastVisitFromReports()
+	{
+		const ss = SpreadsheetApp.getActiveSpreadsheet();
+		const crSheet = ss.getSheetByName('CRVisites');
+		if (!crSheet)
+		{
+			throw new Error(_("La feuille 'CRVisites' est introuvable."));
+		}
+
+		const data = crSheet.getDataRange().getValues();
+		if (data.length < 2)
+		{
+			return;
+		}
+
+		const headers = data[0];
+		const vifIdx = headers.indexOf('N° VIF de la structure visitée');
+		const dateIdx = headers.indexOf('Date de la visite');
+
+		if (vifIdx === -1 || dateIdx === -1)
+		{
+			throw new Error(_("Colonnes requises introuvables dans 'CRVisites'."));
+		}
+
+		const lastVisits = {}; // VIF -> Date object
+
+		for (let i = 1; i < data.length; i++)
+		{
+			const row = data[i];
+			const vif = row[vifIdx];
+			const dateValue = row[dateIdx];
+
+			if (vif && dateValue)
+			{
+				const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+				if (!isNaN(date.getTime()))
+				{
+					if (!lastVisits[vif] || date > lastVisits[vif])
+					{
+						lastVisits[vif] = date;
+					}
+				}
+			}
+		}
+
+		const result = [['Code VIF', 'Date de la dernière visite']];
+		for (const vif in lastVisits)
+		{
+			result.push([vif, lastVisits[vif]]);
+		}
+
+		const dateSuffix = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd');
+		const newSheetName = `CRVisitesUpdate_${dateSuffix}`;
+
+		let newSheet = ss.getSheetByName(newSheetName);
+		if (newSheet)
+		{
+			ss.deleteSheet(newSheet);
+		}
+		newSheet = ss.insertSheet(newSheetName);
+
+		const rows = result.length;
+		const cols = result[0].length;
+
+		// Resize sheet to the size of the result BEFORE pasting content (or after, but resizing the sheet itself)
+		const currentMaxRows = newSheet.getMaxRows();
+		const currentMaxCols = newSheet.getMaxColumns();
+
+		if (currentMaxRows > rows)
+		{
+			newSheet.deleteRows(rows + 1, currentMaxRows - rows);
+		}
+		if (currentMaxCols > cols)
+		{
+			newSheet.deleteColumns(cols + 1, currentMaxCols - cols);
+		}
+
+		newSheet.getRange(1, 1, rows, cols).setValues(result);
+		newSheet.activate();
+	}
 
 	/**
 	 * Generates a visit report for the given values.
