@@ -146,6 +146,11 @@ class ReportManager
 	static updateLastVisitFromReports()
 	{
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+		// 1. Build map from 'Code VIF' to 'ID du Contact' from ACStructures
+		const vifToIdMap = getVifToContactIdMap();
+
+		// 2. Process CRVisites
 		const crSheet = ss.getSheetByName('CRVisites');
 		if (!crSheet)
 		{
@@ -188,10 +193,10 @@ class ReportManager
 			}
 		}
 
-		const result = [['Code VIF', 'Date de la dernière visite']];
+		const result = [['Code VIF', 'ID du Contact', 'Date de la dernière visite']];
 		for (const vif in lastVisits)
 		{
-			result.push([vif, lastVisits[vif]]);
+			result.push([vif, vifToIdMap[vif] || '', lastVisits[vif]]);
 		}
 
 		const dateSuffix = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd');
@@ -207,7 +212,7 @@ class ReportManager
 		const rows = result.length;
 		const cols = result[0].length;
 
-		// Resize sheet to the size of the result BEFORE pasting content (or after, but resizing the sheet itself)
+		// Resize sheet to the size of the result
 		const currentMaxRows = newSheet.getMaxRows();
 		const currentMaxCols = newSheet.getMaxColumns();
 

@@ -257,6 +257,50 @@ function getNotes(range)
 }
 
 /**
+ * Builds a map from 'Code VIF' to 'ID du Contact' from the 'ACStructures' sheet.
+ * @return {Object} An object where keys are Code VIF and values are ID du Contact.
+ */
+function getVifToContactIdMap()
+{
+	const sheetName = 'ACStructures';
+	const ss = SpreadsheetApp.getActiveSpreadsheet();
+	const sheet = ss.getSheetByName(sheetName);
+	if (!sheet)
+	{
+		throw new Error(_("La feuille '%s' est introuvable.", sheetName));
+	}
+
+	const data = sheet.getDataRange().getValues();
+	if (data.length < 2)
+	{
+		return {};
+	}
+
+	const headers = data[0];
+	const vifIdx = headers.indexOf('Code VIF');
+	const idIdx = headers.indexOf('ID du Contact');
+
+	if (vifIdx === -1 || idIdx === -1)
+	{
+		throw new Error(_("Colonnes requises ('Code VIF' ou 'ID du Contact') introuvables dans '%s'.", sheetName));
+	}
+
+	const map = {};
+	for (let i = 1; i < data.length; i++)
+	{
+		const row = data[i];
+		const vif = row[vifIdx];
+		const id = row[idIdx];
+		if (vif && id)
+		{
+			map[vif] = id;
+		}
+	}
+
+	return map;
+}
+
+/**
  * Creates a Map from two arrays (keys and values).
  * @param {Array} keys The array of keys.
  * @param {Array} values The array of values.
