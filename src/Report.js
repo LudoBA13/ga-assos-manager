@@ -147,8 +147,8 @@ class ReportManager
 	{
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-		// 1. Build map from 'Code VIF' to 'ID du Contact' from ACStructures
-		const vifToIdMap = getVifToContactIdMap();
+		// 1. Get association data keyed by Code VIF
+		const assos = getAssos('Code VIF', ['ID du Contact', 'Nom']);
 
 		// 2. Process CRVisites
 		const crSheet = ss.getSheetByName('CRVisites');
@@ -193,13 +193,27 @@ class ReportManager
 			}
 		}
 
-		const result = [['Code VIF', 'ID du Contact', 'Date de la dernière visite']];
+		const result = [['ID du Contact', 'Nom', 'Date de dernière visite']];
+		const timeZone = Session.getScriptTimeZone();
+		const dateFormat = _('dd/MM/yyyy');
+
 		for (const vif in lastVisits)
 		{
-			result.push([vif, vifToIdMap[vif] || '', lastVisits[vif]]);
+			const asso = assos[vif];
+			if (!asso)
+			{
+				continue;
+			}
+
+			const formattedDate = Utilities.formatDate(lastVisits[vif], timeZone, dateFormat);
+			result.push([
+				asso['ID du Contact'] || '',
+				asso['Nom'] || '',
+				formattedDate
+			]);
 		}
 
-		const dateSuffix = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd');
+		const dateSuffix = Utilities.formatDate(new Date(), timeZone, 'yyyyMMdd');
 		const newSheetName = `CRVisitesUpdate_${dateSuffix}`;
 
 		let newSheet = ss.getSheetByName(newSheetName);

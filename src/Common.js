@@ -258,10 +258,11 @@ function getNotes(range)
 
 /**
  * Retrieves associations from the 'ACStructures' sheet.
+ * @param {string} [keyName] Optional column name to use as the key. If omitted, the first column is used.
  * @param {Array<string>} [colNames] Optional array of column names to retrieve. If omitted, all columns are returned.
- * @return {Object} A dictionary where keys are values from the first column and values are objects containing row data.
+ * @return {Object} A dictionary where keys are values from the specified column and values are objects containing row data.
  */
-function getAssos(colNames)
+function getAssos(keyName, colNames)
 {
 	const sheetName = 'ACStructures';
 	const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -278,6 +279,13 @@ function getAssos(colNames)
 	}
 
 	const headers = data[0];
+	const keyIdx = keyName ? headers.indexOf(keyName) : 0;
+
+	if (keyIdx === -1)
+	{
+		throw new Error(_("La colonne de clé '%s' est introuvable dans '%s'.", keyName, sheetName));
+	}
+
 	const targetCols = colNames || headers.filter(h => h);
 	const colIndices = targetCols.map(name => headers.indexOf(name));
 
@@ -286,7 +294,7 @@ function getAssos(colNames)
 	for (let i = 1; i < data.length; i++)
 	{
 		const row = data[i];
-		const key = row[0];
+		const key = row[keyIdx];
 		if (!key)
 		{
 			continue;
