@@ -148,7 +148,7 @@ class ReportManager
 		const ss = SpreadsheetApp.getActiveSpreadsheet();
 
 		// 1. Get association data keyed by Code VIF
-		const assos = getAssos('Code VIF', ['ID du Contact', 'Nom']);
+		const assos = getAssos('Code VIF', ['ID du Contact', 'Nom', 'Date de la dernière visite']);
 
 		// 2. Process CRVisites
 		const crSheet = ss.getSheetByName('CRVisites');
@@ -193,7 +193,7 @@ class ReportManager
 			}
 		}
 
-		const result = [['ID du Contact', 'Nom', 'Date de dernière visite']];
+		const result = [['ID du Contact', 'Nom', 'Date de la dernière visite']];
 		const timeZone = Session.getScriptTimeZone();
 		const dateFormat = _('dd/MM/yyyy');
 
@@ -205,7 +205,17 @@ class ReportManager
 				continue;
 			}
 
-			const formattedDate = Utilities.formatDate(lastVisits[vif], timeZone, dateFormat);
+			const newDate = lastVisits[vif];
+			const oldDateValue = asso['Date de la dernière visite'];
+			const oldDate = oldDateValue instanceof Date ? oldDateValue : new Date(oldDateValue);
+
+			// Only output if the new date is strictly newer than the old one
+			if (!isNaN(oldDate.getTime()) && newDate <= oldDate)
+			{
+				continue;
+			}
+
+			const formattedDate = Utilities.formatDate(newDate, timeZone, dateFormat);
 			result.push([
 				asso['ID du Contact'] || '',
 				asso['Nom'] || '',
