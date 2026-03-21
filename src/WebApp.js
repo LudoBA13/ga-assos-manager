@@ -182,8 +182,8 @@ function doGet(e)
 {
 	const template = HtmlService.createTemplateFromFile('WebApp.Index');
 
-	// Pass the user identity to the template
-	template.userEmail = Session.getActiveUser().getEmail();
+	// Pass the user identity to the template (display name only)
+	template.userEmail = Session.getActiveUser().getEmail().replace('@banquealimentaire.org', '');
 	template.scriptUrl = ScriptApp.getService().getUrl();
 	template.configs = getAllConfigs();
 
