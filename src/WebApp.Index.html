@@ -48,6 +48,11 @@
 					<li><small><?= userEmail ?></small></li>
 				</ul>
 			</nav>
+			<nav aria-label="breadcrumb">
+				<ul id="breadcrumb-list">
+					<li>Associations</li>
+				</ul>
+			</nav>
 		</header>
 
 		<main class="container">
@@ -160,22 +165,58 @@
 				}
 			}
 
-			function updateNav(screenId)
+			function updateNav(screenId, assoName = null)
 			{
+				const breadcrumb = document.getElementById('breadcrumb-list');
+				breadcrumb.innerHTML = '<li><a href="#" onclick="event.preventDefault(); navigateTo(\'structure:view\')">Associations</a></li>';
+
 				// Update active link highlighting
-				document.querySelectorAll('header nav a').forEach(a => a.removeAttribute('aria-current'));
+				document.querySelectorAll('header nav:first-of-type a').forEach(a => a.removeAttribute('aria-current'));
+
+				let screenLabel = '';
+				let screenLink = '';
 
 				if (screenId === 'structure:view')
 				{
-					document.getElementById('nav-link-structure').setAttribute('aria-current', 'page');
+					screenLabel = 'Consulter';
+					screenLink = 'nav-link-structure';
 				}
 				else if (screenId === 'tools:car')
 				{
-					document.getElementById('nav-link-car').setAttribute('aria-current', 'page');
+					screenLabel = 'CAR';
+					screenLink = 'nav-link-car';
 				}
 				else if (screenId === 'tools:admin')
 				{
-					document.getElementById('nav-link-admin').setAttribute('aria-current', 'page');
+					screenLabel = 'Admin';
+					screenLink = 'nav-link-admin';
+				}
+
+				if (screenLink)
+				{
+					document.getElementById(screenLink).setAttribute('aria-current', 'page');
+					
+					const li = document.createElement('li');
+					if (assoName)
+					{
+						const link = document.createElement('a');
+						link.href = "#";
+						link.textContent = screenLabel;
+						link.onclick = (e) => { e.preventDefault(); navigateTo(screenId); };
+						li.appendChild(link);
+					}
+					else
+					{
+						li.textContent = screenLabel;
+					}
+					breadcrumb.appendChild(li);
+				}
+
+				if (assoName)
+				{
+					const li = document.createElement('li');
+					li.textContent = assoName;
+					breadcrumb.appendChild(li);
 				}
 			}
 
@@ -277,12 +318,15 @@
 				if (!id || !structures[id])
 				{
 					container.style.display = 'none';
+					updateNav('structure:view');
 					return;
 				}
 
 				const s = structures[id];
 				document.getElementById('detail-nom').innerText = s.Nom;
 				document.getElementById('detail-vif').innerText = s['Code VIF'];
+
+				updateNav('structure:view', s.Nom);
 
 				if (!skipHashUpdate)
 				{
