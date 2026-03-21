@@ -13,22 +13,31 @@
 
 			body {
 				display: flex;
-				justify-content: center;
+				flex-direction: column;
+				justify-content: flex-start;
 				align-items: center;
 				min-height: 100vh;
 				margin: 0;
-				padding: 20px;
+				padding: 0;
 			}
 
-			.card {
+			header.container {
+				padding-top: 1rem;
+				border-bottom: 1px solid var(--pico-border-color);
+				margin-bottom: 2rem;
 				width: 100%;
-				max-width: 400px;
-				text-align: center;
 			}
 
-			.user-info {
-				color: var(--pico-muted-color);
-				font-size: 0.85rem;
+			.app-screen {
+				display: none;
+				width: 100%;
+				max-width: 500px;
+				text-align: center;
+				padding: 0 20px 40px 20px;
+			}
+
+			.app-screen.active {
+				display: block;
 			}
 
 			select, button {
@@ -43,14 +52,6 @@
 			/* Ensure select text is as centered as possible (browser dependent) */
 			select {
 				text-align-last: center;
-			}
-
-			/* Mobile Adjustments */
-			@media (max-width: 600px) {
-				body {
-					align-items: flex-start;
-					padding-top: 2rem;
-				}
 			}
 
 			.icon-prefixed-link {
@@ -73,43 +74,81 @@
 			.no-margin-bottom {
 				margin-bottom: 0;
 			}
+
+			/* Hover effect for buttons */
+			button:hover {
+				filter: brightness(1.1);
+				cursor: pointer;
+			}
+
+			/* Nav styles */
+			#app-nav a {
+				white-space: nowrap;
+			}
 		</style>
 	</head>
-	<body class="container">
-		<article class="card">
-			<header>
-				<h1 class="no-margin-bottom">Associations</h1>
-			</header>
+	<body>
+		<header class="container">
+			<nav id="app-nav">
+				<ul>
+					<li>
+						<a href="#" class="secondary" id="nav-link-structure" onclick="event.preventDefault(); navigateTo('structure:view')">Consulter</a>
+					</li>
+					<li>
+						<a href="#" class="secondary" id="nav-link-car" onclick="event.preventDefault(); navigateTo('tools:car')">CAR</a>
+					</li>
+					<li>
+						<a href="#" class="secondary" id="nav-link-admin" onclick="event.preventDefault(); navigateTo('tools:admin')">Admin</a>
+					</li>
+				</ul>
+				<ul>
+					<li><small><?= userEmail ?></small></li>
+				</ul>
+			</nav>
+		</header>
 
-			<p class="user-info">
-				Connecté en tant que :<br>
-				<strong><?= userEmail ?></strong>
-			</p>
+		<main class="container">
+			<article id="structure:view" class="app-screen active">
+				<label for="consult-select">
+					Sélectionner une association
+					<select id="consult-select" onchange="displayStructureDetails(this.value)">
+						<option value="">Chargement des données...</option>
+					</select>
+				</label>
 
-			<label for="consult-select">
-				Sélectionner une association
-				<select id="consult-select" onchange="displayStructureDetails(this.value)">
-					<option value="">Chargement des données...</option>
-				</select>
-			</label>
+				<div id="details-container" style="display: none;">
+					<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
+					<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
+					<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
+					<p><strong>AssoConnect :</strong>
+						<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> |
+						<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
+					</p>
 
-			<div id="details-container" style="display: none;">
-				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
-				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
-				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
-				<p><strong>AssoConnect :</strong>
-					<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> |
-					<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
+					<button class="outline" id="detail-fip-btn">
+						Ouvrir la fiche info partenaire
+					</button>
+					<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
+						Créer un compte rendu de visite
+					</button>
+				</div>
+			</article>
+
+			<article id="tools:car" class="app-screen">
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+					Pellentesque elementum dignissim ultricies. 
+					Fusce rhoncus ipsum tempor eros aliquam, ut hendrerit enim interdum.
 				</p>
+			</article>
 
-				<button class="outline" id="detail-fip-btn">
-					Ouvrir la fiche info partenaire
-				</button>
-				<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
-					Créer un compte rendu de visite
-				</button>
-			</div>
-		</article>
+			<article id="tools:admin" class="app-screen">
+				<p>
+					Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+					Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+				</p>
+			</article>
+		</main>
 
 		<script>
 			const Config = <?!= JSON.stringify(configs) ?>;
@@ -119,7 +158,83 @@
 			window.onload = function()
 			{
 				loadFullStructures();
+
+				// Handle future history changes
+				google.script.history.setChangeHandler(function(e)
+				{
+					const targetHash = e.location.hash || 'structure:view';
+					navigateTo(targetHash, true);
+				});
 			};
+
+			function navigateTo(targetHash, skipHistory = false)
+			{
+				// Parse hash for screen and optional VIF code (e.g. structure:view:123)
+				const parts = targetHash.split(':');
+				const screenId = (parts.length >= 2) ? (parts[0] + ':' + parts[1]) : parts[0];
+				const vifCode = parts[2];
+
+				const screen = document.getElementById(screenId);
+				if (!screen)
+				{
+					console.warn('Screen not found:', screenId);
+					return;
+				}
+
+				document.querySelector('.app-screen.active')?.classList.remove('active');
+				screen.classList.add('active');
+				updateNav(screenId);
+
+				if (screenId === 'structure:view')
+				{
+					handleStructureViewNavigation(vifCode);
+				}
+
+				if (!skipHistory)
+				{
+					google.script.history.push({hash: targetHash}, null, targetHash);
+				}
+			}
+
+			function handleStructureViewNavigation(vifCode)
+			{
+				const select = document.getElementById('consult-select');
+				if (!vifCode)
+				{
+					select.value = '';
+					displayStructureDetails('', true); // skip hash update
+					return;
+				}
+
+				if (Object.keys(structures).length === 0) return;
+
+				// Find internal ID from VIF code
+				const id = Object.keys(structures).find(k => structures[k]['Code VIF'] == vifCode);
+				if (id)
+				{
+					select.value = id;
+					displayStructureDetails(id, true); // skip hash update
+				}
+			}
+
+			function updateNav(screenId)
+			{
+				// Update active link highlighting
+				document.querySelectorAll('#app-nav a').forEach(a => a.removeAttribute('aria-current'));
+
+				if (screenId === 'structure:view')
+				{
+					document.getElementById('nav-link-structure').setAttribute('aria-current', 'page');
+				}
+				else if (screenId === 'tools:car')
+				{
+					document.getElementById('nav-link-car').setAttribute('aria-current', 'page');
+				}
+				else if (screenId === 'tools:admin')
+				{
+					document.getElementById('nav-link-admin').setAttribute('aria-current', 'page');
+				}
+			}
 
 			function loadFullStructures()
 			{
@@ -136,6 +251,14 @@
 						console.log('Cache found, loading data...');
 						structures = JSON.parse(cachedData);
 						populateConsultSelect(structures);
+						
+						// Process initial location from hash after data is loaded
+						google.script.url.getLocation(function(location)
+						{
+							const targetHash = location.hash || 'structure:view';
+							navigateTo(targetHash, true);
+							google.script.history.replace({hash: targetHash}, null, targetHash);
+						});
 						return;
 					}
 					catch (e)
@@ -170,6 +293,14 @@
 							console.warn('Impossible de sauvegarder dans localStorage :', e.message);
 						}
 						populateConsultSelect(data);
+						
+						// Process initial location from hash after data is loaded
+						google.script.url.getLocation(function(location)
+						{
+							const targetHash = location.hash || 'structure:view';
+							navigateTo(targetHash, true);
+							google.script.history.replace({hash: targetHash}, null, targetHash);
+						});
 					})
 					.withFailureHandler(function(err)
 					{
@@ -197,7 +328,7 @@
 				});
 			}
 
-			function displayStructureDetails(id)
+			function displayStructureDetails(id, skipHashUpdate = false)
 			{
 				const container = document.getElementById('details-container');
 				if (!id || !structures[id])
@@ -209,6 +340,12 @@
 				const s = structures[id];
 				document.getElementById('detail-nom').innerText = s.Nom;
 				document.getElementById('detail-vif').innerText = s['Code VIF'];
+
+				if (!skipHashUpdate)
+				{
+					const targetHash = 'structure:view:' + s['Code VIF'];
+					google.script.history.push({hash: targetHash}, null, targetHash);
+				}
 
 				const driveLink = document.getElementById('detail-drive');
 				const driveUrl = s['Lien vers les documents stockés sur le Drive'];
