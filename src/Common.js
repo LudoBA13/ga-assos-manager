@@ -43,6 +43,9 @@ function getAllConfigs()
 		}
 	});
 
+	// Inject dynamic cache buster from Importer
+	config.cacheBuster = Importer.getCacheBuster();
+
 	return config;
 }
 

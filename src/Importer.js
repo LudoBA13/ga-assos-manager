@@ -112,6 +112,9 @@ class Importer
 		// Write new data
 		sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
 
+		// Update cache buster
+		this.updateCacheBuster();
+
 		// Process and update FuzzyDB
 		try
 		{
@@ -121,6 +124,27 @@ class Importer
 		{
 			console.warn('Failed to update FuzzyDB: ' + e.message);
 		}
+	}
+
+	/**
+	 * Retrieves the cached timestamp used as a cache buster.
+	 * If no timestamp is cached, it defaults to '0'.
+	 *
+	 * @returns {string} The cache buster timestamp.
+	 */
+	static getCacheBuster()
+	{
+		const props = PropertiesService.getScriptProperties();
+		return props.getProperty('cacheBuster') || '0';
+	}
+
+	/**
+	 * Updates the cached timestamp to the current time.
+	 */
+	static updateCacheBuster()
+	{
+		const props = PropertiesService.getScriptProperties();
+		props.setProperty('cacheBuster', Date.now().toString());
 	}
 
 	static updateFuzzyDB(acStructuresData)

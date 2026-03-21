@@ -123,10 +123,52 @@
 
 			function loadFullStructures()
 			{
+				const cacheBuster = Config.cacheBuster || 'default';
+				const cacheKey = 'structures_' + cacheBuster;
+				const cachedData = localStorage.getItem(cacheKey);
+
+				console.log('Cache buster:', cacheBuster, '| Cache key:', cacheKey);
+
+				if (cachedData)
+				{
+					try
+					{
+						console.log('Cache found, loading data...');
+						structures = JSON.parse(cachedData);
+						populateConsultSelect(structures);
+						return;
+					}
+					catch (e)
+					{
+						console.warn('Error parsing cache, reloading...', e);
+						localStorage.removeItem(cacheKey);
+					}
+				}
+
+				console.log('Cache not found or invalid, fetching fresh data...');
+
+				// Cleanup old versions to avoid saturating localStorage
+				for (let i = 0; i < localStorage.length; i++)
+				{
+					const key = localStorage.key(i);
+					if (key && key.startsWith('structures_') && key !== cacheKey)
+					{
+						localStorage.removeItem(key);
+					}
+				}
+
 				google.script.run
 					.withSuccessHandler(function(data)
 					{
 						structures = data;
+						try
+						{
+							localStorage.setItem(cacheKey, JSON.stringify(data));
+						}
+						catch (e)
+						{
+							console.warn('Impossible de sauvegarder dans localStorage :', e.message);
+						}
 						populateConsultSelect(data);
 					})
 					.withFailureHandler(function(err)

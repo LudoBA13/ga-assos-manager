@@ -17,6 +17,29 @@ class WebApp
 {
 	getACStructures()
 	{
+		const configs = getAllConfigs();
+		const cacheBuster = configs.cacheBuster || 'v1';
+		const cache = CacheService.getScriptCache();
+		const cacheKey = 'ACStructures_' + cacheBuster;
+		const cached = cache.get(cacheKey);
+
+		console.log('Server cache buster:', cacheBuster, '| Cache key:', cacheKey);
+
+		if (cached)
+		{
+			try
+			{
+				console.log('Server cache hit.');
+				return JSON.parse(cached);
+			}
+			catch (e)
+			{
+				console.warn('Server cache corrupted, fetching from sheet.');
+			}
+		}
+
+		console.log('Server cache miss, fetching from spreadsheet.');
+
 		const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('ACStructures');
 		if (!sheet)
 		{
@@ -70,6 +93,16 @@ class WebApp
 				'Date de la dernière visite': dateStr,
 				'Lien vers les documents stockés sur le Drive': driveIdx !== -1 ? row[driveIdx] : ''
 			};
+		}
+
+		try
+		{
+			cache.put(cacheKey, JSON.stringify(result), 21600); // 6 hours
+		}
+		catch (e)
+		{
+			// Probably exceeding cache size limit (100KB)
+			console.warn("Could not cache structures: " + e.message);
 		}
 
 		return result;
