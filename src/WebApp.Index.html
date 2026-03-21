@@ -7,51 +7,14 @@
 		<title>Console Associations</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 		<style>
-			:root {
-				--pico-font-family: 'Google Sans', Roboto, Arial, sans-serif;
-			}
-
-			body {
-				display: flex;
-				flex-direction: column;
-				justify-content: flex-start;
-				align-items: center;
-				min-height: 100vh;
-				margin: 0;
-				padding: 0;
-			}
-
-			header.container {
-				padding-top: 1rem;
-				border-bottom: 1px solid var(--pico-border-color);
-				margin-bottom: 2rem;
-				width: 100%;
-			}
-
 			.app-screen {
 				display: none;
-				width: 100%;
 				max-width: 500px;
-				text-align: center;
-				padding: 0 20px 40px 20px;
+				margin: 0 auto;
 			}
 
 			.app-screen.active {
 				display: block;
-			}
-
-			select, button {
-				width: 100%;
-				text-align: center;
-			}
-
-			button + button {
-				margin-top: .5em;
-			}
-
-			/* Ensure select text is as centered as possible (browser dependent) */
-			select {
-				text-align-last: center;
 			}
 
 			.icon-prefixed-link {
@@ -61,35 +24,15 @@
 			}
 
 			#details-container {
-				text-align: left;
 				margin-top: 1rem;
 				border-top: 1px solid var(--pico-border-color);
 				padding-top: 1rem;
-			}
-
-			#details-container > p {
-				margin-bottom: 0.5rem;
-			}
-
-			.no-margin-bottom {
-				margin-bottom: 0;
-			}
-
-			/* Hover effect for buttons */
-			button:hover {
-				filter: brightness(1.1);
-				cursor: pointer;
-			}
-
-			/* Nav styles */
-			#app-nav a {
-				white-space: nowrap;
 			}
 		</style>
 	</head>
 	<body>
 		<header class="container">
-			<nav id="app-nav">
+			<nav>
 				<ul>
 					<li>
 						<a href="#" class="secondary" id="nav-link-structure" onclick="event.preventDefault(); navigateTo('structure:view')">Consulter</a>
@@ -116,7 +59,7 @@
 					</select>
 				</label>
 
-				<div id="details-container" style="display: none;">
+				<section id="details-container" style="display: none;">
 					<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
 					<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
 					<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
@@ -131,7 +74,7 @@
 					<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
 						Créer un compte rendu de visite
 					</button>
-				</div>
+				</section>
 			</article>
 
 			<article id="tools:car" class="app-screen">
@@ -220,7 +163,7 @@
 			function updateNav(screenId)
 			{
 				// Update active link highlighting
-				document.querySelectorAll('#app-nav a').forEach(a => a.removeAttribute('aria-current'));
+				document.querySelectorAll('header nav a').forEach(a => a.removeAttribute('aria-current'));
 
 				if (screenId === 'structure:view')
 				{
