@@ -9,8 +9,6 @@
 		<style>
 			.app-screen {
 				display: none;
-				max-width: 500px;
-				margin: 0 auto;
 			}
 
 			.app-screen.active {
@@ -28,21 +26,34 @@
 				border-top: 1px solid var(--pico-border-color);
 				padding-top: 1rem;
 			}
+
+			/* Custom layout for sidebar and content */
+			@media (min-width: 992px) {
+				.main-grid {
+					display: grid;
+					grid-template-columns: 250px 1fr;
+					gap: var(--pico-spacing);
+				}
+			}
+
+			aside nav details summary {
+				font-weight: bold;
+			}
+
+			aside nav ul {
+				margin-bottom: 0;
+			}
+			
+			aside nav ul li {
+				padding-left: 0.5rem;
+			}
 		</style>
 	</head>
 	<body>
 		<header class="container">
 			<nav>
 				<ul>
-					<li>
-						<a href="#" class="secondary" id="nav-link-structure" onclick="event.preventDefault(); navigateTo('structure:view')">Consulter</a>
-					</li>
-					<li>
-						<a href="#" class="secondary" id="nav-link-car" onclick="event.preventDefault(); navigateTo('tools:car')">CAR</a>
-					</li>
-					<li>
-						<a href="#" class="secondary" id="nav-link-admin" onclick="event.preventDefault(); navigateTo('tools:admin')">Admin</a>
-					</li>
+					<li><strong>Console Associations</strong></li>
 				</ul>
 				<ul>
 					<li><small><?= userEmail ?></small></li>
@@ -56,46 +67,75 @@
 		</header>
 
 		<main class="container">
-			<article id="structure:view" class="app-screen active">
-				<label for="consult-select">
-					Sélectionner une association
-					<select id="consult-select" onchange="displayStructureDetails(this.value)">
-						<option value="">Chargement des données...</option>
-					</select>
-				</label>
+			<div class="main-grid">
+				<aside>
+					<nav>
+						<details id="nav-group-consulter" name="nav-group" open>
+							<summary>Consulter</summary>
+							<ul>
+								<li><a href="#" id="nav-link-consulter-association" onclick="event.preventDefault(); navigateTo('consulter:association')">Associations</a></li>
+							</ul>
+						</details>
+						<details id="nav-group-car" name="nav-group">
+							<summary>CAR</summary>
+							<ul>
+								<li><a href="#" id="nav-link-car-page1" onclick="event.preventDefault(); navigateTo('car:page1')">Page 1</a></li>
+							</ul>
+						</details>
+						<details id="nav-group-admin" name="nav-group">
+							<summary>Admin</summary>
+							<ul>
+								<li><a href="#" id="nav-link-admin-page1" onclick="event.preventDefault(); navigateTo('admin:page1')">Page 1</a></li>
+							</ul>
+						</details>
+					</nav>
+				</aside>
 
-				<section id="details-container" style="display: none;">
-					<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
-					<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
-					<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
-					<p><strong>AssoConnect :</strong>
-						<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> |
-						<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
-					</p>
+				<section>
+					<article id="consulter:association" class="app-screen">
+						<header>Sélectionner une association</header>
+						<label for="consult-select">
+							<select id="consult-select" onchange="displayStructureDetails(this.value)">
+								<option value="">Chargement des données...</option>
+							</select>
+						</label>
 
-					<button class="outline" id="detail-fip-btn">
-						Ouvrir la fiche info partenaire
-					</button>
-					<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
-						Créer un compte rendu de visite
-					</button>
+						<section id="details-container" style="display: none;">
+							<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
+							<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
+							<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
+							<p><strong>AssoConnect :</strong>
+								<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> |
+								<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
+							</p>
+
+							<button class="outline" id="detail-fip-btn">
+								Ouvrir la fiche info partenaire
+							</button>
+							<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
+								Créer un compte rendu de visite
+							</button>
+						</section>
+					</article>
+
+					<article id="car:page1" class="app-screen">
+						<header>CAR - Page 1</header>
+						<p>
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+							Pellentesque elementum dignissim ultricies. 
+							Fusce rhoncus ipsum tempor eros aliquam, ut hendrerit enim interdum.
+						</p>
+					</article>
+
+					<article id="admin:page1" class="app-screen">
+						<header>Admin - Page 1</header>
+						<p>
+							Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+							Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+						</p>
+					</article>
 				</section>
-			</article>
-
-			<article id="tools:car" class="app-screen">
-				<p>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-					Pellentesque elementum dignissim ultricies. 
-					Fusce rhoncus ipsum tempor eros aliquam, ut hendrerit enim interdum.
-				</p>
-			</article>
-
-			<article id="tools:admin" class="app-screen">
-				<p>
-					Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-					Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-				</p>
-			</article>
+			</div>
 		</main>
 
 		<script>
@@ -110,14 +150,14 @@
 				// Handle future history changes
 				google.script.history.setChangeHandler(function(e)
 				{
-					const targetHash = e.location.hash || 'structure:view';
+					const targetHash = e.location.hash || 'consulter:association';
 					navigateTo(targetHash, true);
 				});
 			};
 
 			function navigateTo(targetHash, skipHistory = false)
 			{
-				// Parse hash for screen and optional VIF code (e.g. structure:view:123)
+				// Parse hash for screen and optional VIF code (e.g. consulter:association:123)
 				const parts = targetHash.split(':');
 				const screenId = (parts.length >= 2) ? (parts[0] + ':' + parts[1]) : parts[0];
 				const vifCode = parts[2];
@@ -129,11 +169,21 @@
 					return;
 				}
 
-				document.querySelector('.app-screen.active')?.classList.remove('active');
+				// Hide current screen and show new one
+				document.querySelectorAll('.app-screen.active').forEach(s => s.classList.remove('active'));
 				screen.classList.add('active');
+				
+				// Open corresponding accordion
+				const rootCategory = parts[0];
+				const details = document.getElementById('nav-group-' + rootCategory);
+				if (details && !details.hasAttribute('open'))
+				{
+					details.setAttribute('open', '');
+				}
+
 				updateNav(screenId);
 
-				if (screenId === 'structure:view')
+				if (screenId === 'consulter:association')
 				{
 					handleStructureViewNavigation(vifCode);
 				}
@@ -168,33 +218,34 @@
 			function updateNav(screenId, assoName = null)
 			{
 				const breadcrumb = document.getElementById('breadcrumb-list');
-				breadcrumb.innerHTML = '<li><a href="#" onclick="event.preventDefault(); navigateTo(\'structure:view\')">Associations</a></li>';
+				breadcrumb.innerHTML = '<li><a href="#" onclick="event.preventDefault(); navigateTo(\'consulter:association\')">Associations</a></li>';
 
 				// Update active link highlighting
-				document.querySelectorAll('header nav:first-of-type a').forEach(a => a.removeAttribute('aria-current'));
+				document.querySelectorAll('aside nav a').forEach(a => a.removeAttribute('aria-current'));
 
 				let screenLabel = '';
 				let screenLink = '';
 
-				if (screenId === 'structure:view')
+				if (screenId === 'consulter:association')
 				{
 					screenLabel = 'Consulter';
-					screenLink = 'nav-link-structure';
+					screenLink = 'nav-link-consulter-association';
 				}
-				else if (screenId === 'tools:car')
+				else if (screenId === 'car:page1')
 				{
 					screenLabel = 'CAR';
-					screenLink = 'nav-link-car';
+					screenLink = 'nav-link-car-page1';
 				}
-				else if (screenId === 'tools:admin')
+				else if (screenId === 'admin:page1')
 				{
 					screenLabel = 'Admin';
-					screenLink = 'nav-link-admin';
+					screenLink = 'nav-link-admin-page1';
 				}
 
 				if (screenLink)
 				{
-					document.getElementById(screenLink).setAttribute('aria-current', 'page');
+					const linkElement = document.getElementById(screenLink);
+					if (linkElement) linkElement.setAttribute('aria-current', 'page');
 					
 					const li = document.createElement('li');
 					if (assoName)
@@ -226,20 +277,16 @@
 				const cacheKey = 'structures_' + cacheBuster;
 				const cachedData = localStorage.getItem(cacheKey);
 
-				console.log('Cache buster:', cacheBuster, '| Cache key:', cacheKey);
-
 				if (cachedData)
 				{
 					try
 					{
-						console.log('Cache found, loading data...');
 						structures = JSON.parse(cachedData);
 						populateConsultSelect(structures);
 						
-						// Process initial location from hash after data is loaded
 						google.script.url.getLocation(function(location)
 						{
-							const targetHash = location.hash || 'structure:view';
+							const targetHash = location.hash || 'consulter:association';
 							navigateTo(targetHash, true);
 							google.script.history.replace({hash: targetHash}, null, targetHash);
 						});
@@ -247,20 +294,7 @@
 					}
 					catch (e)
 					{
-						console.warn('Error parsing cache, reloading...', e);
 						localStorage.removeItem(cacheKey);
-					}
-				}
-
-				console.log('Cache not found or invalid, fetching fresh data...');
-
-				// Cleanup old versions to avoid saturating localStorage
-				for (let i = 0; i < localStorage.length; i++)
-				{
-					const key = localStorage.key(i);
-					if (key && key.startsWith('structures_') && key !== cacheKey)
-					{
-						localStorage.removeItem(key);
 					}
 				}
 
@@ -278,10 +312,9 @@
 						}
 						populateConsultSelect(data);
 						
-						// Process initial location from hash after data is loaded
 						google.script.url.getLocation(function(location)
 						{
-							const targetHash = location.hash || 'structure:view';
+							const targetHash = location.hash || 'consulter:association';
 							navigateTo(targetHash, true);
 							google.script.history.replace({hash: targetHash}, null, targetHash);
 						});
@@ -318,7 +351,7 @@
 				if (!id || !structures[id])
 				{
 					container.style.display = 'none';
-					updateNav('structure:view');
+					updateNav('consulter:association');
 					return;
 				}
 
@@ -326,11 +359,11 @@
 				document.getElementById('detail-nom').innerText = s.Nom;
 				document.getElementById('detail-vif').innerText = s['Code VIF'];
 
-				updateNav('structure:view', s.Nom);
+				updateNav('consulter:association', s.Nom);
 
 				if (!skipHashUpdate)
 				{
-					const targetHash = 'structure:view:' + s['Code VIF'];
+					const targetHash = 'consulter:association:' + s['Code VIF'];
 					google.script.history.push({hash: targetHash}, null, targetHash);
 				}
 
@@ -389,7 +422,6 @@
 				const s = structures[id];
 				let dateStr = s['Date de la dernière visite'] || '';
 
-				// Convert DD/MM/YYYY to YYYY-MM-DD if needed
 				dateStr = dateStr.replace(/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/, '$3-$2-$1');
 
 				const url = visitReportFormUrlTemplate
