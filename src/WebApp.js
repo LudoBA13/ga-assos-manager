@@ -182,6 +182,10 @@ function doGet(e)
 {
 	const template = HtmlService.createTemplateFromFile('WebApp.Index');
 
+	// Pass the initial screen from the URL parameter 'p'
+	template.initialScreen = e.parameter.p || 'consulter:association';
+	template.initialVif = e.parameter.vif || null;
+
 	// Pass the user identity to the template (display name only)
 	template.userEmail = Session.getActiveUser().getEmail().replace('@banquealimentaire.org', '');
 	template.scriptUrl = ScriptApp.getService().getUrl();

@@ -147,21 +147,24 @@
 			{
 				loadFullStructures();
 
-				// Handle future history changes
+				// Handle browser back/forward buttons
 				google.script.history.setChangeHandler(function(e)
 				{
-					const targetHash = e.location.hash || 'consulter:association';
-					navigateTo(targetHash, true);
+					const p = e.location.parameter.p || 'consulter:association';
+					const vif = e.location.parameter.vif;
+					navigateTo(p, vif, true);
 				});
 			};
 
-			function navigateTo(targetHash, skipHistory = false)
+			/**
+			 * Navigates to a screen using query parameters (?p=screen/id)
+			 * 
+			 * @param {string} screenId The screen ID (e.g., 'consulter:association')
+			 * @param {string|null} vifCode Optional VIF code for deep linking
+			 * @param {boolean} skipHistory If true, don't push to history (used for back/forward)
+			 */
+			function navigateTo(screenId, vifCode = null, skipHistory = false)
 			{
-				// Parse hash for screen and optional VIF code (e.g. consulter:association:123)
-				const parts = targetHash.split(':');
-				const screenId = (parts.length >= 2) ? (parts[0] + ':' + parts[1]) : parts[0];
-				const vifCode = parts[2];
-
 				const screen = document.getElementById(screenId);
 				if (!screen)
 				{
@@ -169,12 +172,12 @@
 					return;
 				}
 
-				// Hide current screen and show new one
+				// 1. Update UI: Show active screen
 				document.querySelectorAll('.app-screen.active').forEach(s => s.classList.remove('active'));
 				screen.classList.add('active');
 				
-				// Open corresponding accordion
-				const rootCategory = parts[0];
+				// 2. Update UI: Open corresponding accordion sidebar
+				const rootCategory = screenId.split(':')[0];
 				const details = document.getElementById('nav-group-' + rootCategory);
 				if (details && !details.hasAttribute('open'))
 				{
@@ -183,14 +186,18 @@
 
 				updateNav(screenId);
 
+				// 3. Handle specific screen logic
 				if (screenId === 'consulter:association')
 				{
 					handleStructureViewNavigation(vifCode);
 				}
 
+				// 4. Update URL history
 				if (!skipHistory)
 				{
-					google.script.history.push({hash: targetHash}, null, targetHash);
+					const params = { p: screenId };
+					if (vifCode) params.vif = vifCode;
+					google.script.history.push({ screen: screenId, vif: vifCode }, params, '');
 				}
 			}
 
@@ -200,7 +207,7 @@
 				if (!vifCode)
 				{
 					select.value = '';
-					displayStructureDetails('', true); // skip hash update
+					displayStructureDetails('', true); // skip history update
 					return;
 				}
 
@@ -211,7 +218,7 @@
 				if (id)
 				{
 					select.value = id;
-					displayStructureDetails(id, true); // skip hash update
+					displayStructureDetails(id, true); // skip history update
 				}
 			}
 
@@ -220,12 +227,13 @@
 				const breadcrumb = document.getElementById('breadcrumb-list');
 				breadcrumb.innerHTML = '<li><a href="#" onclick="event.preventDefault(); navigateTo(\'consulter:association\')">Associations</a></li>';
 
-				// Update active link highlighting
+				// Update active link highlighting in sidebar
 				document.querySelectorAll('aside nav a').forEach(a => a.removeAttribute('aria-current'));
 
 				let screenLabel = '';
 				let screenLink = '';
 
+				// Simple mapping for breadcrumbs and link highlighting
 				if (screenId === 'consulter:association')
 				{
 					screenLabel = 'Consulter';
@@ -277,6 +285,9 @@
 				const cacheKey = 'structures_' + cacheBuster;
 				const cachedData = localStorage.getItem(cacheKey);
 
+				const initialScreen = '<?= initialScreen ?>';
+				const initialVif = '<?= initialVif ?>';
+
 				if (cachedData)
 				{
 					try
@@ -284,12 +295,8 @@
 						structures = JSON.parse(cachedData);
 						populateConsultSelect(structures);
 						
-						google.script.url.getLocation(function(location)
-						{
-							const targetHash = location.hash || 'consulter:association';
-							navigateTo(targetHash, true);
-							google.script.history.replace({hash: targetHash}, null, targetHash);
-						});
+						// Handle initial load after data is available
+						navigateTo(initialScreen, initialVif, true);
 						return;
 					}
 					catch (e)
@@ -312,12 +319,8 @@
 						}
 						populateConsultSelect(data);
 						
-						google.script.url.getLocation(function(location)
-						{
-							const targetHash = location.hash || 'consulter:association';
-							navigateTo(targetHash, true);
-							google.script.history.replace({hash: targetHash}, null, targetHash);
-						});
+						// Handle initial load after data is available
+						navigateTo(initialScreen, initialVif, true);
 					})
 					.withFailureHandler(function(err)
 					{
@@ -345,7 +348,7 @@
 				});
 			}
 
-			function displayStructureDetails(id, skipHashUpdate = false)
+			function displayStructureDetails(id, skipHistoryUpdate = false)
 			{
 				const container = document.getElementById('details-container');
 				if (!id || !structures[id])
@@ -361,10 +364,9 @@
 
 				updateNav('consulter:association', s.Nom);
 
-				if (!skipHashUpdate)
+				if (!skipHistoryUpdate)
 				{
-					const targetHash = 'consulter:association:' + s['Code VIF'];
-					google.script.history.push({hash: targetHash}, null, targetHash);
+					navigateTo('consulter:association', s['Code VIF']);
 				}
 
 				const driveLink = document.getElementById('detail-drive');
