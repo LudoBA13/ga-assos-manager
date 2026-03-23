@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<base target="_top">
+		<base href="<?= scriptUrl ?>" target="_top">
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Console Associations</title>
@@ -73,19 +73,19 @@
 						<details id="nav-group-consulter" name="nav-group" open>
 							<summary>Consulter</summary>
 							<ul>
-								<li><a href="#" id="nav-link-consulter-association" onclick="event.preventDefault(); navigateTo('consulter:association')">Associations</a></li>
+								<li><a href="?p=consulter:association" id="nav-link-consulter-association" onclick="event.preventDefault(); navigateTo('consulter:association')">Associations</a></li>
 							</ul>
 						</details>
 						<details id="nav-group-car" name="nav-group">
 							<summary>CAR</summary>
 							<ul>
-								<li><a href="#" id="nav-link-car-page1" onclick="event.preventDefault(); navigateTo('car:page1')">Page 1</a></li>
+								<li><a href="?p=car:page1" id="nav-link-car-page1" onclick="event.preventDefault(); navigateTo('car:page1')">Page 1</a></li>
 							</ul>
 						</details>
 						<details id="nav-group-admin" name="nav-group">
 							<summary>Admin</summary>
 							<ul>
-								<li><a href="#" id="nav-link-admin-page1" onclick="event.preventDefault(); navigateTo('admin:page1')">Page 1</a></li>
+								<li><a href="?p=admin:page1" id="nav-link-admin-page1" onclick="event.preventDefault(); navigateTo('admin:page1')">Page 1</a></li>
 							</ul>
 						</details>
 					</nav>
@@ -225,7 +225,7 @@
 			function updateNav(screenId, assoName = null)
 			{
 				const breadcrumb = document.getElementById('breadcrumb-list');
-				breadcrumb.innerHTML = '<li><a href="#" onclick="event.preventDefault(); navigateTo(\'consulter:association\')">Associations</a></li>';
+				breadcrumb.innerHTML = `<li><a href="?p=consulter:association" onclick="event.preventDefault(); navigateTo('consulter:association')">Associations</a></li>`;
 
 				// Update active link highlighting in sidebar
 				document.querySelectorAll('aside nav a').forEach(a => a.removeAttribute('aria-current'));
@@ -259,7 +259,7 @@
 					if (assoName)
 					{
 						const link = document.createElement('a');
-						link.href = "#";
+						link.href = `?p=${screenId}`;
 						link.textContent = screenLabel;
 						link.onclick = (e) => { e.preventDefault(); navigateTo(screenId); };
 						li.appendChild(link);
