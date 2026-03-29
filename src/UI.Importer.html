@@ -42,7 +42,7 @@
 					google.script.run
 						.withSuccessHandler(onSuccess)
 						.withFailureHandler(onFailure)
-						[<?= type === 'structures' ? "'updateACStructuresFromFile'" : "'updateACPersonnesFromFile'" ?>](fileData);
+						[<?= type === 'structures' ? 'updateACStructuresFromFile' : 'updateACPersonnesFromFile' ?>](fileData);
 				};
 				reader.readAsDataURL(file);
 			}
