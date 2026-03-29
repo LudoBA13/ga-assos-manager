@@ -6,7 +6,7 @@
 	</head>
 	<body>
 		<main class="container">
-			<p><?= _("Cette fonction permet d'importer les données Structures en provenance de AssoConnect pour les mettre à jour dans ce document.") ?></p>
+			<p><?= _("Cette fonction permet d'importer les données %s en provenance de AssoConnect pour les mettre à jour dans ce document.", _(type)) ?></p>
 			<form onsubmit="event.preventDefault(); upload();">
 				<label for="file"><?= _('Fichier AssoConnect XLSX') ?></label>
 				<input type="file" id="file" name="file" accept=".xlsx, .xls" required>
@@ -42,7 +42,7 @@
 					google.script.run
 						.withSuccessHandler(onSuccess)
 						.withFailureHandler(onFailure)
-						.updateACStructuresFromFile(fileData);
+						[<?= type === 'structures' ? "'updateACStructuresFromFile'" : "'updateACPersonnesFromFile'" ?>](fileData);
 				};
 				reader.readAsDataURL(file);
 			}

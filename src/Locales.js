@@ -56,7 +56,17 @@ const CATALOG = {
 		"Produit inconnu : %s": "Produit inconnu : %s",
 		"Ajuster la feuille au contenu": "Ajuster la feuille au contenu",
 		"Rafraîchir les statistiques BL": "Rafraîchir les statistiques BL",
-		"Fermer": "Fermer"
+		"Fermer": "Fermer",
+		"Importer les structures": "Importer les structures",
+		"Importer les personnes": "Importer les personnes",
+		"Importation réussie": "Importation réussie",
+		"Format incorrect. Impossible de trouver le champ Code VIF.": "Format incorrect. Impossible de trouver le champ Code VIF.",
+		"Format incorrect. Impossible de trouver le champ Prénom.": "Format incorrect. Impossible de trouver le champ Prénom.",
+		"Cette fonction permet d'importer les données %s en provenance de AssoConnect pour les mettre à jour dans ce document.": "Cette fonction permet d'importer les données %s en provenance de AssoConnect pour les mettre à jour dans ce document.",
+		"structures": "structures",
+		"personnes": "personnes",
+		"Mettre à jour": "Mettre à jour",
+		"Fichier AssoConnect XLSX": "Fichier AssoConnect XLSX"
 	}
 };
 

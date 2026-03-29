@@ -33,6 +33,7 @@ function onOpen()
 
 	ui.createMenu('AssoConnect')
 		.addItem(_('Importer les structures'), 'showImporter')
+		.addItem(_('Importer les personnes'), 'showPersonnesImporter')
 		.addItem(_('Mettre à jour fonctions'), 'deployNamedFunctions')
 		.addSeparator()
 		.addItem(_('Lancer les tests'), 'runTests')
@@ -90,7 +91,12 @@ function resetDailyPlanningDate()
 
 function showImporter()
 {
-	Importer.show();
+	Importer.show('structures');
+}
+
+function showPersonnesImporter()
+{
+	Importer.show('personnes');
 }
 
 function showVifImporter()
@@ -101,6 +107,11 @@ function showVifImporter()
 function updateACStructuresFromFile(fileData)
 {
 	Importer.updateACStructuresFromFile(fileData);
+}
+
+function updateACPersonnesFromFile(fileData)
+{
+	Importer.updateACPersonnesFromFile(fileData);
 }
 
 function startFIPGeneration()

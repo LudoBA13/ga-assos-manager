@@ -26,12 +26,13 @@
 
 class Importer
 {
-	static show()
+	static show(type = 'structures')
 	{
-		const html = HtmlService.createTemplateFromFile('UI.Importer')
-			.evaluate()
+		const template = HtmlService.createTemplateFromFile('UI.Importer');
+		template.type = type;
+		const html = template.evaluate()
 			.setWidth(400);
-		getSafeUi().showModalDialog(html, _('Importer les structures'));
+		getSafeUi().showModalDialog(html, _('Importer les ' + type));
 	}
 
 	static updateACStructuresFromFile(fileData)
@@ -51,6 +52,33 @@ class Importer
 
 		this.updateACStructuresData(data);
 		SpreadsheetApp.getActiveSpreadsheet().toast(_('Importation réussie'));
+	}
+
+	static updateACPersonnesFromFile(fileData)
+	{
+		const data = this.getDataFromXLSXFile(fileData);
+		if (!data || data.length === 0)
+		{
+			throw new Error('No data in file.');
+		}
+
+		// Validate headers
+		const headers = data[0];
+		if (!headers.includes('Prénom'))
+		{
+			throw new Error(_('Format incorrect. Impossible de trouver le champ Prénom.'));
+		}
+
+		this.updateACPersonnesData(data);
+		SpreadsheetApp.getActiveSpreadsheet().toast(_('Importation réussie'));
+	}
+
+	static updateACPersonnesData(data)
+	{
+		copyDataToSheet('ACPersonnes', data);
+
+		// Update cache buster
+		this.updateCacheBuster();
 	}
 
 	static updateACStructuresData(data)
@@ -99,18 +127,7 @@ class Importer
 			row.push(planning, ud, formattedPlanning, counts['Frais'], counts['Sec'], counts['Surgelé']);
 		}
 
-		const ss = SpreadsheetApp.getActiveSpreadsheet();
-		const sheet = ss.getSheetByName('ACStructures');
-		if (!sheet)
-		{
-			throw new Error('Cannot locate the ACStructures sheet.');
-		}
-
-		// Clear existing content
-		sheet.clearContents();
-
-		// Write new data
-		sheet.getRange(1, 1, data.length, data[0].length).setValues(data);
+		copyDataToSheet('ACStructures', data);
 
 		// Update cache buster
 		this.updateCacheBuster();
