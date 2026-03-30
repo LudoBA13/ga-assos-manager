@@ -250,9 +250,37 @@ class DocumentGenerator
 		this._replacePlaceholders(vars);
 		this._outputDocument.getBody().replaceText(this._placeholderRegex.source, '');
 		this._saveAndCloseDocument();
+
+		this.lockFile(this._outputDocumentId);
+
 		this._outputDocument = null;
 
 		return this._outputDocumentId;
+	}
+
+	/**
+	 * Locks a file in Google Drive to prevent edits, comments, and renaming.
+	 * @param {string} fileId The ID of the file to lock.
+	 */
+	lockFile(fileId)
+	{
+		try
+		{
+			const resource = {
+				contentRestrictions: [
+					{
+						readOnly: true,
+						reason: 'Rapport de visite généré et verrouillé automatiquement.'
+					}
+				]
+			};
+			Drive.Files.update(resource, fileId, { supportsAllDrives: true });
+			console.log(`File ${fileId} locked successfully.`);
+		}
+		catch (e)
+		{
+			console.error(`Failed to lock file ${fileId}: ${e.message}`);
+		}
 	}
 
 	/**
