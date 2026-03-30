@@ -50,11 +50,12 @@ class WebApp
 		for (let i = 1; i < data.length; i++)
 		{
 			const row = data[i];
-			const person = personIdx !== -1 ? row[personIdx] : '';
+			const personValue = personIdx !== -1 ? row[personIdx] : '';
+			const personStr = String(personValue || '');
 
-			if (filter && person)
+			if (filter && personStr)
 			{
-				if (!person.toLowerCase().includes(filter.toLowerCase()))
+				if (!personStr.toLowerCase().includes(filter.toLowerCase()))
 				{
 					continue;
 				}
@@ -64,7 +65,7 @@ class WebApp
 				vif: row[vifIdx],
 				structure: structureIdx !== -1 ? row[structureIdx] : '',
 				date: row[dateIdx],
-				person: person
+				person: personStr
 			});
 		}
 
