@@ -12,9 +12,83 @@ function getFipUrl(id)
 	return (new WebApp).getFipUrl(id);
 }
 
+function getRecentVisits(filter)
+{
+	return (new WebApp).getRecentVisits(filter);
+}
+
 
 class WebApp
 {
+	getRecentVisits(filter = null)
+	{
+		const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CRVisites');
+		if (!sheet)
+		{
+			throw new Error("La feuille 'CRVisites' est introuvable.");
+		}
+
+		const data = sheet.getDataRange().getValues();
+		if (data.length < 2)
+		{
+			return [];
+		}
+
+		const headers = data[0];
+		const vifIdx = headers.indexOf('N° VIF de la structure visitée');
+		const structureIdx = headers.indexOf('Nom de la structure visitée');
+		const dateIdx = headers.indexOf('Date de la visite');
+		const personIdx = headers.indexOf('Personnes qui ont fait la visite');
+
+		if (vifIdx === -1 || dateIdx === -1)
+		{
+			throw new Error("Colonnes requises introuvables dans 'CRVisites'.");
+		}
+
+		// Filter and map data
+		let results = [];
+		for (let i = 1; i < data.length; i++)
+		{
+			const row = data[i];
+			const person = personIdx !== -1 ? row[personIdx] : '';
+
+			if (filter && person)
+			{
+				if (!person.toLowerCase().includes(filter.toLowerCase()))
+				{
+					continue;
+				}
+			}
+
+			results.push({
+				vif: row[vifIdx],
+				structure: structureIdx !== -1 ? row[structureIdx] : '',
+				date: row[dateIdx],
+				person: person
+			});
+		}
+
+		// Sort by date descending (most recent first)
+		results.sort((a, b) =>
+		{
+			const dateA = a.date instanceof Date ? a.date : new Date(a.date);
+			const dateB = b.date instanceof Date ? b.date : new Date(b.date);
+			return dateB - dateA;
+		});
+
+		// Format dates for JSON
+		results = results.slice(0, 10).map(r =>
+		{
+			if (r.date instanceof Date)
+			{
+				r.date = r.date.toLocaleDateString('fr-FR');
+			}
+			return r;
+		});
+
+		return results;
+	}
+
 	getACStructures()
 	{
 		const configs = getAllConfigs();
@@ -183,7 +257,7 @@ function doGet(e)
 	const template = HtmlService.createTemplateFromFile('WebApp.Index');
 
 	// Pass the initial screen from the URL parameter 'p'
-	template.initialScreen = e.parameter.p || 'consulter:association';
+	template.initialScreen = e.parameter.p || 'car:visites';
 	template.initialVif = e.parameter.vif || null;
 
 	// Pass the user identity to the template (display name only)

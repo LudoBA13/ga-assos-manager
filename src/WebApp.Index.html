@@ -79,7 +79,7 @@
 						<details id="nav-group-car" name="nav-group">
 							<summary>CAR</summary>
 							<ul>
-								<li><a href="?p=car:page1" id="nav-link-car-page1" onclick="event.preventDefault(); navigateTo('car:page1')">Page 1</a></li>
+								<li><a href="?p=car:visites" id="nav-link-car-visites" onclick="event.preventDefault(); navigateTo('car:visites')">Visites</a></li>
 							</ul>
 						</details>
 						<details id="nav-group-admin" name="nav-group">
@@ -118,13 +118,29 @@
 						</section>
 					</article>
 
-					<article id="car:page1" class="app-screen">
-						<header>CAR - Page 1</header>
-						<p>
-							Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-							Pellentesque elementum dignissim ultricies. 
-							Fusce rhoncus ipsum tempor eros aliquam, ut hendrerit enim interdum.
-						</p>
+					<article id="car:visites" class="app-screen">
+						<header>Comptes-rendus de visites (CAR)</header>
+						<form id="search-visites-form" onsubmit="event.preventDefault(); searchVisites()">
+							<fieldset role="group">
+								<input type="search" id="search-visite-par" name="visite-par" placeholder="Visité par..." aria-label="Visité par" oninput="searchVisitesDebounced()">
+								<input type="submit" value="Rechercher">
+							</fieldset>
+						</form>
+						
+						<table id="visites-table">
+							<thead>
+								<tr>
+									<th>Date</th>
+									<th>Structure</th>
+									<th>Visité par</th>
+								</tr>
+							</thead>
+							<tbody id="visites-list">
+								<tr>
+									<td colspan="3" style="text-align: center;">Chargement des visites...</td>
+								</tr>
+							</tbody>
+						</table>
 					</article>
 
 					<article id="admin:page1" class="app-screen">
@@ -191,6 +207,10 @@
 				{
 					handleStructureViewNavigation(vifCode);
 				}
+				else if (screenId === 'car:visites')
+				{
+					searchVisites();
+				}
 
 				// 4. Update URL history
 				if (!skipHistory)
@@ -239,10 +259,10 @@
 					screenLabel = 'Consulter';
 					screenLink = 'nav-link-consulter-association';
 				}
-				else if (screenId === 'car:page1')
+				else if (screenId === 'car:visites')
 				{
-					screenLabel = 'CAR';
-					screenLink = 'nav-link-car-page1';
+					screenLabel = 'Visites';
+					screenLink = 'nav-link-car-visites';
 				}
 				else if (screenId === 'admin:page1')
 				{
@@ -465,6 +485,66 @@
 						alert('Erreur : ' + err.message);
 					})
 					.getFipUrl(id);
+			}
+
+			let searchTimeout = null;
+			function searchVisitesDebounced()
+			{
+				if (searchTimeout) clearTimeout(searchTimeout);
+				searchTimeout = setTimeout(searchVisites, 300);
+			}
+
+			function searchVisites()
+			{
+				const filter = document.getElementById('search-visite-par').value;
+				const tbody = document.getElementById('visites-list');
+
+				// Optional: Show loading state only if it takes time or if list is empty
+				// tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Recherche en cours...</td></tr>';
+
+				google.script.run
+					.withSuccessHandler(function(visites)
+					{
+						tbody.innerHTML = '';
+						if (visites.length === 0)
+						{
+							tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Aucun résultat trouvé.</td></tr>';
+							return;
+						}
+
+						visites.forEach(v =>
+						{
+							const tr = document.createElement('tr');
+
+							const tdDate = document.createElement('td');
+							tdDate.textContent = v.date;
+							tr.appendChild(tdDate);
+
+							const tdStructure = document.createElement('td');
+							const link = document.createElement('a');
+							link.href = `?p=consulter:association&vif=${v.vif}`;
+							link.textContent = v.structure || v.vif;
+							link.onclick = (e) =>
+							{
+								e.preventDefault();
+								navigateTo('consulter:association', v.vif);
+							};
+							tdStructure.appendChild(link);
+							tr.appendChild(tdStructure);
+
+							const tdPerson = document.createElement('td');
+							tdPerson.textContent = v.person;
+							tr.appendChild(tdPerson);
+
+							tbody.appendChild(tr);
+						});
+					})
+					.withFailureHandler(function(err)
+					{
+						console.error('Erreur lors de la recherche des visites : ' + err.message);
+						tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: red;">Erreur : ${err.message}</td></tr>`;
+					})
+					.getRecentVisits(filter);
 			}
 		</script>
 	</body>
