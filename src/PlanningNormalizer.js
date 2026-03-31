@@ -74,93 +74,111 @@ class PlanningNormalizer
 		// 1er, 1eme, 1ère etc.
 		text = text.replace(/\b1\s*(?:er|ere|ère|ier|eme|ème|ième|ieme)\b/gi, '1er');
 		// 2e, 2eme etc.
-		text = text.replace(/\b([2-4])\s*(?:e|eme|ème|èm|ième|ieme)\b/gi, '$1e');
+		text = text.replace(/\b([2-4])\s*(?:e|eme|ème|èm|ième|ieme|éme)\b/gi, '$1e');
 		
-		// 2. Handle multiple weeks/days joined by "&", "et", or ","
-		// Normalize separators between weeks
-		text = text.replace(/(\b1er|[2-4]e)\s*(?:&|et|,)\s*(\b1er|[2-4]e)\b/gi, '$1, $2');
-		text = text.replace(/(\b1er|[2-4]e)\s*,\s*(\b1er|[2-4]e)\s*(?:&|et|,)\s*(\b1er|[2-4]e)\b/gi, '$1, $2, $3');
-		text = text.replace(/(\b1er|[2-4]e)\s*,\s*(\b1er|[2-4]e)\s*,\s*(\b1er|[2-4]e)\s*(?:&|et|,)\s*(\b1er|[2-4]e)\b/gi, '$1, $2, $3, $4');
-
+		// 2. Normalize and Expand multi-week lists
+		// "1er & 3e" -> "1er, 3e"
+		text = text.replace(/(\b1er|[2-4]e)\s*(?:&|et)\s*(\b1er|[2-4]e)\b/gi, '$1, $2');
+		
 		// Handle "ts les", "tous les", "Chaque"
 		text = text.replace(/\bts\s+les\b/gi, 'Tous les');
 		text = text.replace(/\bto[iu][st]\s+les\b/gi, 'Tous les');
 		text = text.replace(/\bChaque\s+((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, 'Tous les $1s');
 
-		// Handle "[day] et [day]" for "Tous les"
-		text = text.replace(/(Tous les)\s+((?:lun|mar|mercre|jeu|vendre)di)s?\s+(?:et|&)\s+((?:lun|mar|mercre|jeu|vendre)di)s?/gi, '$1 $2s. $1 $3s');
+		// 3. Expansion and Distribution
+		// Normalize commas to dots ONLY if they separate what looks like different rules
+		// e.g., "SEC : ..., FRAIS : ..."
+		text = text.replace(/([a-z])\s*,\s*([a-z\s]+:)/gi, '$1. $2');
 
-		// Compress 1er, 2e, 3e, 4e to "Tous les"
-		text = text.replace(/\b1er,\s*2e,\s*3e,\s*4e\b/gi, 'Tous les');
+		// Handle cases where "le [week] [day]" is used after product
+		// e.g., "SEC le 4e lundi, FRAIS ts les lundi"
+		text = text.replace(/([a-z]+)\s+le\s+(\b1er|[2-4]e|Tous les)\b/gi, '$1 : $2');
 
-		// 3. Distribution and Expansion
-		// Check for product prefix like "Sec : 1er & 3e lundi"
-		const productPrefixMatch = text.match(/^([^:]+):\s*(.*)$/);
-		if (productPrefixMatch && /frais|f&l|sec|surg/i.test(productPrefixMatch[1]))
+		// Handle cases where comma is used as a rule separator but without product prefix
+		// e.g., "1er jeudi, 3e mercredi" -> "1er jeudi. 3e mercredi"
+		text = text.replace(/((?:lun|mar|mercre|jeu|vendre)di)s?\s*,\s*(\b1er|[2-4]e|Tous les)\b/gi, '$1. $2');
+
+		// Expand "Week et Week Day" or "Week & Week Day" or "Week Day & Week Day" -> "Week Day. Week Day"
+		let expandedText = text;
+		let prevText;
+		do {
+			prevText = expandedText;
+			// Case 1: "1er et 3e Lundi" -> "1er Lundi. 3e Lundi"
+			expandedText = expandedText.replace(/\b(1er|[2-4]e|Tous les)\s*(?:,|\s+et|\s+&)\s*(1er|[2-4]e|Tous les|(?:\d\s*(?:er|e)))\s+((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, '$1 $3. $2 $3');
+			// Case 2: "Lundi et Mardi" (without explicit weeks, assume recurring or same week if part of a list)
+			expandedText = expandedText.replace(/(Tous les)\s+((?:lun|mar|mercre|jeu|vendre)di)s?\s+(?:et|&)\s+((?:lun|mar|mercre|jeu|vendre)di)s?/gi, '$1 $2s. $1 $3s');
+			// Case 3: "1er Mercredi & 3e Mercredi" -> "1er Mercredi. 3e Mercredi"
+			expandedText = expandedText.replace(/\b(1er|[2-4]e|Tous les)\s+((?:lun|mar|mercre|jeu|vendre)di)s?\s+(?:et|&)\s+(1er|[2-4]e|Tous les)\s+\2s?\b/gi, '$1 $2. $3 $2');
+		} while (expandedText !== prevText);
+		text = expandedText;
+
+		// Split by "/" or ";" or " . "
+		let ruleSegments = text.split(/\s*(?:\/|;)\s*|\s+\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
+		
+		// If only one segment, try to split by comma if it looks like "Product : Rule, Product : Rule"
+		if (ruleSegments.length === 1 && ruleSegments[0].includes(',') && ruleSegments[0].includes(':'))
 		{
-			const product = productPrefixMatch[1].trim();
-			const rest = productPrefixMatch[2].trim();
-			// Expand the rest and apply the product prefix to each
-			const expandedRest = rest.replace(/\b(1er|[2-4]e|Tous les)(?:\s*,\s*(1er|[2-4]e|Tous les))*\s+((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, (match, ...args) =>
-			{
-				const day = args[args.length - 3];
-				const weeks = match.match(/(1er|[2-4]e|Tous les)/gi);
-				return weeks.map(w =>
-				{
-					return w + ' ' + day + ' : ' + product;
-				}).join('. ');
-			});
-			if (expandedRest !== rest)
-			{
-				text = expandedRest;
-			}
+			const commaSplit = ruleSegments[0].split(/\s*,\s*(?=(?:frais|f&l|sec|surgel[ée])\b)/i);
+			if (commaSplit.length > 1) ruleSegments = commaSplit;
 		}
 
-		// Expansion for cases without product prefix: "1er, 3e mercredi" -> "1er mercredi. 3e mercredi"
-		text = text.replace(/\b(1er|[2-4]e|Tous les)(?:\s*,\s*(1er|[2-4]e|Tous les))+\s+((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, (match, ...args) =>
+		let expandedRules = [];
+
+		for (let ruleSegment of ruleSegments)
 		{
-			const day = args[args.length - 3];
-			const weeks = match.match(/(1er|[2-4]e|Tous les)/gi);
-			return weeks.map(w =>
+			// Check for product prefix or suffix
+			const colonParts = ruleSegment.split(/\s*:\s*/);
+			let products = null;
+			let content = ruleSegment;
+
+			if (colonParts.length >= 2)
 			{
-				return w + ' ' + day;
-			}).join('. ');
-		});
+				if (/frais|f&l|sec|surg/i.test(colonParts[0]))
+				{
+					products = colonParts[0].trim();
+					content = colonParts.slice(1).join(' : ').trim();
+				}
+				else if (/frais|f&l|sec|surg/i.test(colonParts[colonParts.length - 1]))
+				{
+					products = colonParts[colonParts.length - 1].trim();
+					content = colonParts.slice(0, -1).join(' : ').trim();
+				}
+			}
+
+			let expandedRule = content;
+			if (products)
+			{
+				// Distribute products to each separate sentence in content (which might have been expanded above)
+				expandedRule = expandedRule.split(/\.\s+/).map(e => e.trim()).filter(e => e.length > 0).map(e => e + ' : ' + products).join('. ');
+			}
+			expandedRules.push(expandedRule);
+		}
+
+		text = expandedRules.join('. ');
+
+		// Special case for multi-product prefix rules that didn't split correctly
+		// e.g., "SEC : 1er lundi et 3e lundi / Frais : 1er lundi et 3e lundi"
+		// The split above handles "/", but let's ensure we didn't miss "Product : ... Product : ..."
+		text = text.replace(/([a-z])\s+(frais|sec|surgel[ée]|f&l)\s*:/gi, '$1. $2 :');
 
 		// 4. Default Products
-		// Split by common segment separators first.
-		let segments = text.split(/[/|]|\.\s+/).map(s =>
-		{
-			return s.trim();
-		}).filter(s =>
-		{
-			return s.length > 0;
-		});
-
 		const hasAnyProductGlobal = /frais|f&l|sec|surg/i.test(text);
-
-		segments = segments.map(segment =>
-		{
-			const hasProductLocal = /frais|f&l|sec|surg/i.test(segment);
-			if (!hasProductLocal && !hasAnyProductGlobal)
+		let finalSegments = text.split(/\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
+		
+		finalSegments = finalSegments.map(segment => {
+			if (/tous les jours/i.test(segment) && !/frais|f&l|sec|surg/i.test(segment))
 			{
-				// Ensure there's at least a day or week mentioned to avoid adding products to garbage
-				if (/(?:1er|[2-4]e|Tous les|(?:lun|mar|mercre|jeu|vendre)di)/i.test(segment))
-				{
-					if (segment.includes(':'))
-					{
-						return segment.replace(/:\s*$/, ': Frais, Sec, Surgelé').replace(/:(?!\s*Frais|Sec|Surgelé)/i, ': Frais, Sec, Surgelé, ');
-					}
-					else
-					{
-						return segment + ' : Frais, Sec, Surgelé';
-					}
-				}
+				return segment + ' : Frais';
+			}
+			if (!hasAnyProductGlobal && /(?:1er|[2-4]e|Tous les|(?:lun|mar|mercre|jeu|vendre)di)/i.test(segment))
+			{
+				if (!segment.includes(':')) segment += ' : Frais, Sec, Surgelé';
+				else if (segment.endsWith(':')) segment += ' Frais, Sec, Surgelé';
 			}
 			return segment;
 		});
 
-		text = segments.join('. ');
+		text = finalSegments.join('. ');
 
 		// 5. Final pass through parseFlexiblePlanning -> decodePlanning
 		try
@@ -174,7 +192,7 @@ class PlanningNormalizer
 		catch (e)
 		{
 			// Fallback: use standard normalize on each segment if combined fails
-			return segments.map(s =>
+			return finalSegments.map(s =>
 			{
 				return PlanningNormalizer.normalize(s);
 			}).join(' ').trim();
