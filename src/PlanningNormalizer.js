@@ -27,6 +27,163 @@
 class PlanningNormalizer
 {
 	/**
+	 * Normalizes a natural language planning string to be compatible with parseFlexiblePlanning.
+	 * It expands multiple weeks/days and handles missing product types by assuming all three.
+	 *
+	 * @param {string} input The raw natural language input.
+	 * @returns {string} The normalized string.
+	 */
+	static normalizeNaturalLanguagePlanning(input)
+	{
+		if (!input)
+		{
+			return '';
+		}
+
+		let text = input.toString().trim();
+
+		// Handle "livraison" special case
+		if (/livraison/i.test(text))
+		{
+			return '';
+		}
+
+		// Skip unparseable placeholders
+		if (/à définir|Enlévement/i.test(text))
+		{
+			return '';
+		}
+
+		// 1. Pre-normalize superscripts and common separators
+		text = text.replaceAll('\u1D49', 'e').replaceAll('\u02B3', 'r');
+		
+		// Handle typos and abbreviations found in CSV
+		text = text.replace(/\bmercerdi\b/gi, 'mercredi');
+		text = text.replace(/\bmerc\.?\b/gi, 'mercredi');
+		text = text.replace(/\blun\.?\b/gi, 'lundi');
+		text = text.replace(/\bmar\.?\b/gi, 'mardi');
+		text = text.replace(/\bmer\.?\b/gi, 'mercredi');
+		text = text.replace(/\bjeu\.?\b/gi, 'jeudi');
+		text = text.replace(/\bven\.?\b/gi, 'vendredi');
+		
+		// Handle "matin", "mat.", "après-midi"
+		text = text.replace(/\bmat(?:in|\.)?\b/gi, '8h30');
+		text = text.replace(/\bapr[èe]s\s*-?\s*midi\b/gi, '14h');
+		
+		// Normalize weeks (1er, 2e, 3e, 4e)
+		// 1er, 1eme, 1ère etc.
+		text = text.replace(/\b1\s*(?:er|ere|ère|ier|eme|ème|ième|ieme)\b/gi, '1er');
+		// 2e, 2eme etc.
+		text = text.replace(/\b([2-4])\s*(?:e|eme|ème|èm|ième|ieme)\b/gi, '$1e');
+		
+		// 2. Handle multiple weeks/days joined by "&", "et", or ","
+		// Normalize separators between weeks
+		text = text.replace(/(\b1er|[2-4]e)\s*(?:&|et|,)\s*(\b1er|[2-4]e)\b/gi, '$1, $2');
+		text = text.replace(/(\b1er|[2-4]e)\s*,\s*(\b1er|[2-4]e)\s*(?:&|et|,)\s*(\b1er|[2-4]e)\b/gi, '$1, $2, $3');
+		text = text.replace(/(\b1er|[2-4]e)\s*,\s*(\b1er|[2-4]e)\s*,\s*(\b1er|[2-4]e)\s*(?:&|et|,)\s*(\b1er|[2-4]e)\b/gi, '$1, $2, $3, $4');
+
+		// Handle "ts les", "tous les", "Chaque"
+		text = text.replace(/\bts\s+les\b/gi, 'Tous les');
+		text = text.replace(/\bto[iu][st]\s+les\b/gi, 'Tous les');
+		text = text.replace(/\bChaque\s+((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, 'Tous les $1s');
+
+		// Handle "[day] et [day]" for "Tous les"
+		text = text.replace(/(Tous les)\s+((?:lun|mar|mercre|jeu|vendre)di)s?\s+(?:et|&)\s+((?:lun|mar|mercre|jeu|vendre)di)s?/gi, '$1 $2s. $1 $3s');
+
+		// Compress 1er, 2e, 3e, 4e to "Tous les"
+		text = text.replace(/\b1er,\s*2e,\s*3e,\s*4e\b/gi, 'Tous les');
+
+		// 3. Distribution and Expansion
+		// Check for product prefix like "Sec : 1er & 3e lundi"
+		const productPrefixMatch = text.match(/^([^:]+):\s*(.*)$/);
+		if (productPrefixMatch && /frais|f&l|sec|surg/i.test(productPrefixMatch[1]))
+		{
+			const product = productPrefixMatch[1].trim();
+			const rest = productPrefixMatch[2].trim();
+			// Expand the rest and apply the product prefix to each
+			const expandedRest = rest.replace(/\b(1er|[2-4]e|Tous les)(?:\s*,\s*(1er|[2-4]e|Tous les))*\s+((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, (match, ...args) =>
+			{
+				const day = args[args.length - 3];
+				const weeks = match.match(/(1er|[2-4]e|Tous les)/gi);
+				return weeks.map(w =>
+				{
+					return w + ' ' + day + ' : ' + product;
+				}).join('. ');
+			});
+			if (expandedRest !== rest)
+			{
+				text = expandedRest;
+			}
+		}
+
+		// Expansion for cases without product prefix: "1er, 3e mercredi" -> "1er mercredi. 3e mercredi"
+		text = text.replace(/\b(1er|[2-4]e|Tous les)(?:\s*,\s*(1er|[2-4]e|Tous les))+\s+((?:lun|mar|mercre|jeu|vendre)di)s?\b/gi, (match, ...args) =>
+		{
+			const day = args[args.length - 3];
+			const weeks = match.match(/(1er|[2-4]e|Tous les)/gi);
+			return weeks.map(w =>
+			{
+				return w + ' ' + day;
+			}).join('. ');
+		});
+
+		// 4. Default Products
+		// Split by common segment separators first.
+		let segments = text.split(/[/|]|\.\s+/).map(s =>
+		{
+			return s.trim();
+		}).filter(s =>
+		{
+			return s.length > 0;
+		});
+
+		const hasAnyProductGlobal = /frais|f&l|sec|surg/i.test(text);
+
+		segments = segments.map(segment =>
+		{
+			const hasProductLocal = /frais|f&l|sec|surg/i.test(segment);
+			if (!hasProductLocal && !hasAnyProductGlobal)
+			{
+				// Ensure there's at least a day or week mentioned to avoid adding products to garbage
+				if (/(?:1er|[2-4]e|Tous les|(?:lun|mar|mercre|jeu|vendre)di)/i.test(segment))
+				{
+					if (segment.includes(':'))
+					{
+						return segment.replace(/:\s*$/, ': Frais, Sec, Surgelé').replace(/:(?!\s*Frais|Sec|Surgelé)/i, ': Frais, Sec, Surgelé, ');
+					}
+					else
+					{
+						return segment + ' : Frais, Sec, Surgelé';
+					}
+				}
+			}
+			return segment;
+		});
+
+		text = segments.join('. ');
+
+		// 5. Final pass through parseFlexiblePlanning -> decodePlanning
+		try
+		{
+			const encoded = parseFlexiblePlanning(text);
+			if (encoded)
+			{
+				return decodePlanning(encoded);
+			}
+		}
+		catch (e)
+		{
+			// Fallback: use standard normalize on each segment if combined fails
+			return segments.map(s =>
+			{
+				return PlanningNormalizer.normalize(s);
+			}).join(' ').trim();
+		}
+
+		return PlanningNormalizer.normalize(text);
+	}
+
+	/**
 	 * Normalizes a user-supplied schedule string to be compatible with parseHumanReadable.
 	 *
 	 * Target format for each entry: "Week Day Time : Product, Product."
