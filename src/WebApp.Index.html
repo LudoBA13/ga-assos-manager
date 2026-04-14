@@ -1,18 +1,56 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<base href="<?= scriptUrl ?>" target="_top">
+		<base target="_top">
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Console Associations</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
 		<style>
-			.app-screen {
-				display: none;
+			:root {
+				--pico-font-family: 'Google Sans', Roboto, Arial, sans-serif;
 			}
 
-			.app-screen.active {
-				display: block;
+			body {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-height: 100vh;
+				margin: 0;
+				padding: 20px;
+			}
+
+			.card {
+				width: 100%;
+				max-width: 400px;
+				text-align: center;
+			}
+
+			.user-info {
+				color: var(--pico-muted-color);
+				font-size: 0.85rem;
+			}
+
+			select, button {
+				width: 100%;
+				text-align: center;
+			}
+
+			button + button {
+				margin-top: .5em;
+			}
+
+			/* Ensure select text is as centered as possible (browser dependent) */
+			select {
+				text-align-last: center;
+			}
+
+			/* Mobile Adjustments */
+			@media (max-width: 600px) {
+				body {
+					align-items: flex-start;
+					padding-top: 2rem;
+				}
 			}
 
 			.icon-prefixed-link {
@@ -22,137 +60,56 @@
 			}
 
 			#details-container {
+				text-align: left;
 				margin-top: 1rem;
 				border-top: 1px solid var(--pico-border-color);
 				padding-top: 1rem;
 			}
 
-			/* Custom layout for sidebar and content */
-			@media (min-width: 992px) {
-				.main-grid {
-					display: grid;
-					grid-template-columns: 250px 1fr;
-					gap: var(--pico-spacing);
-				}
+			#details-container > p {
+				margin-bottom: 0.5rem;
 			}
 
-			aside nav details summary {
-				font-weight: bold;
-			}
-
-			aside nav ul {
+			.no-margin-bottom {
 				margin-bottom: 0;
-			}
-			
-			aside nav ul li {
-				padding-left: 0.5rem;
 			}
 		</style>
 	</head>
-	<body>
-		<header class="container">
-			<nav>
-				<ul>
-					<li><strong>Console Associations</strong></li>
-				</ul>
-				<ul>
-					<li><small><?= userEmail ?></small></li>
-				</ul>
-			</nav>
-			<nav aria-label="breadcrumb">
-				<ul id="breadcrumb-list">
-					<li>Associations</li>
-				</ul>
-			</nav>
-		</header>
+	<body class="container">
+		<article class="card">
+			<header>
+				<h1 class="no-margin-bottom">Associations</h1>
+			</header>
 
-		<main class="container">
-			<div class="main-grid">
-				<aside>
-					<nav>
-						<details id="nav-group-consulter" name="nav-group" open>
-							<summary>Consulter</summary>
-							<ul>
-								<li><a href="?p=consulter:association" id="nav-link-consulter-association" onclick="event.preventDefault(); navigateTo('consulter:association')">Associations</a></li>
-							</ul>
-						</details>
-						<details id="nav-group-car" name="nav-group">
-							<summary>CAR</summary>
-							<ul>
-								<li><a href="?p=car:visites" id="nav-link-car-visites" onclick="event.preventDefault(); navigateTo('car:visites')">Visites</a></li>
-							</ul>
-						</details>
-						<details id="nav-group-admin" name="nav-group">
-							<summary>Admin</summary>
-							<ul>
-								<li><a href="?p=admin:page1" id="nav-link-admin-page1" onclick="event.preventDefault(); navigateTo('admin:page1')">Page 1</a></li>
-							</ul>
-						</details>
-					</nav>
-				</aside>
+			<p class="user-info">
+				Connecté en tant que :<br>
+				<strong><?= userEmail ?></strong>
+			</p>
 
-				<section>
-					<article id="consulter:association" class="app-screen">
-						<header>Sélectionner une association</header>
-						<label for="consult-select">
-							<select id="consult-select" onchange="displayStructureDetails(this.value)">
-								<option value="">Chargement des données...</option>
-							</select>
-						</label>
+			<label for="consult-select">
+				Sélectionner une association
+				<select id="consult-select" onchange="displayStructureDetails(this.value)">
+					<option value="">Chargement des données...</option>
+				</select>
+			</label>
 
-						<section id="details-container" style="display: none;">
-							<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
-							<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
-							<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
-							<p><strong>AssoConnect :</strong>
-								<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> |
-								<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
-							</p>
+			<div id="details-container" style="display: none;">
+				<p><strong>Nom :</strong> <span id="detail-nom"></span></p>
+				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
+				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
+				<p><strong>AssoConnect :</strong>
+					<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> |
+					<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
+				</p>
 
-							<button class="outline" id="detail-fip-btn">
-								Ouvrir la fiche info partenaire
-							</button>
-							<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
-								Créer un compte rendu de visite
-							</button>
-						</section>
-					</article>
-
-					<article id="car:visites" class="app-screen">
-						<header>Comptes-rendus de visites (CAR)</header>
-						<form id="search-visites-form" onsubmit="event.preventDefault(); searchVisites()">
-							<fieldset role="group">
-								<input type="search" id="search-visite-par" name="visite-par" placeholder="Visité par..." aria-label="Visité par" oninput="searchVisitesDebounced()">
-								<input type="submit" value="Rechercher">
-							</fieldset>
-						</form>
-						
-						<table id="visites-table">
-							<thead>
-								<tr>
-									<th>Date</th>
-									<th>Structure</th>
-									<th>Visité par</th>
-								</tr>
-							</thead>
-							<tbody id="visites-list">
-								<tr>
-									<td colspan="3" style="text-align: center;">Chargement des visites...</td>
-								</tr>
-							</tbody>
-						</table>
-					</article>
-
-					<article id="admin:page1" class="app-screen">
-						<header>Admin - Page 1</header>
-						<p>
-							Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-							Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-						</p>
-					</article>
-				</section>
+				<button class="outline" id="detail-fip-btn">
+					Ouvrir la fiche info partenaire
+				</button>
+				<button class="secondary" id="consult-create-report-btn" onclick="createReportFromConsultation()">
+					Créer un compte rendu de visite
+				</button>
 			</div>
-		</main>
+		</article>
 
 		<script>
 			const Config = <?!= JSON.stringify(configs) ?>;
@@ -162,142 +119,7 @@
 			window.onload = function()
 			{
 				loadFullStructures();
-
-				// Handle browser back/forward buttons
-				google.script.history.setChangeHandler(function(e)
-				{
-					const p = e.location.parameter.p || 'consulter:association';
-					const vif = e.location.parameter.vif;
-					navigateTo(p, vif, true);
-				});
 			};
-
-			/**
-			 * Navigates to a screen using query parameters (?p=screen/id)
-			 * 
-			 * @param {string} screenId The screen ID (e.g., 'consulter:association')
-			 * @param {string|null} vifCode Optional VIF code for deep linking
-			 * @param {boolean} skipHistory If true, don't push to history (used for back/forward)
-			 */
-			function navigateTo(screenId, vifCode = null, skipHistory = false)
-			{
-				const screen = document.getElementById(screenId);
-				if (!screen)
-				{
-					console.warn('Screen not found:', screenId);
-					return;
-				}
-
-				// 1. Update UI: Show active screen
-				document.querySelectorAll('.app-screen.active').forEach(s => s.classList.remove('active'));
-				screen.classList.add('active');
-				
-				// 2. Update UI: Open corresponding accordion sidebar
-				const rootCategory = screenId.split(':')[0];
-				const details = document.getElementById('nav-group-' + rootCategory);
-				if (details && !details.hasAttribute('open'))
-				{
-					details.setAttribute('open', '');
-				}
-
-				updateNav(screenId);
-
-				// 3. Handle specific screen logic
-				if (screenId === 'consulter:association')
-				{
-					handleStructureViewNavigation(vifCode);
-				}
-				else if (screenId === 'car:visites')
-				{
-					searchVisites();
-				}
-
-				// 4. Update URL history
-				if (!skipHistory)
-				{
-					const params = { p: screenId };
-					if (vifCode) params.vif = vifCode;
-					google.script.history.push({ screen: screenId, vif: vifCode }, params, '');
-				}
-			}
-
-			function handleStructureViewNavigation(vifCode)
-			{
-				const select = document.getElementById('consult-select');
-				if (!vifCode)
-				{
-					select.value = '';
-					displayStructureDetails('', true); // skip history update
-					return;
-				}
-
-				if (Object.keys(structures).length === 0) return;
-
-				// Find internal ID from VIF code
-				const id = Object.keys(structures).find(k => structures[k]['Code VIF'] == vifCode);
-				if (id)
-				{
-					select.value = id;
-					displayStructureDetails(id, true); // skip history update
-				}
-			}
-
-			function updateNav(screenId, assoName = null)
-			{
-				const breadcrumb = document.getElementById('breadcrumb-list');
-				breadcrumb.innerHTML = `<li><a href="?p=consulter:association" onclick="event.preventDefault(); navigateTo('consulter:association')">Associations</a></li>`;
-
-				// Update active link highlighting in sidebar
-				document.querySelectorAll('aside nav a').forEach(a => a.removeAttribute('aria-current'));
-
-				let screenLabel = '';
-				let screenLink = '';
-
-				// Simple mapping for breadcrumbs and link highlighting
-				if (screenId === 'consulter:association')
-				{
-					screenLabel = 'Consulter';
-					screenLink = 'nav-link-consulter-association';
-				}
-				else if (screenId === 'car:visites')
-				{
-					screenLabel = 'Visites';
-					screenLink = 'nav-link-car-visites';
-				}
-				else if (screenId === 'admin:page1')
-				{
-					screenLabel = 'Admin';
-					screenLink = 'nav-link-admin-page1';
-				}
-
-				if (screenLink)
-				{
-					const linkElement = document.getElementById(screenLink);
-					if (linkElement) linkElement.setAttribute('aria-current', 'page');
-					
-					const li = document.createElement('li');
-					if (assoName)
-					{
-						const link = document.createElement('a');
-						link.href = `?p=${screenId}`;
-						link.textContent = screenLabel;
-						link.onclick = (e) => { e.preventDefault(); navigateTo(screenId); };
-						li.appendChild(link);
-					}
-					else
-					{
-						li.textContent = screenLabel;
-					}
-					breadcrumb.appendChild(li);
-				}
-
-				if (assoName)
-				{
-					const li = document.createElement('li');
-					li.textContent = assoName;
-					breadcrumb.appendChild(li);
-				}
-			}
 
 			function loadFullStructures()
 			{
@@ -305,23 +127,33 @@
 				const cacheKey = 'structures_' + cacheBuster;
 				const cachedData = localStorage.getItem(cacheKey);
 
-				const initialScreen = '<?= initialScreen ?>';
-				const initialVif = '<?= initialVif ?>';
+				console.log('Cache buster:', cacheBuster, '| Cache key:', cacheKey);
 
 				if (cachedData)
 				{
 					try
 					{
+						console.log('Cache found, loading data...');
 						structures = JSON.parse(cachedData);
 						populateConsultSelect(structures);
-						
-						// Handle initial load after data is available
-						navigateTo(initialScreen, initialVif, true);
 						return;
 					}
 					catch (e)
 					{
+						console.warn('Error parsing cache, reloading...', e);
 						localStorage.removeItem(cacheKey);
+					}
+				}
+
+				console.log('Cache not found or invalid, fetching fresh data...');
+
+				// Cleanup old versions to avoid saturating localStorage
+				for (let i = 0; i < localStorage.length; i++)
+				{
+					const key = localStorage.key(i);
+					if (key && key.startsWith('structures_') && key !== cacheKey)
+					{
+						localStorage.removeItem(key);
 					}
 				}
 
@@ -338,9 +170,6 @@
 							console.warn('Impossible de sauvegarder dans localStorage :', e.message);
 						}
 						populateConsultSelect(data);
-						
-						// Handle initial load after data is available
-						navigateTo(initialScreen, initialVif, true);
 					})
 					.withFailureHandler(function(err)
 					{
@@ -368,26 +197,18 @@
 				});
 			}
 
-			function displayStructureDetails(id, skipHistoryUpdate = false)
+			function displayStructureDetails(id)
 			{
 				const container = document.getElementById('details-container');
 				if (!id || !structures[id])
 				{
 					container.style.display = 'none';
-					updateNav('consulter:association');
 					return;
 				}
 
 				const s = structures[id];
 				document.getElementById('detail-nom').innerText = s.Nom;
 				document.getElementById('detail-vif').innerText = s['Code VIF'];
-
-				updateNav('consulter:association', s.Nom);
-
-				if (!skipHistoryUpdate)
-				{
-					navigateTo('consulter:association', s['Code VIF']);
-				}
 
 				const driveLink = document.getElementById('detail-drive');
 				const driveUrl = s['Lien vers les documents stockés sur le Drive'];
@@ -444,6 +265,7 @@
 				const s = structures[id];
 				let dateStr = s['Date de la dernière visite'] || '';
 
+				// Convert DD/MM/YYYY to YYYY-MM-DD if needed
 				dateStr = dateStr.replace(/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/, '$3-$2-$1');
 
 				const url = visitReportFormUrlTemplate
@@ -485,66 +307,6 @@
 						alert('Erreur : ' + err.message);
 					})
 					.getFipUrl(id);
-			}
-
-			let searchTimeout = null;
-			function searchVisitesDebounced()
-			{
-				if (searchTimeout) clearTimeout(searchTimeout);
-				searchTimeout = setTimeout(searchVisites, 300);
-			}
-
-			function searchVisites()
-			{
-				const filter = document.getElementById('search-visite-par').value;
-				const tbody = document.getElementById('visites-list');
-
-				// Optional: Show loading state only if it takes time or if list is empty
-				// tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Recherche en cours...</td></tr>';
-
-				google.script.run
-					.withSuccessHandler(function(visites)
-					{
-						tbody.innerHTML = '';
-						if (visites.length === 0)
-						{
-							tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Aucun résultat trouvé.</td></tr>';
-							return;
-						}
-
-						visites.forEach(v =>
-						{
-							const tr = document.createElement('tr');
-
-							const tdDate = document.createElement('td');
-							tdDate.textContent = v.date;
-							tr.appendChild(tdDate);
-
-							const tdStructure = document.createElement('td');
-							const link = document.createElement('a');
-							link.href = `?p=consulter:association&vif=${v.vif}`;
-							link.textContent = v.structure || v.vif;
-							link.onclick = (e) =>
-							{
-								e.preventDefault();
-								navigateTo('consulter:association', v.vif);
-							};
-							tdStructure.appendChild(link);
-							tr.appendChild(tdStructure);
-
-							const tdPerson = document.createElement('td');
-							tdPerson.textContent = v.person;
-							tr.appendChild(tdPerson);
-
-							tbody.appendChild(tr);
-						});
-					})
-					.withFailureHandler(function(err)
-					{
-						console.error('Erreur lors de la recherche des visites : ' + err.message);
-						tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: red;">Erreur : ${err.message}</td></tr>`;
-					})
-					.getRecentVisits(filter);
 			}
 		</script>
 	</body>
