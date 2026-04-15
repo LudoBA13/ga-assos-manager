@@ -57,6 +57,7 @@ class WebApp
 		const vifIdx = headers.indexOf('Code VIF');
 		const nomIdx = headers.indexOf('Nom');
 		const dateIdx = headers.indexOf('Date de la dernière visite');
+		const carIdx = headers.indexOf('Interlocuteur principal dans la BA (nom, fonction)');
 		const driveIdx = headers.indexOf('Lien vers les documents stockés sur le Drive');
 
 		if (idIdx === -1)
@@ -91,6 +92,7 @@ class WebApp
 				'Code VIF': vifIdx !== -1 ? row[vifIdx] : '',
 				'Nom': nomIdx !== -1 ? row[nomIdx] : '',
 				'Date de la dernière visite': dateStr,
+				'Interlocuteur principal dans la BA (nom, fonction)': row[carIdx] || '',
 				'Lien vers les documents stockés sur le Drive': driveIdx !== -1 ? row[driveIdx] : ''
 			};
 		}

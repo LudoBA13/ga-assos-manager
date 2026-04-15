@@ -98,7 +98,7 @@
 				<p><strong>Code VIF :</strong> <span id="detail-vif"></span></p>
 				<p><strong>Drive :</strong> <a id="detail-drive" href="#" target="_blank" class="icon-prefixed-link"><img src="https://drive.google.com/favicon.ico" width="16" height="16" alt="Drive">Ouvrir le dossier</a></p>
 				<p><strong>AssoConnect :</strong>
-					<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://web-assoconnect-frc-prod-cdn-endpoint-software.azureedge.net/legacy/assoconnect.com/image/favicon.png" width="16" height="16" alt="AssoConnect">Voir</a> |
+					<a id="detail-ac-view" href="#" target="_blank" class="icon-prefixed-link"><img src="https://www.assoconnect.com/favicon-32x32.png" width="16" height="16" alt="AssoConnect">Voir</a> |
 					<a id="detail-ac-edit" href="#" target="_blank">Éditer</a>
 				</p>
 
@@ -271,6 +271,7 @@
 				const url = visitReportFormUrlTemplate
 					.replace('<<Nom>>', encodeURIComponent(s.Nom || ''))
 					.replace('<<Code VIF>>', encodeURIComponent(s['Code VIF'] || ''))
+					.replace('<<Interlocuteur principal dans la BA (nom, fonction)>>', encodeURIComponent((s['Interlocuteur principal dans la BA (nom, fonction)'] || '').replace(/<.*?>/g, '').replaceAll('|', ', ')))
 					.replace('<<Date de la dernière visite>>', encodeURIComponent(dateStr));
 
 				window.open(url, '_blank');
