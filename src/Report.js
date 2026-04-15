@@ -316,9 +316,37 @@ class ReportManager
 			}
 		}
 
+		ReportManager.customizeVars(vars);
+
 		const documentName = `CR Visite ${dateStr}`;
 
 		return generator.generateDocument(vars, documentName, destinationFolderId);
+	}
+
+	/**
+	 * Modifies vars to convert numeric ratings to star meter
+	 */
+	static customizeVars(vars)
+	{
+		const ratingProps = [
+			'Prod. Sec Qualité', 'Prod. Sec Quantité',
+			'Prod. Frais, Légumes, Fruits Qualité', 'Prod. Frais, Légumes, Fruits Quantité',
+			'Prod. Surgelés Qualité', 'Prod. Surgelés Quantité'
+		];
+
+		for (const prop of ratingProps)
+		{
+			const val = vars.get(prop);
+			if (val !== undefined && val !== null && val !== '')
+			{
+				const num = parseInt(val, 10);
+				if (!isNaN(num) && num >= 0 && num <= 5)
+				{
+					const stars = '★'.repeat(num) + '☆'.repeat(5 - num);
+					vars.set(prop, stars);
+				}
+			}
+		}
 	}
 
 	/**
@@ -389,7 +417,7 @@ class ReportManager
 
 				const placeholder = paragraph.appendText(`<<${title}>>`);
 				placeholder.setFontFamily('Asap');
-				placeholder.setForegroundColor('#1c4587');
+				placeholder.setForegroundColor('#990000');
 			}
 		});
 	}
