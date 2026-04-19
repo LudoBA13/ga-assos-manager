@@ -90,8 +90,6 @@ class Importer
 			throw new Error('No data passed to updateACStructuresData.');
 		}
 
-		console.time('ImportStructures');
-
 		// 1. Locate headers and extend them
 		const headers = data[0];
 		const infoIdx = headers.indexOf('Informations complémentaires');
@@ -99,7 +97,6 @@ class Importer
 		headers.push('$planning', 'UD', 'Planning', 'Passages Frais', 'Passages Sec', 'Passages Surgelé');
 
 		// 2. Process rows to extract extra data
-		console.time('ProcessRows');
 		const udRegex = /\[UD\]\s*(\d+)/;
 		const planningRegex = /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:\p{L}+,\s*)+\p{L}+(?:\.\s*|$))+)/u;
 
@@ -132,20 +129,15 @@ class Importer
 			const counts = countProductOccurrences(planning);
 			row.push(planning, ud, formattedPlanning, counts['Frais'], counts['Sec'], counts['Surgelé']);
 		}
-		console.timeEnd('ProcessRows');
 
-		// 3. Update Sheet
-		console.time('SheetPatcher');
 		const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('ACStructures') || SpreadsheetApp.getActiveSpreadsheet().insertSheet('ACStructures');
 		const patcher = new SheetPatcher(sheet);
 		patcher.replace(data);
-		console.timeEnd('SheetPatcher');
 
 		// Update cache buster
 		this.updateCacheBuster();
 
 		// Process and update FuzzyDB
-		console.time('FuzzyDBUpdate');
 		try
 		{
 			this.updateFuzzyDB(data);
@@ -154,9 +146,6 @@ class Importer
 		{
 			console.warn('Failed to update FuzzyDB: ' + e.message);
 		}
-		console.timeEnd('FuzzyDBUpdate');
-
-		console.timeEnd('ImportStructures');
 	}
 
 	/**
@@ -277,32 +266,25 @@ class Importer
 	 */
 	static getDataFromXLSXFile(fileData)
 	{
-		console.time('getDataFromXLSXFile');
 		let tmpSheetFile;
 
 		try
 		{
 			// 1. Decode base64 and create a blob
-			console.time('DecodeAndBlob');
 			const decodedData = Utilities.base64Decode(fileData.data);
 			const blob = Utilities.newBlob(decodedData, fileData.mimeType, fileData.name);
-			console.timeEnd('DecodeAndBlob');
 
 			// 2. Define resource for conversion and create the Google Sheet directly
-			console.time('DriveCreate');
 			const resource = {
 				title: fileData.name.split('.').slice(0, -1).join('.'), // Use file name for the new Sheet's title
 				mimeType: MimeType.GOOGLE_SHEETS,
 			};
 			tmpSheetFile = Drive.Files.create(resource, blob);
-			console.timeEnd('DriveCreate');
 
 			// 3. Copy data from the new sheet to the active spreadsheet
-			console.time('ReadSheetData');
 			const tmpSpreadsheet = SpreadsheetApp.openById(tmpSheetFile.id);
 			const tmpSheet       = tmpSpreadsheet.getSheets()[0];
 			const data           = tmpSheet.getDataRange().getValues();
-			console.timeEnd('ReadSheetData');
 
 			if (data.length === 0)
 			{
@@ -316,7 +298,6 @@ class Importer
 			// 4. Cleanup: Delete the temporary Google Sheet
 			if (tmpSheetFile && tmpSheetFile.id)
 			{
-				console.time('DriveCleanup');
 				try
 				{
 					Drive.Files.remove(tmpSheetFile.id);
@@ -325,9 +306,7 @@ class Importer
 				{
 					console.error('Cleanup Error: Failed to remove temporary file with ID ' + tmpSheetFile.id + '. Error: ' + e.message);
 				}
-				console.timeEnd('DriveCleanup');
 			}
-			console.timeEnd('getDataFromXLSXFile');
 		}
 	}
 }
