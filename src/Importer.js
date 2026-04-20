@@ -75,6 +75,50 @@ class Importer
 
 	static updateACPersonnesData(data)
 	{
+		if (!data || data.length === 0)
+		{
+			throw new Error('No data passed to updateACPersonnesData.');
+		}
+
+		// 1. Locate headers and extend them
+		const headers = data[0];
+		const structuresIdx = headers.findIndex(h => h && h.toLowerCase() === 'structures');
+
+		headers.push('$vifs', '$ids');
+
+		// 2. Prepare mapping and regex
+		const idRegex = /profile\/(\d+)/g;
+		const idToVifMap = getContactIdToVifMap();
+
+		// 3. Process rows to extract extra data
+		for (let i = 1; i < data.length; i++)
+		{
+			const row = data[i];
+			let idsStr = '';
+			let vifsStr = '';
+
+			if (structuresIdx !== -1)
+			{
+				const structuresRaw = row[structuresIdx] ? String(row[structuresIdx]) : '';
+				const matches = Array.from(structuresRaw.matchAll(idRegex), m => m[1]);
+				if (matches.length > 0)
+				{
+					idsStr = '|' + matches.join('|') + '|';
+					
+					const vifs = matches
+						.map(id => idToVifMap[id])
+						.filter(vif => vif !== undefined && vif !== null && vif !== '');
+					
+					if (vifs.length > 0)
+					{
+						vifsStr = '|' + vifs.join('|') + '|';
+					}
+				}
+			}
+
+			row.push(vifsStr, idsStr);
+		}
+
 		const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('ACPersonnes') || SpreadsheetApp.getActiveSpreadsheet().insertSheet('ACPersonnes');
 		const patcher = new SheetPatcher(sheet);
 		patcher.replace(data);
