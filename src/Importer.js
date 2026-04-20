@@ -98,7 +98,7 @@ class Importer
 
 		// 2. Process rows to extract extra data
 		const udRegex = /\[UD\]\s*(\d+)/;
-		const planningRegex = /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:\p{L}+,\s*)+\p{L}+(?:\.\s*|$))+)/u;
+		const planningRegex = /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:\p{L}+,\s*)*\p{L}+(?:\.\s*|$))+)/u;
 
 		for (let i = 1; i < data.length; i++)
 		{
