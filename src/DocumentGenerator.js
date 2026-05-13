@@ -274,7 +274,7 @@ class DocumentGenerator
 					}
 				]
 			};
-			Drive.Files.update(resource, fileId, { supportsAllDrives: true });
+			Drive.Files.update(resource, fileId, null, { supportsAllDrives: true });
 			console.log(`File ${fileId} locked successfully.`);
 		}
 		catch (e)

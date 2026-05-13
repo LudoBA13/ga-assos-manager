@@ -1,1 +1,1 @@
-../../ga-sheet-patcher/SheetPatcher.js
+../../ga-sheet-patcher/src/SheetPatcher.js

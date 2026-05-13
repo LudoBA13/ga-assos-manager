@@ -35,16 +35,6 @@ function generateVisitReport(values)
 }
 
 /**
- * Retrieves report values for the given timestamp.
- * @param {string|number|Date} timestamp The unique identifier (timestamp) for the record.
- * @return {Map<string, any>} The values as a Map.
- */
-function getReportValuesFromTimestamp(timestamp)
-{
-	return ReportManager.getReportValuesFromTimestamp(timestamp);
-}
-
-/**
  * Triggered when a form is submitted.
  * @param {Object} e The form submission event.
  */

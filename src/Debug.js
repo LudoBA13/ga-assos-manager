@@ -8,60 +8,17 @@
 
 function debugGenerateReports()
 {
-  generateVisitReportsByRange(9, 9);
+  generateVisitReportsByRange(34, 34);
 }
 
 /**
- * Generates visit reports for the timestamps found in CRVisites!A2:A8.
- * This is intended for manual testing and debugging within the GAS Editor.
+ * Generates visit reports for a specified range of rows in the 'CRVisites' sheet.
+ * @param {number} startRow The 1-based starting row number (inclusive).
+ * @param {number} endRow The 1-based ending row number (inclusive).
  */
-function debugGenerateReportsInRange()
+function debugGenerateReportsInRange(startRow, endRow)
 {
-	const sheetName = 'CRVisites';
-	const rangeAddress = 'A10:A11';
-
-	const ss = SpreadsheetApp.getActiveSpreadsheet();
-	const sheet = ss.getSheetByName(sheetName);
-
-	if (!sheet)
-	{
-		console.error(`Error: Sheet "${sheetName}" not found.`);
-		return;
-	}
-
-	const timestamps = sheet.getRange(rangeAddress).getValues();
-	console.log(`Starting batch report generation for range ${sheetName}!${rangeAddress}`);
-
-	timestamps.forEach((row, index) =>
-	{
-		const timestamp = row[0];
-		const rowIndex = index + 2;
-
-		if (!timestamp)
-		{
-			console.warn(`[Row ${rowIndex}] Skipping: Empty timestamp.`);
-			return;
-		}
-
-		console.log(`[Row ${rowIndex}] Processing record with timestamp: ${timestamp}`);
-
-		try
-		{
-			// 1. Retrieve the full set of values for this record
-			const vars = getReportValuesFromTimestamp(timestamp);
-
-			// 2. Generate the report
-			const docId = generateVisitReport(vars);
-
-			console.log(`[Row ${rowIndex}] Success! Document ID: ${docId}`);
-		}
-		catch (e)
-		{
-			console.error(`[Row ${rowIndex}] Failed: ${e.message}`);
-		}
-	});
-
-	console.log('Batch generation process finished.');
+	generateVisitReportsByRange(startRow, endRow);
 }
 
 /**
