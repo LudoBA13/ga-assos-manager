@@ -255,7 +255,8 @@ class ReportManager
 		const vif = vars.get('N° VIF de la structure visitée');
 		if (!vif)
 		{
-			throw new Error(_("Le 'N° VIF de la structure visitée' est manquant pour cet enregistrement."));
+			const varsObj = Object.fromEntries(vars);
+			throw new Error(_("Le 'N° VIF de la structure visitée' est manquant pour cet enregistrement. Vars: %s", JSON.stringify(varsObj)));
 		}
 
 		const asso = getAssoByVif(vif);
