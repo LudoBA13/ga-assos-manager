@@ -42,8 +42,6 @@ function onOpen()
 	ui.createMenu('Admin')
 		.addItem(_('Exporter les données interservices'), 'exportInterServicesData')
 		.addItem(_("Générer les Fiches d'Informations Partenaires"), 'generateFIPDocuments')
-		.addItem(_('Importer bons de livraisons VIF'), 'showVifImporter')
-		.addItem(_('Rafraîchir les statistiques BL'), 'refreshBLStats')
 		.addItem(_('Ajuster la feuille au contenu'), 'cropCurrentSheet')
 		.addToUi();
 }
@@ -97,11 +95,6 @@ function showImporter()
 function showPersonnesImporter()
 {
 	Importer.show('personnes');
-}
-
-function showVifImporter()
-{
-	VifImporter.show();
 }
 
 function updateACStructuresFromFile(fileData)
