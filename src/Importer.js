@@ -137,6 +137,7 @@ class Importer
 		// 1. Locate headers and extend them
 		const headers = data[0];
 		const infoIdx = headers.indexOf('Informations complémentaires');
+		const entrepotIdx = headers.indexOf("Entrepôt d'enlèvement");
 
 		headers.push('$planning', 'UD', 'Planning', 'Passages Frais', 'Passages Sec', 'Passages Surgelé');
 
@@ -171,6 +172,13 @@ class Importer
 
 			const formattedPlanning = formatPlanningForDisplay(decodePlanning(planning));
 			const counts = countProductOccurrences(planning);
+
+			if (entrepotIdx !== -1 && String(row[entrepotIdx]) === '2')
+			{
+				counts['Sec'] = 1;
+				counts['Surgelé'] = 1;
+			}
+
 			row.push(planning, ud, formattedPlanning, counts['Frais'], counts['Sec'], counts['Surgelé']);
 		}
 
