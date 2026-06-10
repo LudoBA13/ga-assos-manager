@@ -173,7 +173,7 @@ class Importer
 			const formattedPlanning = formatPlanningForDisplay(decodePlanning(planning));
 			const counts = countProductOccurrences(planning);
 
-			if (entrepotIdx !== -1 && String(row[entrepotIdx]) === '2')
+			if (entrepotIdx !== -1 && String(row[entrepotIdx]) === 'Entrepôt 2')
 			{
 				counts['Sec'] = 1;
 				counts['Surgelé'] = 1;
