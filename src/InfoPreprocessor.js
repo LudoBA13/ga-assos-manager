@@ -24,30 +24,27 @@
  * SOFTWARE.
  */
 
+const TAGS_CONFIG = [
+	{ key: 'ud', regex: /\[UD\]\s*(\d+)/, label: '[UD] ' },
+	{ key: 'planning', regex: /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:[\p{L}&]+,\s*)*[\p{L}&]+(?:\.\s*|$))+)/u, label: '[Planning] ' },
+	{ key: 'nomDiminutif', regex: /\[Nom diminutif\]\s*([-\s\w]+)/, label: '[Nom diminutif] ' }
+];
+
 const InfoPreprocessor = {
 	extractTags: (text) =>
 	{
-		const udRegex = /\[UD\]\s*(\d+)/;
-		const planningRegex = /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:[\p{L}&]+,\s*)*[\p{L}&]+(?:\.\s*|$))+)/u;
-		const nomDiminutifRegex = /\[Nom diminutif\]\s*([-\s\w]+)/;
-
-		return {
-			ud: text.match(udRegex)?.[1] || null,
-			planning: text.match(planningRegex)?.[1] || null,
-			nomDiminutif: text.match(nomDiminutifRegex)?.[1] || null
-		};
+		const result = {};
+		for (const tag of TAGS_CONFIG)
+		{
+			result[tag.key] = text.match(tag.regex)?.[1] || null;
+		}
+		return result;
 	},
 
 	reconstructTags: (text, values) =>
 	{
 		let result = text;
-		const tags = [
-			{ key: 'ud', regex: /\[UD\]\s*(\d+)/, label: '[UD] ' },
-			{ key: 'planning', regex: /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:[\p{L}&]+,\s*)*[\p{L}&]+(?:\.\s*|$))+)/u, label: '[Planning] ' },
-			{ key: 'nomDiminutif', regex: /\[Nom diminutif\]\s*([-\s\w]+)/, label: '[Nom diminutif] ' }
-		];
-
-		for (const tag of tags)
+		for (const tag of TAGS_CONFIG)
 		{
 			if (!values.hasOwnProperty(tag.key) || values[tag.key] === null)
 			{
