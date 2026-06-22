@@ -35,10 +35,41 @@ const InfoPreprocessor = {
 			ud: text.match(udRegex)?.[1] || null,
 			planning: text.match(planningRegex)?.[1] || null,
 			nomDiminutif: text.match(nomDiminutifRegex)?.[1] || null
-			};
-			},
+		};
+	},
 
-			/**
+	reconstructTags: (text, values) =>
+	{
+		let result = text;
+		const tags = [
+			{ key: 'ud', regex: /\[UD\]\s*(\d+)/, label: '[UD] ' },
+			{ key: 'planning', regex: /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:[\p{L}&]+,\s*)*[\p{L}&]+(?:\.\s*|$))+)/u, label: '[Planning] ' },
+			{ key: 'nomDiminutif', regex: /\[Nom diminutif\]\s*([-\s\w]+)/, label: '[Nom diminutif] ' }
+		];
+
+		for (const tag of tags)
+		{
+			if (!values.hasOwnProperty(tag.key) || values[tag.key] === null)
+			{
+				continue;
+			}
+
+			if (tag.regex.test(result))
+			{
+				// Update existing tag
+				result = result.replace(tag.regex, `${tag.label}${values[tag.key]}`);
+			}
+			else
+			{
+				// Add tag at end
+				result = (result.trim() + ` ${tag.label}${values[tag.key]}`).trim();
+			}
+		}
+
+		return result;
+	},
+
+	/**
 	 * Preprocesses the "Informations complémentaires" field to normalize human-readable data
 	 * into machine-parsable tags.
 	 *
