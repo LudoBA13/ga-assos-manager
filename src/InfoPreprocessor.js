@@ -25,7 +25,20 @@
  */
 
 const InfoPreprocessor = {
-	/**
+	extractTags: (text) =>
+	{
+		const udRegex = /\[UD\]\s*(\d+)/;
+		const planningRegex = /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:[\p{L}&]+,\s*)*[\p{L}&]+(?:\.\s*|$))+)/u;
+		const nomDiminutifRegex = /\[Nom diminutif\]\s*([-\s\w]+)/;
+
+		return {
+			ud: text.match(udRegex)?.[1] || null,
+			planning: text.match(planningRegex)?.[1] || null,
+			nomDiminutif: text.match(nomDiminutifRegex)?.[1] || null
+			};
+			},
+
+			/**
 	 * Preprocesses the "Informations complémentaires" field to normalize human-readable data
 	 * into machine-parsable tags.
 	 *

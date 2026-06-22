@@ -29,7 +29,8 @@ function runInfoPreprocessorTests()
 	const testCases = [
 		test_InfoPreprocessor_UD,
 		test_InfoPreprocessor_Planning,
-		test_InfoPreprocessor_Normalization
+		test_InfoPreprocessor_Normalization,
+		test_InfoPreprocessor_Combined
 	];
 
 	const results = {
@@ -201,4 +202,16 @@ function test_InfoPreprocessor_Normalization()
 	const input6 = "60 UD. Planning : 1\u1D49\u02B3 mercredi 8h30 : Frais, Sec, Surgelé.";
 	const expected6 = "$ud:60$$planning:1MeMdFr1MeMdSe1MeMdSu$";
 	assertEqual(expected6, InfoPreprocessor.process(input6), "Mixed UD and Unicode 1er");
+}
+
+function test_InfoPreprocessor_Combined()
+{
+	const input = "[UD] 300. [Planning] 1er lundi 10h : Frais, Sec, Surgelé, F&L. 3e lundi 10h : Frais, Sec, Surgelé, F&L.";
+	const expected = {
+		ud: "300",
+		planning: "1er lundi 10h : Frais, Sec, Surgelé, F&L. 3e lundi 10h : Frais, Sec, Surgelé, F&L.",
+		nomDiminutif: null
+	};
+	const actual = InfoPreprocessor.extractTags(input);
+	assertEqual(JSON.stringify(expected), JSON.stringify(actual), "Combined UD and Planning tags");
 }

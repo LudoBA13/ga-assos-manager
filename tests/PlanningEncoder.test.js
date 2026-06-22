@@ -299,6 +299,9 @@ function test_parseHumanReadable()
 
 	const text9 = "1er lundi 8h30 : Frais. 2e mardi 14h : Sec. 3e mercredi 10h : Surgelé. 4e jeudi 8h30 : Frais.";
 	assertPlanningEqual("1LuMdFr2MaApSe3MeMfSu4JeMdFr", parseHumanReadable(text9), "Test 9: Standard ordinal strings (backward compatibility for 1er, 2e, 3e, 4e)");
+
+	const text10 = "1er lundi 8h30 : Frais, Sec, F&L.";
+	assertPlanningEqual("1LuMdFr1LuMdSe", parseHumanReadable(text10), "Test 10: Ignore unknown product F&L");
 }
 
 function test_decodePlannings()

@@ -141,39 +141,22 @@ class Importer
 
 		headers.push('$planning', 'UD', 'Planning', 'Passages Frais', 'Passages Sec', 'Passages Surgelé', 'Nom diminutif');
 
-		// 2. Process rows to extract extra data
-		const udRegex = /\[UD\]\s*(\d+)/;
-		const planningRegex = /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:\p{L}+,\s*)*\p{L}+(?:\.\s*|$))+)/u;
-		const nomDiminutifRegex = /\[Nom diminutif\]\s*([-\s\w]+)/;
-
-		for (let i = 1; i < data.length; i++)
-		{
-			const row = data[i];
-			let planning = '';
-			let ud = '';
-			let nomDiminutif = '';
-
 			if (infoIdx !== -1)
 			{
 				const infoRaw = row[infoIdx] ? String(row[infoIdx]) : '';
-				const info = InfoPreprocessor.process(infoRaw);
+				const tags = InfoPreprocessor.extractTags(infoRaw);
 
-				const udMatch = info.match(udRegex);
-				const planningMatch = info.match(planningRegex);
-				const nomDiminutifMatch = info.match(nomDiminutifRegex);
-
-				if (udMatch)
+				if (tags.ud)
 				{
-					const udVal = udMatch[1];
-					ud = udVal !== '' ? Number(udVal) : '';
+					ud = tags.ud !== '' ? Number(tags.ud) : '';
 				}
-				if (planningMatch)
+				if (tags.planning)
 				{
-					planning = parseHumanReadable(planningMatch[1]);
+					planning = parseHumanReadable(tags.planning);
 				}
-				if (nomDiminutifMatch)
+				if (tags.nomDiminutif)
 				{
-					nomDiminutif = nomDiminutifMatch[1].trim();
+					nomDiminutif = tags.nomDiminutif.trim();
 				}
 			}
 
