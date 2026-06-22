@@ -139,17 +139,19 @@ class Importer
 		const infoIdx = headers.indexOf('Informations complémentaires');
 		const entrepotIdx = headers.indexOf("Entrepôt d'enlèvement");
 
-		headers.push('$planning', 'UD', 'Planning', 'Passages Frais', 'Passages Sec', 'Passages Surgelé');
+		headers.push('$planning', 'UD', 'Planning', 'Passages Frais', 'Passages Sec', 'Passages Surgelé', 'Nom diminutif');
 
 		// 2. Process rows to extract extra data
 		const udRegex = /\[UD\]\s*(\d+)/;
 		const planningRegex = /\[Planning\]\s*((?:[ \w\u1D49\u02B3]+:\s*(?:\p{L}+,\s*)*\p{L}+(?:\.\s*|$))+)/u;
+		const nomDiminutifRegex = /\[Nom diminutif\]\s*([-\s\w]+)/;
 
 		for (let i = 1; i < data.length; i++)
 		{
 			const row = data[i];
 			let planning = '';
 			let ud = '';
+			let nomDiminutif = '';
 
 			if (infoIdx !== -1)
 			{
@@ -158,6 +160,7 @@ class Importer
 
 				const udMatch = info.match(udRegex);
 				const planningMatch = info.match(planningRegex);
+				const nomDiminutifMatch = info.match(nomDiminutifRegex);
 
 				if (udMatch)
 				{
@@ -167,6 +170,10 @@ class Importer
 				if (planningMatch)
 				{
 					planning = parseHumanReadable(planningMatch[1]);
+				}
+				if (nomDiminutifMatch)
+				{
+					nomDiminutif = nomDiminutifMatch[1].trim();
 				}
 			}
 
@@ -179,7 +186,7 @@ class Importer
 				counts['Surgelé'] = 1;
 			}
 
-			row.push(planning, ud, formattedPlanning, counts['Frais'], counts['Sec'], counts['Surgelé']);
+			row.push(planning, ud, formattedPlanning, counts['Frais'], counts['Sec'], counts['Surgelé'], nomDiminutif);
 		}
 
 		const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('ACStructures') || SpreadsheetApp.getActiveSpreadsheet().insertSheet('ACStructures');
